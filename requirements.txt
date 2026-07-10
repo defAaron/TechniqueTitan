@@ -1,0 +1,7 @@
+# mediapipe is pinned below 0.10.30: newer wheels removed the legacy
+# `mp.solutions` API that the hand detector relies on.
+mediapipe==0.10.21
+opencv-python>=4.8,<5
+numpy>=1.26,<2
+PyYAML>=6.0
+pytest>=8.0

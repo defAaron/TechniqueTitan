@@ -1,0 +1,49 @@
+# Scoring thresholds and weights for the five posture criteria.
+# All values are tunable without code changes (PRD FR-SC-4).
+#
+# For each criterion:
+#   metric : the criterion_metrics key the score is computed from
+#   ideal  : [lo, hi] range that scores 100
+#   limit  : [lo, hi] range beyond which the score is 0
+#            (score falls linearly between ideal edge and limit edge)
+#   weight : contribution to the composite score (weights sum to 1.0)
+#
+# NOTE: these defaults are starting points. Calibrate them against your
+# labeled data (data/labels.csv) after running your first real batches.
+
+severity_bands:
+  good_min: 80      # score >= 80  -> "good"
+  warning_min: 50   # score >= 50  -> "warning", below -> "critical"
+
+outliers:
+  min_confidence: 0.6        # flag detections below this handedness confidence
+  joint_angle_min_deg: 20    # finger joint angles below this are implausible
+  joint_angle_max_deg: 175   # finger joint angles above this are hyper-extended/flat
+  zscore_threshold: 3.0      # flag metrics > N std devs from the batch mean
+
+criteria:
+  wrist_height:
+    metric: wrist_height_delta
+    ideal: [-0.05, 0.20]
+    limit: [-0.40, 0.60]
+    weight: 0.25
+  finger_curvature:
+    metric: mean_finger_curvature
+    ideal: [115.0, 160.0]
+    limit: [70.0, 180.0]
+    weight: 0.25
+  thumb_position:
+    metric: thumb_index_angle
+    ideal: [20.0, 55.0]
+    limit: [0.0, 90.0]
+    weight: 0.15
+  wrist_lateral:
+    metric: wrist_lateral_deviation_deg
+    ideal: [-10.0, 10.0]
+    limit: [-35.0, 35.0]
+    weight: 0.15
+  hand_arch:
+    metric: hand_arch_ratio
+    ideal: [0.12, 0.45]
+    limit: [0.0, 0.80]
+    weight: 0.20

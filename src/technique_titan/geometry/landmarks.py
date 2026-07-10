@@ -1,0 +1,38 @@
+"""Named indices for MediaPipe's 21 hand landmarks, so formulas read clearly."""
+
+WRIST = 0
+
+THUMB_CMC = 1
+THUMB_MCP = 2
+THUMB_IP = 3
+THUMB_TIP = 4
+
+INDEX_MCP = 5
+INDEX_PIP = 6
+INDEX_DIP = 7
+INDEX_TIP = 8
+
+MIDDLE_MCP = 9
+MIDDLE_PIP = 10
+MIDDLE_DIP = 11
+MIDDLE_TIP = 12
+
+RING_MCP = 13
+RING_PIP = 14
+RING_DIP = 15
+RING_TIP = 16
+
+PINKY_MCP = 17
+PINKY_PIP = 18
+PINKY_DIP = 19
+PINKY_TIP = 20
+
+# Finger chains (MCP -> PIP -> DIP -> TIP) for the four long fingers
+FINGER_CHAINS = {
+    "index": (INDEX_MCP, INDEX_PIP, INDEX_DIP, INDEX_TIP),
+    "middle": (MIDDLE_MCP, MIDDLE_PIP, MIDDLE_DIP, MIDDLE_TIP),
+    "ring": (RING_MCP, RING_PIP, RING_DIP, RING_TIP),
+    "pinky": (PINKY_MCP, PINKY_PIP, PINKY_DIP, PINKY_TIP),
+}
+
+ALL_MCPS = (INDEX_MCP, MIDDLE_MCP, RING_MCP, PINKY_MCP)

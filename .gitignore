@@ -1,0 +1,25 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# Generated batch outputs (reproducible from data/raw/)
+data/processed/
+
+# Raw test images (keep folder structure via .gitkeep)
+data/raw/**
+!data/raw/.gitkeep
+
+# IDE
+.idea/
+.vscode/

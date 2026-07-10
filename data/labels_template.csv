@@ -1,0 +1,2 @@
+filename,hand,wrist_height,finger_curvature,thumb_position,wrist_lateral,hand_arch,notes
+example_subfolder/img_001.jpg,right,good,warning,good,good,critical,wrist slightly high

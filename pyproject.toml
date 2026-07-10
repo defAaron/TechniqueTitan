@@ -1,0 +1,23 @@
+[project]
+name = "technique-titan"
+version = "0.1.0"
+description = "Piano hand posture analysis from images and video"
+requires-python = ">=3.9"
+dependencies = [
+    # >=0.10.30 removed the legacy mp.solutions API used by the detector
+    "mediapipe==0.10.21",
+    "opencv-python>=4.8,<5",
+    "numpy>=1.26,<2",
+    "PyYAML>=6.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
