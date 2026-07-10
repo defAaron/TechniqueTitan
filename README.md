@@ -36,9 +36,10 @@ python -m technique_titan.batch.process_folder \
   --input data/raw --output data/processed
 ```
 
-Results land in `data/processed/batch_summary.csv` (one row per image with all
-vectors, angles, and scores) and `data/processed/outliers.csv` (rows worth a
-manual look).
+Both hands are detected and scored independently. Results land in
+`data/processed/batch_summary.csv` (one row **per detected hand**, keyed by
+`source` + `hand` + `hand_index`, with all vectors, angles, and scores) and
+`data/processed/outliers.csv` (rows worth a manual look).
 
 ## Run the UI
 
@@ -50,15 +51,37 @@ streamlit run app.py
 ```
 
 The sidebar offers three modes, each showing an annotated landmark overlay plus
-a five-criterion score panel:
+a five-criterion score panel. When two hands are visible, both are drawn (tagged
+`L`/`R`) and each gets its own score panel:
 
 1. **Photo** - upload a single image for review.
-2. **Video** - upload a clip to build a posture timeline over its frames.
+2. **Video** - upload a clip to build a per-hand posture timeline over its frames.
 3. **Live camera** - real-time feedback from your default camera (grant camera
    permission to the terminal or app running Streamlit).
 
 The batch CLI above remains the tool for bulk data; the UI is for reviewing one
 input at a time.
+
+## Deploy (Streamlit Community Cloud)
+
+The app is deployable to [Streamlit Community Cloud](https://streamlit.io/cloud)
+from this GitHub repo:
+
+1. Push `main` to `https://github.com/defAaron/TechniqueTitan`
+2. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub
+3. **New app** → pick `defAaron/TechniqueTitan`, branch `main`, main file `app.py`
+4. Deploy — Streamlit installs deps from [`requirements.txt`](requirements.txt)
+
+Or from a local checkout (requires a Streamlit Cloud account):
+
+```bash
+pip install streamlit
+streamlit deploy app.py --title "Technique Titan"
+```
+
+**Cloud notes:** Photo and video upload work on Streamlit Cloud. **Live camera**
+requires a local webcam and only works when you run `streamlit run app.py` on
+your machine, not on the hosted server.
 
 ## Documentation
 

@@ -13,13 +13,13 @@ panel.
 from __future__ import annotations
 
 import tempfile
-from collections import Counter
+from collections import defaultdict
 
 import cv2
 import numpy as np
 import streamlit as st
 
-from technique_titan.analysis import analyze_frame, draw_overlay, severity_color
+from technique_titan.analysis import analyze_hands, draw_all_overlays, severity_color
 from technique_titan.detection import HandDetector
 from technique_titan.scoring import load_config
 
@@ -37,9 +37,11 @@ def get_config() -> dict:
     return load_config()
 
 
-def render_scores(result, container=None) -> None:
+def render_scores(result, container=None, title=None) -> None:
     """Render the composite score plus a per-criterion breakdown panel."""
     target = container or st
+    if title:
+        target.markdown(f"#### {title}")
     composite = result.composite_score
     target.metric("Composite score", f"{composite:.0f} / 100" if composite is not None else "-")
 
@@ -62,6 +64,19 @@ def bgr_to_rgb(image_bgr: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
 
+def hand_title(result) -> str:
+    return f"{result.label} hand (confidence {result.hand.confidence:.0%})"
+
+
+def render_hand_panels(results, container=None) -> None:
+    """Render one score panel per hand, side by side."""
+    target = container or st
+    ordered = sorted(results, key=lambda r: r.label)
+    columns = target.columns(len(ordered))
+    for col, result in zip(columns, ordered):
+        render_scores(result, container=col, title=hand_title(result))
+
+
 def photo_mode(config: dict) -> None:
     st.subheader("Photo review")
     st.caption("Upload a single image of a hand on the keys.")
@@ -76,24 +91,21 @@ def photo_mode(config: dict) -> None:
         return
 
     with HandDetector(static_image_mode=True) as detector:
-        result = analyze_frame(image_bgr, detector, config)
+        results = analyze_hands(image_bgr, detector, config)
 
-    if result is None:
+    if not results:
         st.warning("No hand detected. Try a clearer, well-lit image with the hand fully visible.")
         st.image(bgr_to_rgb(image_bgr), caption="Uploaded image", use_container_width=True)
         return
 
-    annotated = draw_overlay(image_bgr, result.hand, result.composite_severity)
-    col_img, col_scores = st.columns([3, 2])
-    with col_img:
-        st.image(
-            bgr_to_rgb(annotated),
-            caption=f"Detected {result.hand.handedness} hand "
-            f"(confidence {result.hand.confidence:.0%})",
-            use_container_width=True,
-        )
-    with col_scores:
-        render_scores(result)
+    annotated = draw_all_overlays(image_bgr, results)
+    labels = ", ".join(sorted(r.label for r in results))
+    st.image(
+        bgr_to_rgb(annotated),
+        caption=f"Detected {len(results)} hand(s): {labels}",
+        use_container_width=True,
+    )
+    render_hand_panels(results)
 
 
 def video_mode(config: dict) -> None:
@@ -118,8 +130,8 @@ def video_mode(config: dict) -> None:
     progress = st.progress(0.0)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 0
 
-    composites: list = []
-    severity_tally: Counter = Counter()
+    composites: dict = defaultdict(list)
+    severity_tally: dict = defaultdict(lambda: defaultdict(int))
     frame_idx = 0
 
     with HandDetector(static_image_mode=False) as detector:
@@ -128,14 +140,15 @@ def video_mode(config: dict) -> None:
             if not ok:
                 break
             if frame_idx % stride == 0:
-                result = analyze_frame(frame, detector, config)
-                if result is not None:
-                    frame = draw_overlay(frame, result.hand, result.composite_severity)
-                    if result.composite_score is not None:
-                        composites.append(result.composite_score)
-                    for key, sev in result.severities.items():
-                        if sev in ("warning", "critical"):
-                            severity_tally[CRITERION_LABELS.get(key, key)] += 1
+                results = analyze_hands(frame, detector, config)
+                if results:
+                    frame = draw_all_overlays(frame, results)
+                    for result in results:
+                        if result.composite_score is not None:
+                            composites[result.label].append(result.composite_score)
+                        for key, sev in result.severities.items():
+                            if sev in ("warning", "critical"):
+                                severity_tally[result.label][CRITERION_LABELS.get(key, key)] += 1
                 frame_placeholder.image(bgr_to_rgb(frame), use_container_width=True)
                 if total_frames:
                     progress.progress(min(frame_idx / total_frames, 1.0))
@@ -149,18 +162,25 @@ def video_mode(config: dict) -> None:
         return
 
     st.markdown("### Session summary")
-    col_a, col_b, col_c = st.columns(3)
-    col_a.metric("Frames scored", len(composites))
-    col_b.metric("Average composite", f"{np.mean(composites):.0f}")
-    col_c.metric("Worst composite", f"{np.min(composites):.0f}")
-
-    if severity_tally:
-        worst = severity_tally.most_common(1)[0][0]
-        st.info(f"Most frequent issue: **{worst}** "
-                f"({severity_tally[worst]} flagged frames)")
+    for label in sorted(composites):
+        series = composites[label]
+        st.markdown(f"#### {label} hand")
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("Frames scored", len(series))
+        col_b.metric("Average composite", f"{np.mean(series):.0f}")
+        col_c.metric("Worst composite", f"{np.min(series):.0f}")
+        issues = severity_tally.get(label)
+        if issues:
+            worst = max(issues, key=issues.get)
+            st.info(f"Most frequent issue: **{worst}** ({issues[worst]} flagged frames)")
 
     st.markdown("#### Composite score over time")
-    st.line_chart({"composite": composites})
+    max_len = max(len(v) for v in composites.values())
+    chart_data = {
+        f"{label} hand": composites[label] + [None] * (max_len - len(composites[label]))
+        for label in sorted(composites)
+    }
+    st.line_chart(chart_data)
 
 
 def live_mode(config: dict) -> None:
@@ -200,13 +220,13 @@ def live_mode(config: dict) -> None:
                 st.warning("Lost the camera feed.")
                 break
             frame = cv2.flip(frame, 1)  # mirror for a natural selfie view
-            result = analyze_frame(frame, detector, config)
-            if result is not None:
-                frame = draw_overlay(frame, result.hand, result.composite_severity)
+            results = analyze_hands(frame, detector, config)
+            if results:
+                frame = draw_all_overlays(frame, results)
             frame_placeholder.image(bgr_to_rgb(frame), use_container_width=True)
-            if result is not None:
+            if results:
                 with scores_placeholder.container():
-                    render_scores(result)
+                    render_hand_panels(results)
             else:
                 scores_placeholder.info("No hand detected in view.")
 

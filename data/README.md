@@ -15,10 +15,13 @@ Then run one command from the project root:
   --input data/raw --output data/processed --labels data/labels.csv
 ```
 
-Outputs land in `processed/`:
+Both hands are detected and scored separately. Outputs land in `processed/`:
 
-- `landmarks/` — raw MediaPipe coordinates, one JSON per image
-- `metrics/` — vectors, joint angles, criterion metrics, scores per image
-- `batch_summary.csv` — one row per image with every computed feature
+- `landmarks/` — raw MediaPipe coordinates, one JSON per image (a `hands` list)
+- `metrics/` — vectors, joint angles, criterion metrics, scores per image (a `hands` list)
+- `batch_summary.csv` — one row **per detected hand** (`source` + `hand` + `hand_index`) with every computed feature
 - `outliers.csv` — auto-flagged rows worth a manual look
 - `failed/failures.csv` — images with no detectable hand, with reasons
+
+Note: `labels.csv` is still merged by `filename`, so a label row currently
+applies to every hand from that image; per-hand labels are future work.

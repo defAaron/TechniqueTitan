@@ -5,15 +5,15 @@ Usage:
         --input data/raw --output data/processed [--labels data/labels.csv]
 
 For every image found under --input (recursively):
-  1. Extract MediaPipe hand landmarks (best hand kept per image).
+  1. Extract MediaPipe hand landmarks (all detected hands, up to two, per image).
   2. Normalize coordinates (wrist origin, palm-span scale).
   3. Compute all vectors, joint angles, and criterion metrics.
   4. Score each criterion against config/scoring.yaml.
 
 Outputs under --output:
-  landmarks/<name>.json     raw landmark coordinates per image
-  metrics/<name>.json       vectors + angles + metrics + scores per image
-  batch_summary.csv         one row per image, all features as columns
+  landmarks/<name>.json     raw landmark coordinates (list of hands) per image
+  metrics/<name>.json       vectors + angles + metrics + scores (list of hands)
+  batch_summary.csv         one row per detected hand, all features as columns
   outliers.csv              auto-flagged suspicious rows
   failed/failures.csv       images with no detectable hand, with reasons
 """
@@ -30,6 +30,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from ..analysis import resolve_labels
 from ..detection import HandDetector
 from ..features import extract_all_features
 from ..scoring import load_config, score_all
@@ -57,8 +58,8 @@ def load_labels(labels_path: Path | None) -> dict:
     return labels
 
 
-def process_image(detector: HandDetector, image_path: Path, config: dict) -> dict:
-    """Returns a result dict, or raises ValueError when unusable."""
+def process_image(detector: HandDetector, image_path: Path, config: dict) -> list:
+    """Returns one result dict per detected hand, or raises ValueError when unusable."""
     image = cv2.imread(str(image_path))
     if image is None:
         raise ValueError("unreadable image file")
@@ -67,20 +68,24 @@ def process_image(detector: HandDetector, image_path: Path, config: dict) -> dic
     if not detection.found:
         raise ValueError("no hand detected")
 
-    hand = max(detection.hands, key=lambda h: h.confidence)
-    # Prefer world landmarks (meters, 3D-stable); fall back to image coords.
-    coords = hand.world_landmarks if hand.world_landmarks is not None else hand.landmarks
+    labels = resolve_labels(detection.hands)
+    results = []
+    for hand_index, (hand, label) in enumerate(zip(detection.hands, labels)):
+        # Prefer world landmarks (meters, 3D-stable); fall back to image coords.
+        coords = hand.world_landmarks if hand.world_landmarks is not None else hand.landmarks
 
-    features = extract_all_features(coords, hand.handedness)
-    scoring = score_all(features["criterion_metrics"], config)
+        features = extract_all_features(coords, hand.handedness)
+        scoring = score_all(features["criterion_metrics"], config)
 
-    return {
-        "hand": hand.handedness.lower(),
-        "confidence": round(hand.confidence, 4),
-        "detection": hand.to_dict(),
-        **features,
-        **scoring,
-    }
+        results.append({
+            "hand_index": hand_index,
+            "hand": label.lower(),
+            "confidence": round(hand.confidence, 4),
+            "detection": hand.to_dict(),
+            **features,
+            **scoring,
+        })
+    return results
 
 
 def flag_outliers(rows: list, config: dict) -> list:
@@ -138,6 +143,7 @@ def write_csv(path: Path, rows: list) -> None:
 def flatten_for_csv(source: str, result: dict, labels: dict) -> dict:
     row = {
         "source": source,
+        "hand_index": result["hand_index"],
         "hand": result["hand"],
         "confidence": result["confidence"],
     }
@@ -187,21 +193,29 @@ def main(argv: list | None = None) -> int:
             rel = str(image_path.relative_to(args.input))
             stem = rel.replace("/", "__").rsplit(".", 1)[0]
             try:
-                result = process_image(detector, image_path, config)
+                results = process_image(detector, image_path, config)
             except ValueError as exc:
                 failures.append({"source": rel, "reason": str(exc)})
                 print(f"  [{i}/{len(images)}] FAILED {rel}: {exc}")
                 continue
 
+            landmarks_payload = [
+                {"hand_index": r["hand_index"], "hand": r["hand"], **r["detection"]}
+                for r in results
+            ]
             with open(landmarks_dir / f"{stem}.json", "w") as f:
-                json.dump({"source": rel, **result["detection"]}, f, indent=2)
+                json.dump({"source": rel, "hands": landmarks_payload}, f, indent=2)
 
-            metrics_payload = {k: v for k, v in result.items() if k != "detection"}
+            metrics_payload = [
+                {k: v for k, v in r.items() if k != "detection"} for r in results
+            ]
             with open(metrics_dir / f"{stem}.json", "w") as f:
-                json.dump({"source": rel, **metrics_payload}, f, indent=2)
+                json.dump({"source": rel, "hands": metrics_payload}, f, indent=2)
 
-            summary_rows.append(flatten_for_csv(rel, result, labels))
-            print(f"  [{i}/{len(images)}] ok {rel} (composite {result['composite_score']})")
+            for r in results:
+                summary_rows.append(flatten_for_csv(rel, r, labels))
+            composites = ", ".join(f"{r['hand']} {r['composite_score']}" for r in results)
+            print(f"  [{i}/{len(images)}] ok {rel} ({len(results)} hand(s): {composites})")
 
     write_csv(args.output / "batch_summary.csv", summary_rows)
     outliers = flag_outliers(summary_rows, config)
@@ -209,7 +223,8 @@ def main(argv: list | None = None) -> int:
     write_csv(failed_dir / "failures.csv", failures)
 
     print(
-        f"\nDone: {len(summary_rows)} processed, {len(failures)} failed, "
+        f"\nDone: {len(summary_rows)} hand(s) scored across "
+        f"{len(images) - len(failures)} image(s), {len(failures)} failed, "
         f"{len(outliers)} flagged as outliers."
     )
     print(f"  summary : {args.output / 'batch_summary.csv'}")
