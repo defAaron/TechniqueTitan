@@ -70,13 +70,15 @@ from this GitHub repo:
 1. Push `main` to `https://github.com/defAaron/TechniqueTitan`
 2. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub
 3. **New app** → pick `defAaron/TechniqueTitan`, branch `main`, main file `app.py`
-4. Deploy — Streamlit installs deps from [`requirements.txt`](requirements.txt)
+4. **Advanced settings → Python version: 3.11** (MediaPipe has no wheel for 3.13)
+5. Deploy — Streamlit installs deps from [`requirements.txt`](requirements.txt)
+   and system libs from [`packages.txt`](packages.txt)
 
-Or from a local checkout (requires a Streamlit Cloud account):
+Or from a local checkout:
 
 ```bash
-pip install streamlit
-streamlit deploy app.py --title "Technique Titan"
+pip install -e .
+streamlit run app.py
 ```
 
 **Cloud notes:** Photo and video upload work on Streamlit Cloud. **Live camera**

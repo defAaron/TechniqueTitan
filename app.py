@@ -12,8 +12,13 @@ panel.
 
 from __future__ import annotations
 
+import sys
 import tempfile
 from collections import defaultdict
+from pathlib import Path
+
+# Allow imports without `pip install -e .` (required on Streamlit Cloud).
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 import cv2
 import numpy as np
