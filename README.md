@@ -40,6 +40,26 @@ Results land in `data/processed/batch_summary.csv` (one row per image with all
 vectors, angles, and scores) and `data/processed/outliers.csv` (rows worth a
 manual look).
 
+## Run the UI
+
+A simple Streamlit app for interactive, one-at-a-time review:
+
+```bash
+pip install -e .        # installs streamlit and the package
+streamlit run app.py
+```
+
+The sidebar offers three modes, each showing an annotated landmark overlay plus
+a five-criterion score panel:
+
+1. **Photo** - upload a single image for review.
+2. **Video** - upload a clip to build a posture timeline over its frames.
+3. **Live camera** - real-time feedback from your default camera (grant camera
+   permission to the terminal or app running Streamlit).
+
+The batch CLI above remains the tool for bulk data; the UI is for reviewing one
+input at a time.
+
 ## Documentation
 
 - [Product requirements](docs/PRD.md)

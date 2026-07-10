@@ -9,6 +9,7 @@ dependencies = [
     "opencv-python>=4.8,<5",
     "numpy>=1.26,<2",
     "PyYAML>=6.0",
+    "streamlit>=1.30",
 ]
 
 [build-system]
