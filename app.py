@@ -16,6 +16,8 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
+import platform
+import os
 
 # Allow imports without `pip install -e .` (required on Streamlit Cloud).
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
@@ -67,6 +69,61 @@ def render_scores(result, container=None, title=None) -> None:
 
 def bgr_to_rgb(image_bgr: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+
+
+def _is_streamlit_cloud() -> bool:
+    """Heuristic: hosted apps cannot access the server's (nonexistent) webcam."""
+    host = os.environ.get("HOSTNAME", "") + os.environ.get("STREAMLIT_SERVER_ADDRESS", "")
+    return "streamlit" in host.lower()
+
+
+def _using_headless_opencv() -> bool:
+    try:
+        import importlib.metadata as meta
+        meta.distribution("opencv-python-headless")
+        try:
+            meta.distribution("opencv-python")
+            return False  # full build wins if both present
+        except meta.PackageNotFoundError:
+            return True
+    except meta.PackageNotFoundError:
+        return False
+
+
+def open_camera():
+    """Open the default webcam, using the macOS AVFoundation backend when available."""
+    if platform.system() == "Darwin" and hasattr(cv2, "CAP_AVFOUNDATION"):
+        cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+        if cap.isOpened():
+            return cap
+        cap.release()
+    cap = cv2.VideoCapture(0)
+    return cap if cap.isOpened() else None
+
+
+def camera_help_message() -> str:
+    if _is_streamlit_cloud():
+        return (
+            "Live camera is not available on Streamlit Cloud (no webcam on the server). "
+            "Use **Photo** or **Video** upload instead, or run locally with "
+            "`streamlit run app.py`."
+        )
+    if _using_headless_opencv():
+        return (
+            "Live camera needs the full OpenCV build, not headless. "
+            "Run: `pip uninstall opencv-python-headless -y && pip install opencv-python` "
+            "then restart Streamlit."
+        )
+    if platform.system() == "Darwin":
+        return (
+            "Camera not available. On macOS, open **System Settings → Privacy & Security → "
+            "Camera** and allow access for **Cursor**, **Terminal**, or whichever app "
+            "launched Streamlit. Then restart the app."
+        )
+    return (
+        "Camera not available. Check that a webcam is connected and not in use by "
+        "another app, then try again."
+    )
 
 
 def hand_title(result) -> str:
@@ -192,6 +249,13 @@ def live_mode(config: dict) -> None:
     st.subheader("Live camera review")
     st.caption("Real-time posture feedback from your default camera.")
 
+    if _is_streamlit_cloud():
+        st.warning(
+            "Live camera only works when you run the app **locally** "
+            "(`streamlit run app.py`). On Streamlit Cloud, use Photo or Video upload."
+        )
+        return
+
     if "live_running" not in st.session_state:
         st.session_state.live_running = False
 
@@ -205,14 +269,10 @@ def live_mode(config: dict) -> None:
         st.write("Press **Start camera** to begin.")
         return
 
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
+    cap = open_camera()
+    if cap is None:
         st.session_state.live_running = False
-        st.error(
-            "Camera not available. On macOS, go to System Settings > "
-            "Privacy & Security > Camera and allow access for the terminal "
-            "or app running Streamlit."
-        )
+        st.error(camera_help_message())
         return
 
     frame_placeholder = st.empty()
