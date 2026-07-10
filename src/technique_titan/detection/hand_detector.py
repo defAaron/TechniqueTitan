@@ -1,7 +1,7 @@
 """MediaPipe Hands wrapper that returns structured landmark data.
 
-Evolves the prototype in HandTrackingModule.py into an importable component
-(PRD FR-PD-1, FR-PD-2, FR-PD-3, FR-PD-5).
+Evolves the prototype in `scripts/hand_detector_prototype.py` into an
+importable component (PRD FR-PD-1, FR-PD-2, FR-PD-3, FR-PD-5).
 """
 
 from __future__ import annotations

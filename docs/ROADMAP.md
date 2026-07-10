@@ -10,11 +10,16 @@ This roadmap turns the PRD into a phased, milestone-based delivery plan. Each ph
 estimates, not commitments.
 
 ### Baseline (what exists today)
-The repository currently contains a proven hand-landmarking prototype only:
-`HandTrackingMin.py` (live webcam → MediaPipe Hands → drawn landmarks + FPS overlay),
-`HandTrackingModule.py` (early `handDetector` class), and a Python 3.9.5 `venv` with
-`mediapipe 0.10.21`, `opencv-python 4.12`, `opencv-contrib-python 4.11`, and `numpy 2.0.2`.
-There is **no scoring, feedback, persistence, UI, packaging, or tests yet.** The roadmap
+The repository currently contains a proven hand-landmarking prototype and a
+bulk geometry pipeline:
+
+- `scripts/live_webcam_demo.py` — live webcam → MediaPipe Hands → drawn landmarks + FPS overlay
+- `scripts/hand_detector_prototype.py` — early `handDetector` class
+- `src/technique_titan/` — installable package (detection, geometry, features, scoring, batch CLI)
+- `tests/` — unit tests with synthetic landmark fixtures
+- `config/scoring.yaml` — tunable scoring thresholds
+
+There is **no feedback engine, persistence layer, UI, or CI yet.** The roadmap
 builds outward from this baseline.
 
 ---
@@ -26,7 +31,7 @@ builds outward from this baseline.
 - Establish tooling, structure, and a data-collection strategy before building features.
 
 **Key Deliverables**
-- Project structure (e.g., `src/`, `tests/`, `data/`, `docs/`) with the existing prototype refactored into a clean, importable detection module (evolving `HandTrackingModule.py`; existing files left intact per project constraints, new module added alongside).
+- Project structure (`src/`, `tests/`, `data/`, `docs/`, `scripts/`, `config/`) with the existing prototype refactored into a clean, importable detection module (evolving `scripts/hand_detector_prototype.py`; originals preserved in `scripts/` and `legacy/`).
 - Dependency manifests pinned to the versions already in the `venv` (`requirements.txt` and/or `pyproject.toml`): Python 3.9+, MediaPipe ~0.10.x, OpenCV ~4.x, NumPy ~2.x.
 - Tooling: formatter + linter (e.g., black/ruff), pre-commit hooks, and a minimal CI pipeline that runs lint + tests.
 - Test harness with at least one smoke test that loads a sample image and extracts landmarks.

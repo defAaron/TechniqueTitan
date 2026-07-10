@@ -38,9 +38,10 @@ evaluation** that works from a standard camera, without specialized hardware.
 This PRD is written against the actual contents of the repository as of the date above. The
 codebase currently contains:
 
-- `HandTrackingMin.py` — a minimal script that opens the default webcam via OpenCV (`cv2.VideoCapture(0)`), runs MediaPipe Hands on each frame, draws the 21 hand landmarks and connections, prints landmark pixel coordinates, and overlays an FPS counter.
-- `HandTrackingModule.py` — an in-progress `handDetector` class that wraps MediaPipe Hands (`findHands`) for reuse; it is an early prototype and not yet a finished, importable module.
-- `venv/` — a Python 3.9.5 virtual environment containing `mediapipe 0.10.21`, `opencv-python 4.12.0.88`, `opencv-contrib-python 4.11.0.86`, and `numpy 2.0.2`.
+- `scripts/live_webcam_demo.py` — a minimal script that opens the default webcam via OpenCV (`cv2.VideoCapture(0)`), runs MediaPipe Hands on each frame, draws the 21 hand landmarks and connections, prints landmark pixel coordinates, and overlays an FPS counter.
+- `scripts/hand_detector_prototype.py` — an in-progress `handDetector` class that wraps MediaPipe Hands (`findHands`) for reuse; it is an early prototype and not yet a finished, importable module.
+- `src/technique_titan/` — the installable package with detection, geometry, scoring, and batch processing modules.
+- `legacy/pycharm/` — archived copies of the original PyCharm project upload.
 
 There is currently **no scoring logic, no feedback engine, no persistence layer, no UI, no
 tests, and no packaging metadata** (e.g. `requirements.txt`/`pyproject.toml`). Everything
@@ -92,11 +93,11 @@ for traceability against the roadmap.
 
 ### 3.2 Pose / Hand Detection
 
-- **FR-PD-1 (MUST):** The system MUST extract the 21 standard hand landmarks per detected hand using MediaPipe Hands (or an equivalent landmark model), consistent with the approach in `HandTrackingMin.py`.
+- **FR-PD-1 (MUST):** The system MUST extract the 21 standard hand landmarks per detected hand using MediaPipe Hands (or an equivalent landmark model), consistent with the approach in `scripts/live_webcam_demo.py`.
 - **FR-PD-2 (MUST):** The system MUST determine hand laterality (left vs. right) to interpret thumb and lateral-deviation criteria correctly.
 - **FR-PD-3 (MUST):** The system MUST expose a confidence/quality signal per detection and suppress scoring when confidence is below a configurable threshold.
 - **FR-PD-4 (SHOULD):** The system SHOULD normalize landmark coordinates (scale/translation invariant) so scoring is robust to camera distance and hand size.
-- **FR-PD-5 (SHOULD):** Detection logic SHOULD be encapsulated in a reusable module (evolving the prototype `handDetector` class in `HandTrackingModule.py` into a tested, importable component).
+- **FR-PD-5 (SHOULD):** Detection logic SHOULD be encapsulated in a reusable module (evolving the prototype `handDetector` class in `scripts/hand_detector_prototype.py` into a tested, importable component).
 - **FR-PD-6 (MAY):** The system MAY estimate camera/viewpoint angle and warn when the angle is unsuitable for a given criterion (e.g., wrist height needs a side view).
 
 ### 3.3 Per-Criterion Scoring
@@ -213,5 +214,5 @@ it to a normalized score, and assigns a severity band.
 
 ## 8. Appendix — Traceability Notes
 
-- The technical feasibility of landmark extraction over a live camera feed is **already demonstrated** in the repository (`HandTrackingMin.py`, `HandTrackingModule.py`) using MediaPipe Hands + OpenCV.
+- The technical feasibility of landmark extraction over a live camera feed is **already demonstrated** in the repository (`scripts/live_webcam_demo.py`, `scripts/hand_detector_prototype.py`) using MediaPipe Hands + OpenCV.
 - All scoring, feedback, persistence, UI, packaging, and testing described above are **new work** not yet present in the repository.
