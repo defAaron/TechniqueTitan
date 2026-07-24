@@ -46,6 +46,15 @@ CRITERION_LABELS = {
     "hand_arch": "Overall hand arch",
 }
 
+# Shorter labels for the narrow live-feedback column.
+CRITERION_LABELS_SHORT = {
+    "wrist_height": "Wrist height",
+    "finger_curvature": "Finger curve",
+    "thumb_position": "Thumb",
+    "wrist_lateral": "Wrist lateral",
+    "hand_arch": "Hand arch",
+}
+
 
 @st.cache_resource
 def get_config() -> dict:
@@ -57,7 +66,63 @@ def get_coaching_config() -> dict:
     return load_coaching_config()
 
 
-def render_coaching(result, scoring_config: dict, coaching_config: dict, container=None) -> None:
+def _inject_split_layout_css() -> None:
+    """Camera stays in view; feedback column scrolls independently if needed."""
+    st.markdown(
+        """
+        <style>
+        /* Target the feedback column in the live/photo split layout. */
+        div[data-testid="stHorizontalBlock"]:has(.tt-feedback-anchor)
+          > div[data-testid="stColumn"]:last-child,
+        div[data-testid="stHorizontalBlock"]:has(.tt-feedback-anchor)
+          > div[data-testid="column"]:last-child {
+            max-height: 78vh;
+            overflow-y: auto;
+            padding-left: 0.75rem;
+            border-left: 1px solid rgba(49, 51, 63, 0.15);
+        }
+        .tt-score-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0.2rem 0;
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+        .tt-score-label { flex: 0 0 5.8rem; color: inherit; }
+        .tt-score-badge { flex: 0 0 4.2rem; font-weight: 600; font-size: 0.75rem; }
+        .tt-score-num { flex: 0 0 2.2rem; text-align: right; opacity: 0.85; }
+        .tt-score-bar {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(128, 128, 128, 0.25);
+            overflow: hidden;
+        }
+        .tt-score-bar > span {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+        }
+        .tt-composite {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0.15rem 0 0.45rem 0;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_coaching(
+    result,
+    scoring_config: dict,
+    coaching_config: dict,
+    container=None,
+    *,
+    compact: bool = False,
+) -> None:
     """Show prioritized coaching tips below the score breakdown."""
     target = container or st
     report = generate_coaching(
@@ -74,20 +139,49 @@ def render_coaching(result, scoring_config: dict, coaching_config: dict, contain
         return
 
     primary = report.primary
-    label = CRITERION_LABELS.get(primary.criterion, primary.criterion)
-    primary_text = f"**Focus first: {label}**\n\n{primary.problem}\n\n{primary.fix}"
+    labels = CRITERION_LABELS_SHORT if compact else CRITERION_LABELS
+    label = labels.get(primary.criterion, primary.criterion)
+    if compact:
+        primary_text = f"**Focus: {label}** — {primary.problem} {primary.fix}"
+    else:
+        primary_text = f"**Focus first: {label}**\n\n{primary.problem}\n\n{primary.fix}"
     if primary.severity == "critical":
         target.error(primary_text)
     else:
         target.warning(primary_text)
 
     extras = report.tips[1:]
-    if extras:
-        lines = []
-        for tip in extras:
-            tip_label = CRITERION_LABELS.get(tip.criterion, tip.criterion)
-            lines.append(f"- **{tip_label}** — {tip.problem} → {tip.fix}")
+    if not extras:
+        return
+    lines = []
+    for tip in extras:
+        tip_label = labels.get(tip.criterion, tip.criterion)
+        lines.append(f"- **{tip_label}** — {tip.problem} → {tip.fix}")
+    if compact:
+        with target.expander(f"More tips ({len(extras)})", expanded=False):
+            st.markdown("\n".join(lines))
+    else:
         target.markdown("\n".join(lines))
+
+
+def _compact_score_rows_html(result) -> str:
+    """One dense HTML block for all five criteria (saves vertical Streamlit widget chrome)."""
+    parts = []
+    for key, label in CRITERION_LABELS_SHORT.items():
+        score = result.scores.get(key)
+        sev = result.severities.get(key, "unknown")
+        color = severity_color(sev, hex=True)
+        pct = int(score) if isinstance(score, (int, float)) else 0
+        num = f"{score:.0f}" if isinstance(score, (int, float)) else "—"
+        parts.append(
+            "<div class='tt-score-row'>"
+            f"<span class='tt-score-label'>{label}</span>"
+            f"<span class='tt-score-badge' style='color:{color}'>{sev.upper()}</span>"
+            f"<span class='tt-score-num'>{num}</span>"
+            f"<div class='tt-score-bar'><span style='width:{pct}%;background:{color}'></span></div>"
+            "</div>"
+        )
+    return "".join(parts)
 
 
 def render_scores(
@@ -97,30 +191,50 @@ def render_scores(
     *,
     scoring_config: dict | None = None,
     coaching_config: dict | None = None,
+    compact: bool = False,
 ) -> None:
     """Render the composite score plus a per-criterion breakdown panel."""
     target = container or st
     if title:
-        target.markdown(f"#### {title}")
-    composite = result.composite_score
-    target.metric("Composite score", f"{composite:.0f} / 100" if composite is not None else "-")
-
-    for key, label in CRITERION_LABELS.items():
-        score = result.scores.get(key)
-        sev = result.severities.get(key, "unknown")
-        color = severity_color(sev, hex=True)
-        badge = f"<span style='color:{color};font-weight:600'>{sev.upper()}</span>"
-
-        if isinstance(score, (int, float)):
-            target.markdown(f"**{label}** &nbsp; {badge} &nbsp; ({score:.0f}/100)",
-                            unsafe_allow_html=True)
-            target.progress(int(score))
+        if compact:
+            target.markdown(f"**{title}**")
         else:
-            target.markdown(f"**{label}** &nbsp; {badge}", unsafe_allow_html=True)
-            target.progress(0)
+            target.markdown(f"#### {title}")
+    composite = result.composite_score
+    if compact:
+        comp = f"{composite:.0f}" if composite is not None else "—"
+        target.markdown(
+            f"<div class='tt-composite'>{comp} <span style='font-size:0.85rem;"
+            f"font-weight:500;opacity:0.7'>/ 100</span></div>",
+            unsafe_allow_html=True,
+        )
+        target.markdown(_compact_score_rows_html(result), unsafe_allow_html=True)
+    else:
+        target.metric("Composite score", f"{composite:.0f} / 100" if composite is not None else "-")
+        for key, label in CRITERION_LABELS.items():
+            score = result.scores.get(key)
+            sev = result.severities.get(key, "unknown")
+            color = severity_color(sev, hex=True)
+            badge = f"<span style='color:{color};font-weight:600'>{sev.upper()}</span>"
+
+            if isinstance(score, (int, float)):
+                target.markdown(
+                    f"**{label}** &nbsp; {badge} &nbsp; ({score:.0f}/100)",
+                    unsafe_allow_html=True,
+                )
+                target.progress(int(score))
+            else:
+                target.markdown(f"**{label}** &nbsp; {badge}", unsafe_allow_html=True)
+                target.progress(0)
 
     if scoring_config is not None and coaching_config is not None:
-        render_coaching(result, scoring_config, coaching_config, container=target)
+        render_coaching(
+            result,
+            scoring_config,
+            coaching_config,
+            container=target,
+            compact=compact,
+        )
 
 
 def bgr_to_rgb(image_bgr: np.ndarray) -> np.ndarray:
@@ -182,7 +296,9 @@ def camera_help_message() -> str:
     )
 
 
-def hand_title(result) -> str:
+def hand_title(result, *, compact: bool = False) -> str:
+    if compact:
+        return f"{result.label} · {result.hand.confidence:.0%}"
     return f"{result.label} hand (confidence {result.hand.confidence:.0%})"
 
 
@@ -192,10 +308,29 @@ def render_hand_panels(
     *,
     scoring_config: dict | None = None,
     coaching_config: dict | None = None,
+    compact: bool = False,
 ) -> None:
-    """Render one score panel per hand, side by side."""
+    """Render score panels per hand.
+
+    Full mode places hands side by side. Compact mode stacks them so a narrow
+    feedback column can show both hands without horizontal squeeze.
+    """
     target = container or st
     ordered = sorted(results, key=lambda r: r.label)
+    if compact:
+        # Marker for CSS that makes this column independently scrollable.
+        target.markdown("<div class='tt-feedback-anchor'></div>", unsafe_allow_html=True)
+        for result in ordered:
+            render_scores(
+                result,
+                container=target,
+                title=hand_title(result, compact=True),
+                scoring_config=scoring_config,
+                coaching_config=coaching_config,
+                compact=True,
+            )
+        return
+
     columns = target.columns(len(ordered))
     for col, result in zip(columns, ordered):
         render_scores(
@@ -204,6 +339,7 @@ def render_hand_panels(
             title=hand_title(result),
             scoring_config=scoring_config,
             coaching_config=coaching_config,
+            compact=False,
         )
 
 
@@ -284,12 +420,21 @@ def photo_mode(config: dict, coaching_config: dict) -> None:
         image_bgr, results, config, coaching_config, draw_all_overlays
     )
     labels = ", ".join(sorted(r.label for r in results))
-    st.image(
-        bgr_to_rgb(annotated),
-        caption=f"Detected {len(results)} hand(s): {labels}",
-        use_container_width=True,
-    )
-    render_hand_panels(results, scoring_config=config, coaching_config=coaching_config)
+    _inject_split_layout_css()
+    cam_col, feed_col = st.columns([1.7, 1.0], gap="medium")
+    with cam_col:
+        st.image(
+            bgr_to_rgb(annotated),
+            caption=f"Detected {len(results)} hand(s): {labels}",
+            use_container_width=True,
+        )
+    with feed_col:
+        render_hand_panels(
+            results,
+            scoring_config=config,
+            coaching_config=coaching_config,
+            compact=True,
+        )
 
 
 def video_mode(config: dict, coaching_config: dict) -> None:
@@ -544,8 +689,12 @@ def live_mode(config: dict, coaching_config: dict) -> None:
         st.error(camera_help_message())
         return
 
-    frame_placeholder = st.empty()
-    scores_placeholder = st.empty()
+    # Split viewport: large camera left, compact coaching/scores right.
+    # Feedback column scrolls on its own so the camera stays visible.
+    _inject_split_layout_css()
+    cam_col, feed_col = st.columns([1.7, 1.0], gap="medium")
+    frame_placeholder = cam_col.empty()
+    scores_placeholder = feed_col.empty()
 
     try:
         with HandDetector(static_image_mode=False) as detector:
@@ -576,6 +725,7 @@ def live_mode(config: dict, coaching_config: dict) -> None:
                             results,
                             scoring_config=config,
                             coaching_config=coaching_config,
+                            compact=True,
                         )
                 else:
                     scores_placeholder.info("No hand detected in view.")
