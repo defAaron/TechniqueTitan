@@ -5,15 +5,17 @@ Run with:
     streamlit run app.py
 
 Three modes (sidebar): analyze a photo, analyze a video, or open the live
-camera. Each mode reuses the same detect -> features -> score pipeline as the
-batch CLI and shows an annotated landmark overlay plus a five-criterion score
-panel.
+camera. Live camera can run as a preview or record an annotated session with
+per-hand average scores. Each mode reuses the same detect -> features -> score
+pipeline as the batch CLI and shows an annotated landmark overlay, a
+five-criterion score panel, and prioritized coaching tips from config/coaching.yaml.
 """
 
 from __future__ import annotations
 
 import sys
 import tempfile
+import shutil
 from collections import defaultdict
 from pathlib import Path
 import platform
@@ -27,6 +29,12 @@ import numpy as np
 import streamlit as st
 
 from technique_titan.analysis import analyze_hands, draw_all_overlays, severity_color
+from technique_titan.coaching import (
+    annotate_with_coaching,
+    generate_coaching,
+    load_coaching_config,
+    tip_for_label,
+)
 from technique_titan.detection import HandDetector
 from technique_titan.scoring import load_config
 
@@ -44,7 +52,52 @@ def get_config() -> dict:
     return load_config()
 
 
-def render_scores(result, container=None, title=None) -> None:
+@st.cache_resource
+def get_coaching_config() -> dict:
+    return load_coaching_config()
+
+
+def render_coaching(result, scoring_config: dict, coaching_config: dict, container=None) -> None:
+    """Show prioritized coaching tips below the score breakdown."""
+    target = container or st
+    report = generate_coaching(
+        result.scores,
+        result.severities,
+        result.criterion_metrics,
+        scoring_config,
+        coaching_config,
+    )
+    if report.encouragement:
+        target.success(report.encouragement)
+        return
+    if not report.tips:
+        return
+
+    primary = report.primary
+    label = CRITERION_LABELS.get(primary.criterion, primary.criterion)
+    primary_text = f"**Focus first: {label}**\n\n{primary.problem}\n\n{primary.fix}"
+    if primary.severity == "critical":
+        target.error(primary_text)
+    else:
+        target.warning(primary_text)
+
+    extras = report.tips[1:]
+    if extras:
+        lines = []
+        for tip in extras:
+            tip_label = CRITERION_LABELS.get(tip.criterion, tip.criterion)
+            lines.append(f"- **{tip_label}** — {tip.problem} → {tip.fix}")
+        target.markdown("\n".join(lines))
+
+
+def render_scores(
+    result,
+    container=None,
+    title=None,
+    *,
+    scoring_config: dict | None = None,
+    coaching_config: dict | None = None,
+) -> None:
     """Render the composite score plus a per-criterion breakdown panel."""
     target = container or st
     if title:
@@ -65,6 +118,9 @@ def render_scores(result, container=None, title=None) -> None:
         else:
             target.markdown(f"**{label}** &nbsp; {badge}", unsafe_allow_html=True)
             target.progress(0)
+
+    if scoring_config is not None and coaching_config is not None:
+        render_coaching(result, scoring_config, coaching_config, container=target)
 
 
 def bgr_to_rgb(image_bgr: np.ndarray) -> np.ndarray:
@@ -130,16 +186,80 @@ def hand_title(result) -> str:
     return f"{result.label} hand (confidence {result.hand.confidence:.0%})"
 
 
-def render_hand_panels(results, container=None) -> None:
+def render_hand_panels(
+    results,
+    container=None,
+    *,
+    scoring_config: dict | None = None,
+    coaching_config: dict | None = None,
+) -> None:
     """Render one score panel per hand, side by side."""
     target = container or st
     ordered = sorted(results, key=lambda r: r.label)
     columns = target.columns(len(ordered))
     for col, result in zip(columns, ordered):
-        render_scores(result, container=col, title=hand_title(result))
+        render_scores(
+            result,
+            container=col,
+            title=hand_title(result),
+            scoring_config=scoring_config,
+            coaching_config=coaching_config,
+        )
 
 
-def photo_mode(config: dict) -> None:
+def accumulate_frame_scores(results, composites: dict, severity_tally: dict) -> None:
+    """Append per-hand composite scores and warning/critical tallies from one frame."""
+    for result in results:
+        if result.composite_score is not None:
+            composites[result.label].append(result.composite_score)
+        for key, sev in result.severities.items():
+            if sev in ("warning", "critical"):
+                severity_tally[result.label][CRITERION_LABELS.get(key, key)] += 1
+
+
+def render_session_summary(
+    composites: dict,
+    severity_tally: dict,
+    *,
+    heading: str = "Session summary",
+    coaching_config: dict | None = None,
+) -> None:
+    """Show average / worst composites, top issues, and a score timeline chart."""
+    if not composites:
+        st.warning("No hands detected in the analyzed frames.")
+        return
+
+    st.markdown(f"### {heading}")
+    for label in sorted(composites):
+        series = composites[label]
+        st.markdown(f"#### {label} hand")
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("Frames scored", len(series))
+        col_b.metric("Average composite", f"{np.mean(series):.0f}")
+        col_c.metric("Worst composite", f"{np.min(series):.0f}")
+        issues = severity_tally.get(label)
+        if issues:
+            worst = max(issues, key=issues.get)
+            st.info(f"Most frequent issue: **{worst}** ({issues[worst]} flagged frames)")
+            if coaching_config is not None:
+                tip = tip_for_label(coaching_config, worst, CRITERION_LABELS)
+                if tip is not None:
+                    st.caption(f"Tip: {tip.problem} {tip.fix}")
+
+    st.markdown("#### Composite score over time")
+    max_len = max(len(v) for v in composites.values())
+    chart_data = {
+        f"{label} hand": composites[label] + [None] * (max_len - len(composites[label]))
+        for label in sorted(composites)
+    }
+    st.line_chart(chart_data)
+
+
+def _empty_severity_tally() -> dict:
+    return defaultdict(lambda: defaultdict(int))
+
+
+def photo_mode(config: dict, coaching_config: dict) -> None:
     st.subheader("Photo review")
     st.caption("Upload a single image of a hand on the keys.")
     upload = st.file_uploader("Choose an image", type=["png", "jpg", "jpeg"])
@@ -160,17 +280,19 @@ def photo_mode(config: dict) -> None:
         st.image(bgr_to_rgb(image_bgr), caption="Uploaded image", use_container_width=True)
         return
 
-    annotated = draw_all_overlays(image_bgr, results)
+    annotated = annotate_with_coaching(
+        image_bgr, results, config, coaching_config, draw_all_overlays
+    )
     labels = ", ".join(sorted(r.label for r in results))
     st.image(
         bgr_to_rgb(annotated),
         caption=f"Detected {len(results)} hand(s): {labels}",
         use_container_width=True,
     )
-    render_hand_panels(results)
+    render_hand_panels(results, scoring_config=config, coaching_config=coaching_config)
 
 
-def video_mode(config: dict) -> None:
+def video_mode(config: dict, coaching_config: dict) -> None:
     st.subheader("Video review")
     st.caption("Upload a short clip; frames are analyzed to build a posture timeline.")
     upload = st.file_uploader("Choose a video", type=["mp4", "mov", "avi", "m4v"])
@@ -193,7 +315,7 @@ def video_mode(config: dict) -> None:
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 0
 
     composites: dict = defaultdict(list)
-    severity_tally: dict = defaultdict(lambda: defaultdict(int))
+    severity_tally: dict = _empty_severity_tally()
     frame_idx = 0
 
     with HandDetector(static_image_mode=False) as detector:
@@ -204,13 +326,10 @@ def video_mode(config: dict) -> None:
             if frame_idx % stride == 0:
                 results = analyze_hands(frame, detector, config)
                 if results:
-                    frame = draw_all_overlays(frame, results)
-                    for result in results:
-                        if result.composite_score is not None:
-                            composites[result.label].append(result.composite_score)
-                        for key, sev in result.severities.items():
-                            if sev in ("warning", "critical"):
-                                severity_tally[result.label][CRITERION_LABELS.get(key, key)] += 1
+                    frame = annotate_with_coaching(
+                        frame, results, config, coaching_config, draw_all_overlays
+                    )
+                    accumulate_frame_scores(results, composites, severity_tally)
                 frame_placeholder.image(bgr_to_rgb(frame), use_container_width=True)
                 if total_frames:
                     progress.progress(min(frame_idx / total_frames, 1.0))
@@ -218,34 +337,134 @@ def video_mode(config: dict) -> None:
 
     cap.release()
     progress.progress(1.0)
+    render_session_summary(composites, severity_tally, coaching_config=coaching_config)
 
-    if not composites:
-        st.warning("No hands detected in the analyzed frames.")
+
+def _init_live_session_state() -> None:
+    defaults = {
+        "live_running": False,
+        "live_record_path": None,
+        "live_composites": None,
+        "live_severity_tally": None,
+        "live_has_recording": False,
+        "live_frame_dir": None,
+        "live_frames_written": 0,
+    }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+
+def _clear_live_recording() -> None:
+    path = st.session_state.get("live_record_path")
+    if path and Path(path).exists():
+        try:
+            Path(path).unlink()
+        except OSError:
+            pass
+    frame_dir = st.session_state.get("live_frame_dir")
+    if frame_dir and Path(frame_dir).exists():
+        try:
+            shutil.rmtree(frame_dir)
+        except OSError:
+            pass
+    st.session_state.live_record_path = None
+    st.session_state.live_composites = None
+    st.session_state.live_severity_tally = None
+    st.session_state.live_has_recording = False
+    st.session_state.live_frame_dir = None
+    st.session_state.live_frames_written = 0
+
+
+def _begin_live_recording() -> None:
+    frame_dir = tempfile.mkdtemp(prefix="tt_live_frames_")
+    st.session_state.live_frame_dir = frame_dir
+    st.session_state.live_composites = {}
+    st.session_state.live_severity_tally = {}
+    st.session_state.live_frames_written = 0
+    st.session_state.live_record_path = None
+    st.session_state.live_has_recording = False
+
+
+def _persist_live_recording_frame(frame_bgr: np.ndarray, results) -> None:
+    """Save one annotated frame and append scores to session state."""
+    composites = defaultdict(list, st.session_state.live_composites or {})
+    severity_tally = _empty_severity_tally()
+    if st.session_state.live_severity_tally:
+        for label, counts in st.session_state.live_severity_tally.items():
+            severity_tally[label] = defaultdict(int, counts)
+
+    accumulate_frame_scores(results, composites, severity_tally)
+
+    frame_dir = st.session_state.live_frame_dir
+    if not frame_dir:
         return
 
-    st.markdown("### Session summary")
-    for label in sorted(composites):
-        series = composites[label]
-        st.markdown(f"#### {label} hand")
-        col_a, col_b, col_c = st.columns(3)
-        col_a.metric("Frames scored", len(series))
-        col_b.metric("Average composite", f"{np.mean(series):.0f}")
-        col_c.metric("Worst composite", f"{np.min(series):.0f}")
-        issues = severity_tally.get(label)
-        if issues:
-            worst = max(issues, key=issues.get)
-            st.info(f"Most frequent issue: **{worst}** ({issues[worst]} flagged frames)")
-
-    st.markdown("#### Composite score over time")
-    max_len = max(len(v) for v in composites.values())
-    chart_data = {
-        f"{label} hand": composites[label] + [None] * (max_len - len(composites[label]))
-        for label in sorted(composites)
+    idx = st.session_state.live_frames_written
+    cv2.imwrite(str(Path(frame_dir) / f"{idx:06d}.jpg"), frame_bgr)
+    st.session_state.live_composites = {label: list(scores) for label, scores in composites.items()}
+    st.session_state.live_severity_tally = {
+        label: dict(counts) for label, counts in severity_tally.items()
     }
-    st.line_chart(chart_data)
+    st.session_state.live_frames_written = idx + 1
 
 
-def live_mode(config: dict) -> None:
+def _finalize_live_recording() -> bool:
+    """Build the annotated video and mark the session ready for summary/download."""
+    if st.session_state.live_has_recording:
+        return True
+
+    frame_dir = st.session_state.live_frame_dir
+    if not frame_dir or st.session_state.live_frames_written == 0:
+        return False
+
+    frames = sorted(Path(frame_dir).glob("*.jpg"))
+    if not frames:
+        return False
+
+    sample = cv2.imread(str(frames[0]))
+    if sample is None:
+        return False
+
+    height, width = sample.shape[:2]
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+        out_path = tmp.name
+
+    writer = _open_video_writer(sample, out_path)
+    if writer is None:
+        return False
+
+    try:
+        for frame_path in frames:
+            frame = cv2.imread(str(frame_path))
+            if frame is not None:
+                writer.write(frame)
+    finally:
+        writer.release()
+
+    if not Path(out_path).exists():
+        return False
+
+    st.session_state.live_record_path = out_path
+    st.session_state.live_has_recording = True
+
+    try:
+        shutil.rmtree(frame_dir)
+    except OSError:
+        pass
+    st.session_state.live_frame_dir = None
+    return True
+
+
+def _open_video_writer(frame: np.ndarray, path: str) -> cv2.VideoWriter | None:
+    height, width = frame.shape[:2]
+    fps = 20.0
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    writer = cv2.VideoWriter(path, fourcc, fps, (width, height))
+    return writer if writer.isOpened() else None
+
+
+def live_mode(config: dict, coaching_config: dict) -> None:
     st.subheader("Live camera review")
     st.caption("Real-time posture feedback from your default camera.")
 
@@ -256,18 +475,68 @@ def live_mode(config: dict) -> None:
         )
         return
 
-    if "live_running" not in st.session_state:
-        st.session_state.live_running = False
+    _init_live_session_state()
+
+    session_type = st.radio(
+        "Session type",
+        ("Live preview", "Record session"),
+        horizontal=True,
+        help=(
+            "Live preview shows real-time feedback only. "
+            "Record session saves an annotated video and averages scores per hand."
+        ),
+    )
+    recording = session_type == "Record session"
 
     col_start, col_stop = st.columns(2)
     if col_start.button("Start camera", type="primary"):
+        if recording:
+            _clear_live_recording()
+            _begin_live_recording()
         st.session_state.live_running = True
     if col_stop.button("Stop camera"):
         st.session_state.live_running = False
+        if recording:
+            _finalize_live_recording()
+
+    if st.session_state.live_has_recording and not st.session_state.live_running:
+        composites = st.session_state.live_composites or {}
+        severity_tally = st.session_state.live_severity_tally or {}
+        if composites:
+            render_session_summary(
+                composites,
+                severity_tally,
+                heading="Recording summary",
+                coaching_config=coaching_config,
+            )
+        else:
+            st.markdown("### Recording summary")
+            st.warning("No hands detected during the recording.")
+        path = st.session_state.live_record_path
+        if path and Path(path).exists():
+            with open(path, "rb") as f:
+                st.download_button(
+                    "Download annotated video",
+                    data=f.read(),
+                    file_name="technique_titan_session.mp4",
+                    mime="video/mp4",
+                )
+        if st.button("Clear recording"):
+            _clear_live_recording()
+            st.rerun()
 
     if not st.session_state.live_running:
-        st.write("Press **Start camera** to begin.")
+        if not st.session_state.live_has_recording:
+            if recording:
+                st.write("Press **Start camera** to begin recording with landmarks.")
+            else:
+                st.write("Press **Start camera** to begin.")
         return
+
+    if recording:
+        st.error("Recording… Stop the camera when you are done.")
+    else:
+        st.info("Live preview running.")
 
     cap = open_camera()
     if cap is None:
@@ -278,24 +547,43 @@ def live_mode(config: dict) -> None:
     frame_placeholder = st.empty()
     scores_placeholder = st.empty()
 
-    with HandDetector(static_image_mode=False) as detector:
-        while st.session_state.live_running:
-            ok, frame = cap.read()
-            if not ok:
-                st.warning("Lost the camera feed.")
-                break
-            frame = cv2.flip(frame, 1)  # mirror for a natural selfie view
-            results = analyze_hands(frame, detector, config)
-            if results:
-                frame = draw_all_overlays(frame, results)
-            frame_placeholder.image(bgr_to_rgb(frame), use_container_width=True)
-            if results:
-                with scores_placeholder.container():
-                    render_hand_panels(results)
-            else:
-                scores_placeholder.info("No hand detected in view.")
+    try:
+        with HandDetector(static_image_mode=False) as detector:
+            while st.session_state.live_running:
+                ok, frame = cap.read()
+                if not ok:
+                    st.warning("Lost the camera feed.")
+                    break
+                frame = cv2.flip(frame, 1)  # mirror for a natural selfie view
+                results = analyze_hands(frame, detector, config)
+                if results:
+                    frame = annotate_with_coaching(
+                        frame, results, config, coaching_config, draw_all_overlays
+                    )
+                    if recording:
+                        _persist_live_recording_frame(frame, results)
+                elif recording:
+                    frame_dir = st.session_state.live_frame_dir
+                    if frame_dir:
+                        idx = st.session_state.live_frames_written
+                        cv2.imwrite(str(Path(frame_dir) / f"{idx:06d}.jpg"), frame)
+                        st.session_state.live_frames_written = idx + 1
 
-    cap.release()
+                frame_placeholder.image(bgr_to_rgb(frame), use_container_width=True)
+                if results:
+                    with scores_placeholder.container():
+                        render_hand_panels(
+                            results,
+                            scoring_config=config,
+                            coaching_config=coaching_config,
+                        )
+                else:
+                    scores_placeholder.info("No hand detected in view.")
+    finally:
+        cap.release()
+        if recording and not st.session_state.live_has_recording:
+            if _finalize_live_recording():
+                st.rerun()
 
 
 def main() -> None:
@@ -304,6 +592,7 @@ def main() -> None:
     st.write("Piano hand posture review")
 
     config = get_config()
+    coaching_config = get_coaching_config()
     mode = st.sidebar.radio(
         "Mode",
         ("Photo", "Video", "Live camera"),
@@ -311,11 +600,11 @@ def main() -> None:
     )
 
     if mode == "Photo":
-        photo_mode(config)
+        photo_mode(config, coaching_config)
     elif mode == "Video":
-        video_mode(config)
+        video_mode(config, coaching_config)
     else:
-        live_mode(config)
+        live_mode(config, coaching_config)
 
 
 if __name__ == "__main__":

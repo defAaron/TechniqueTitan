@@ -1,0 +1,120 @@
+# Plain-language coaching templates for Technique Titan (PRD FR-FB-1…FR-FB-3).
+# Separate from scoring.yaml so copy can change without retuning thresholds.
+#
+# For each criterion and severity (warning / critical), three directions:
+#   too_low  — metric below the ideal range low edge
+#   too_high — metric above the ideal range high edge
+#   generic  — fallback when the metric is missing or NaN
+
+encouragement: "Nice work — your hand posture looks balanced. Keep that shape."
+
+criteria:
+  wrist_height:
+    warning:
+      too_low:
+        problem: "Your wrist is lifted a bit higher than your knuckles."
+        fix: "Ease the wrist down until it sits level with the knuckle line."
+      too_high:
+        problem: "Your wrist is starting to drop below the knuckle line."
+        fix: "Gently lift the wrist until it lines up with your knuckles."
+      generic:
+        problem: "Your wrist height is a little off balance."
+        fix: "Aim for a calm, level wrist even with the knuckles."
+    critical:
+      too_low:
+        problem: "Your wrist is raised well above the knuckles."
+        fix: "Lower the wrist so it rests level with the knuckle bridge."
+      too_high:
+        problem: "Your wrist is collapsing below the keys."
+        fix: "Lift the wrist until it sits level with your knuckles."
+      generic:
+        problem: "Your wrist height needs a clear reset."
+        fix: "Bring the wrist level with the knuckles and hold that shape."
+
+  finger_curvature:
+    warning:
+      too_low:
+        problem: "Your fingers are curling a little too tightly."
+        fix: "Soften the joints — imagine holding a small soft bubble."
+      too_high:
+        problem: "Your fingers look a bit flat on the keys."
+        fix: "Round the knuckles gently, as if holding a soft bubble."
+      generic:
+        problem: "Your finger curve could be more natural."
+        fix: "Keep a soft, rounded shape in each long finger."
+    critical:
+      too_low:
+        problem: "Your fingers are clenched too tightly."
+        fix: "Release the fist and find a soft, rounded curve."
+      too_high:
+        problem: "Your fingers are lying flat across the keys."
+        fix: "Lift into a gentle curve — imagine holding a soft bubble."
+      generic:
+        problem: "Your finger curve needs a clear reset."
+        fix: "Rebuild a soft, rounded shape in each long finger."
+
+  thumb_position:
+    warning:
+      too_low:
+        problem: "Your thumb is tucked a little too close to the hand."
+        fix: "Ease the thumb out so it rests on its side, ready to play."
+      too_high:
+        problem: "Your thumb is flaring out a bit wide."
+        fix: "Draw the thumb in so it rests calmly on its side."
+      generic:
+        problem: "Your thumb position is a little off."
+        fix: "Rest the thumb on its side, neither tucked nor flared."
+    critical:
+      too_low:
+        problem: "Your thumb is tucked tightly against the hand."
+        fix: "Open the thumb onto its side so it can move freely."
+      too_high:
+        problem: "Your thumb is sticking out far from the keys."
+        fix: "Bring the thumb in to rest on its side near the hand."
+      generic:
+        problem: "Your thumb needs a clear position reset."
+        fix: "Place the thumb on its side — relaxed, not tucked or flared."
+
+  wrist_lateral:
+    warning:
+      too_low:
+        problem: "Your wrist is bending a little toward the thumb side."
+        fix: "Guide the hand so the wrist sits straighter over the forearm."
+      too_high:
+        problem: "Your wrist is bending a little toward the pinky side."
+        fix: "Guide the hand so the wrist sits straighter over the forearm."
+      generic:
+        problem: "Your wrist is angled a little sideways."
+        fix: "Align the hand so the wrist stays straight with the forearm."
+    critical:
+      too_low:
+        problem: "Your wrist is bent sharply toward the thumb side."
+        fix: "Straighten the wrist so the hand lines up with the forearm."
+      too_high:
+        problem: "Your wrist is bent sharply toward the pinky side."
+        fix: "Straighten the wrist so the hand lines up with the forearm."
+      generic:
+        problem: "Your wrist has a strong sideways bend."
+        fix: "Reset so the wrist sits straight in line with the forearm."
+
+  hand_arch:
+    warning:
+      too_low:
+        problem: "The arch across your knuckles is starting to flatten."
+        fix: "Lift the knuckle bridge into a gentle, supported dome."
+      too_high:
+        problem: "Your hand arch looks a little too high and stiff."
+        fix: "Ease the dome so the knuckle bridge feels soft and springy."
+      generic:
+        problem: "Your hand arch could use a small adjustment."
+        fix: "Keep a gentle dome across the knuckles, not flat or rigid."
+    critical:
+      too_low:
+        problem: "Your knuckle bridge has collapsed flat."
+        fix: "Rebuild a clear dome across the knuckles, soft but lifted."
+      too_high:
+        problem: "Your hand arch is over-domed and tense."
+        fix: "Soften the arch into a gentle, easy knuckle bridge."
+      generic:
+        problem: "Your hand arch needs a clear reset."
+        fix: "Find a gentle dome across the knuckles — lifted, not locked."

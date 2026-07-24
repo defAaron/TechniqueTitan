@@ -88,6 +88,13 @@ builds outward from this baseline.
 **Goals**
 - Turn scores/severities into clear, prioritized, plain-language coaching.
 
+**Status:** Shipped as an additive layer (`src/technique_titan/coaching.py` +
+`config/coaching.yaml` + Streamlit UI). **Templates chosen over LLM** (PRD Open
+Question 6): deterministic, offline-capable copy with direction-aware
+`too_low` / `too_high` / `generic` variants. Primary-tip landmark highlights are
+drawn on top of the existing whole-hand severity overlay without changing core
+scoring or `draw_all_overlays` behavior.
+
 **Key Deliverables**
 - Feedback generator that, for each non-good criterion, emits a concise critique describing the problem and the fix. *(PRD: FR-FB-1)*
 - Severity-aware prioritization (good / warning / critical), surfacing the most important correction first. *(PRD: FR-FB-2)*

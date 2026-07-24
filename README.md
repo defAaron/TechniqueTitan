@@ -51,7 +51,7 @@ Both hands are detected and scored independently when visible in frame.
 | Bulk image processing (CLI) | Available |
 | Two-hand detection + separate scores | Available |
 | Configurable scoring thresholds | Available (`config/scoring.yaml`) |
-| Natural-language coaching text | Planned (Phase 2) |
+| Natural-language coaching text | Available (UI; YAML templates) |
 | Progress tracking / accounts | Planned (Phase 3+) |
 
 ### Five posture criteria
@@ -190,6 +190,7 @@ For each detected hand the pipeline:
 technique_titan/
 ├── app.py                    # Streamlit UI (photo, video, live)
 ├── config/scoring.yaml       # Tunable thresholds and weights
+├── config/coaching.yaml      # Plain-language coaching templates
 ├── data/                     # Raw intake + processed outputs
 ├── docs/                     # PRD, roadmap, scoring formulas
 ├── scripts/                  # Early webcam prototypes
@@ -199,6 +200,7 @@ technique_titan/
 │   ├── features/             # One module per posture criterion
 │   ├── analysis.py           # Single-frame / multi-hand analysis + overlays
 │   ├── scoring.py            # Metric → score → severity mapping
+│   ├── coaching.py           # Prioritized template coaching + tip highlights
 │   └── batch/                # Bulk folder processor CLI
 └── tests/                    # Unit tests (geometry, features, analysis)
 ```
@@ -288,7 +290,7 @@ python -m technique_titan.batch.process_folder \
 |---|---|
 | 0 — Foundation | Project structure, tests, data strategy |
 | 1 — Core detection | Geometry scoring engine (current) |
-| 2 — Feedback engine | Plain-language coaching text |
+| 2 — Feedback engine | Plain-language coaching text (shipped: templates + UI) |
 | 3 — Product surface | Web UI, persistence, progress charts |
 | 4 — Intelligence | Piano-specific model, teacher/student roles |
 
