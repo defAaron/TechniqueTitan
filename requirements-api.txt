@@ -1,0 +1,10 @@
+# API + engine dependencies (Docker / Railway).
+# Python 3.11 required (MediaPipe 0.10.21 has no 3.13 wheel).
+mediapipe==0.10.21
+opencv-python-headless==4.10.0.84
+numpy>=1.26,<2
+PyYAML>=6.0
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9
+pydantic>=2.0

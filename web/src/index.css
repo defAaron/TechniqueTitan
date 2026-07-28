@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1c1917;
+  --color-ink-muted: #57534e;
+  --color-paper: #f7f4ef;
+  --color-paper-deep: #ebe4d8;
+  --color-forest: #1f5c45;
+  --color-forest-bright: #2d7a5c;
+  --color-warn: #b45309;
+  --color-critical: #b91c1c;
+  --color-good: #15803d;
+  /* Warm metallic accent, borrowed from pedal/hinge hardware. */
+  --color-brass: #a1793a;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply m-0 min-h-screen font-body text-ink;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(31, 92, 69, 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(180, 83, 9, 0.08), transparent),
+      linear-gradient(180deg, var(--color-paper) 0%, var(--color-paper-deep) 100%);
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  /* Fraunces reads tighter and warmer at display sizes. */
+  h1,
+  h2,
+  h3 {
+    font-optical-sizing: auto;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: rgba(31, 92, 69, 0.18);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-forest);
+    outline-offset: 2px;
+  }
+}
+
+/* Alternating white/black band used as a keybed divider. */
+.keybed {
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(247, 244, 239, 0.9) 0 14px,
+    rgba(28, 25, 23, 0.85) 14px 18px
+  );
+}
+
+/*
+ * Scroll-driven parallax: the background image is taller than the stage and
+ * translates downward as the page scrolls, so it lags behind the text (which
+ * moves with normal document scroll). Pure CSS via animation-timeline: scroll().
+ */
+.hero-parallax {
+  min-height: min(72vh, 40rem);
+}
+
+.hero-parallax__media {
+  position: absolute;
+  inset: -25% 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-parallax__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center right;
+  transform: scale(1.08);
+  transform-origin: center right;
+  will-change: transform;
+  animation-name: hero-parallax-bg;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  animation-timeline: scroll();
+  /* Drive the effect over the first viewport of scroll, while the hero is on screen. */
+  animation-range: 0vh 100vh;
+}
+
+@keyframes hero-parallax-bg {
+  from {
+    transform: scale(1.08) translate3d(0, 0, 0);
+  }
+  to {
+    /* Positive Y counters upward scroll → image appears to move slower than text. */
+    transform: scale(1.08) translate3d(0, 22%, 0);
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  .hero-parallax__img {
+    animation: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease-out both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-parallax__img {
+    animation: none;
+    transform: scale(1.08);
+  }
+
+  .animate-fade-up,
+  .animate-pulse-soft {
+    animation: none;
+  }
+}

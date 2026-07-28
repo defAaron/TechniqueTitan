@@ -23,3 +23,9 @@ data/raw/**
 # IDE
 .idea/
 .vscode/
+
+# Frontend
+web/node_modules/
+web/dist/
+web/.env
+web/.env.local

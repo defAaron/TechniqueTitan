@@ -2,3 +2,4 @@
 # opencv-python (non-headless) is required for Live camera mode on macOS.
 opencv-python==4.10.0.84
 pytest>=8.0
+httpx>=0.27

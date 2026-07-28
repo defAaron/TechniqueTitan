@@ -395,14 +395,29 @@ def _empty_severity_tally() -> dict:
     return defaultdict(lambda: defaultdict(int))
 
 
+# Soft limits for hosted demos (Streamlit Cloud / reverse proxies).
+_MAX_PHOTO_BYTES = 8 * 1024 * 1024
+_MAX_VIDEO_BYTES = 40 * 1024 * 1024
+_CAPTURE_GUIDANCE = (
+    "Capture tips: side or 3/4 view of the hand on the keys, good lighting, "
+    "hand fully in frame, camera roughly forearm-height. Avoid heavy blur or gloves."
+)
+
+
 def photo_mode(config: dict, coaching_config: dict) -> None:
     st.subheader("Photo review")
     st.caption("Upload a single image of a hand on the keys.")
+    st.caption(_CAPTURE_GUIDANCE)
     upload = st.file_uploader("Choose an image", type=["png", "jpg", "jpeg"])
     if upload is None:
         return
 
-    data = np.frombuffer(upload.getvalue(), np.uint8)
+    raw = upload.getvalue()
+    if len(raw) > _MAX_PHOTO_BYTES:
+        st.error("Image is too large (max 8 MB). Compress or crop and try again.")
+        return
+
+    data = np.frombuffer(raw, np.uint8)
     image_bgr = cv2.imdecode(data, cv2.IMREAD_COLOR)
     if image_bgr is None:
         st.error("Could not read that image file.")
@@ -440,14 +455,20 @@ def photo_mode(config: dict, coaching_config: dict) -> None:
 def video_mode(config: dict, coaching_config: dict) -> None:
     st.subheader("Video review")
     st.caption("Upload a short clip; frames are analyzed to build a posture timeline.")
+    st.caption(_CAPTURE_GUIDANCE + " Prefer clips under ~30 seconds for faster analysis.")
     upload = st.file_uploader("Choose a video", type=["mp4", "mov", "avi", "m4v"])
     stride = st.slider("Analyze every Nth frame", min_value=1, max_value=15, value=5,
                        help="Higher values are faster but coarser.")
     if upload is None:
         return
 
+    raw = upload.getvalue()
+    if len(raw) > _MAX_VIDEO_BYTES:
+        st.error("Video is too large (max 40 MB). Trim the clip or lower resolution.")
+        return
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
-        tmp.write(upload.getvalue())
+        tmp.write(raw)
         tmp_path = tmp.name
 
     cap = cv2.VideoCapture(tmp_path)
@@ -615,8 +636,9 @@ def live_mode(config: dict, coaching_config: dict) -> None:
 
     if _is_streamlit_cloud():
         st.warning(
-            "Live camera only works when you run the app **locally** "
-            "(`streamlit run app.py`). On Streamlit Cloud, use Photo or Video upload."
+            "**Live camera is local-only.** Streamlit Cloud has no webcam on the server. "
+            "Use **Photo** or **Video** upload here, or run locally with "
+            "`streamlit run app.py`. Browser live camera will ship with the React product UI."
         )
         return
 

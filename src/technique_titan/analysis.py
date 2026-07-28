@@ -102,6 +102,19 @@ def _score_hand(hand: HandDetection, label: str, config: dict) -> AnalysisResult
     )
 
 
+def score_detected_hands(
+    hands: List[HandDetection], config: dict
+) -> List[AnalysisResult]:
+    """Score already-detected hands (e.g. landmarks from the browser)."""
+    if not hands:
+        return []
+    labels = resolve_labels(hands)
+    return [
+        _score_hand(hand, label, config)
+        for hand, label in zip(hands, labels)
+    ]
+
+
 def analyze_hands(
     image_bgr: np.ndarray, detector: HandDetector, config: dict
 ) -> List[AnalysisResult]:
@@ -114,12 +127,7 @@ def analyze_hands(
     detection = detector.detect(image_bgr)
     if not detection.found:
         return []
-
-    labels = resolve_labels(detection.hands)
-    return [
-        _score_hand(hand, label, config)
-        for hand, label in zip(detection.hands, labels)
-    ]
+    return score_detected_hands(detection.hands, config)
 
 
 def _draw_hand(

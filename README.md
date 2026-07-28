@@ -45,13 +45,14 @@ Both hands are detected and scored independently when visible in frame.
 
 | Capability | Status |
 |---|---|
-| Photo upload review | Available (UI) |
-| Video upload + posture timeline | Available (UI) |
-| Live camera feedback | Available (local only) |
+| Photo upload review | Available (Streamlit + React) |
+| Video upload + posture timeline | Available (Streamlit + React) |
+| Live camera feedback | Available (local Streamlit; browser live in React) |
+| REST analyze API | Available (`api/`) |
 | Bulk image processing (CLI) | Available |
 | Two-hand detection + separate scores | Available |
 | Configurable scoring thresholds | Available (`config/scoring.yaml`) |
-| Natural-language coaching text | Available (UI; YAML templates) |
+| Natural-language coaching text | Available (YAML templates) |
 | Progress tracking / accounts | Planned (Phase 3+) |
 
 ### Five posture criteria
@@ -188,11 +189,13 @@ For each detected hand the pipeline:
 
 ```
 technique_titan/
-├── app.py                    # Streamlit UI (photo, video, live)
+├── app.py                    # Streamlit UI (interim; photo, video, live)
+├── api/                      # FastAPI product backend
+├── web/                      # React + TypeScript + Tailwind product UI
 ├── config/scoring.yaml       # Tunable thresholds and weights
 ├── config/coaching.yaml      # Plain-language coaching templates
 ├── data/                     # Raw intake + processed outputs
-├── docs/                     # PRD, roadmap, scoring formulas
+├── docs/                     # PRD, roadmap, scoring formulas, deploy guide
 ├── scripts/                  # Early webcam prototypes
 ├── src/technique_titan/
 │   ├── detection/            # MediaPipe wrapper (HandDetector)
@@ -202,7 +205,7 @@ technique_titan/
 │   ├── scoring.py            # Metric → score → severity mapping
 │   ├── coaching.py           # Prioritized template coaching + tip highlights
 │   └── batch/                # Bulk folder processor CLI
-└── tests/                    # Unit tests (geometry, features, analysis)
+└── tests/                    # Unit tests (geometry, features, analysis, API)
 ```
 
 ### Tech stack
@@ -213,7 +216,9 @@ technique_titan/
 | Image/video I/O | OpenCV `4.x` |
 | Math | NumPy |
 | Scoring config | PyYAML |
-| UI | Streamlit `1.30+` |
+| Interim UI | Streamlit `1.30+` |
+| Product API | FastAPI + Uvicorn |
+| Product UI | React + TypeScript + Tailwind (Vite) |
 | Tests | pytest |
 
 ### Key modules
@@ -231,6 +236,8 @@ technique_titan/
 
 ## Deployment
 
+See **[docs/DEPLOY.md](docs/DEPLOY.md)** for the full Streamlit → FastAPI + React path.
+
 ### Local (all 3 UI modes)
 
 ```bash
@@ -241,7 +248,20 @@ streamlit run app.py
 
 Photo, video, and live camera all work locally.
 
-### Streamlit Community Cloud (photo + video only)
+### Product stack (React UI + API)
+
+```bash
+# API
+pip install -e ".[api]"
+uvicorn api.main:app --reload --port 8000
+
+# UI (separate terminal)
+cd web && npm install && npm run dev
+```
+
+Open http://localhost:5173. Hosted deploy: API on Railway (Docker), UI on Vercel.
+
+### Streamlit Community Cloud (interim photo + video only)
 
 1. Deploy from [share.streamlit.io](https://share.streamlit.io) using repo
    `defAaron/TechniqueTitan`, branch `main`, entrypoint `app.py`.
@@ -249,8 +269,8 @@ Photo, video, and live camera all work locally.
 3. Dependencies install from `requirements.txt`; system libs from `packages.txt`.
 
 Live camera does **not** work on Streamlit Cloud — the server has no webcam.
-Use local deployment or a future WebRTC-based live mode for hosted real-time
-feedback.
+Use the React **Live** page (browser MediaPipe) for hosted real-time feedback.
+Retire Streamlit Cloud once the React app is primary.
 
 ---
 
@@ -280,7 +300,7 @@ python -m technique_titan.batch.process_folder \
 | [docs/PRD.md](docs/PRD.md) | Product requirements and personas |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan |
 | [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md) | Formulas and landmark inputs per criterion |
-| [data/README.md](data/README.md) | Tester data intake and output schema |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Streamlit Cloud + Railway + Vercel deploy guide |
 
 ---
 
