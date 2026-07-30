@@ -54,27 +54,31 @@ export function VideoAnalyze() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Video review</h1>
-        <p className="mt-1 text-sm text-ink-muted">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+          Video review
+        </h1>
+        <p className="mt-1 text-sm text-muted">
           Upload a short clip; frames are sampled to build a posture timeline. Prefer under
           ~30 seconds.
         </p>
       </header>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-stone-300/70 bg-white/60 p-5 sm:flex-row sm:items-end">
+      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:flex-row sm:items-end">
         <label className="flex-1 text-sm">
-          <span className="mb-1 block font-medium">Analyze every Nth frame</span>
+          <span className="mb-1 block font-medium text-foreground">
+            Analyze every Nth frame
+          </span>
           <input
             type="range"
             min={1}
             max={15}
             value={stride}
             onChange={(e) => setStride(Number(e.target.value))}
-            className="w-full accent-forest"
+            className="w-full accent-accent"
           />
-          <span className="text-xs text-ink-muted">Stride: {stride}</span>
+          <span className="text-xs text-muted">Stride: {stride}</span>
         </label>
-        <label className="cursor-pointer rounded-full bg-forest px-5 py-2.5 text-center text-sm font-semibold text-paper hover:bg-forest-bright">
+        <label className="cursor-pointer rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-foreground transition-all duration-200 hover:bg-primary-bright hover:glow-blue">
           Choose video
           <input
             type="file"
@@ -87,33 +91,48 @@ export function VideoAnalyze() {
       </div>
 
       {busy && (
-        <p className="animate-pulse-soft text-sm font-medium text-forest">
+        <p className="animate-pulse-soft text-sm font-medium text-accent">
           Analyzing frames… this can take a minute for longer clips.
         </p>
       )}
       {error && (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="rounded-xl border border-critical/40 bg-critical/10 px-4 py-3 text-sm text-critical">
           {error}
         </p>
       )}
 
       {result && chartData.length > 0 && (
-        <section className="animate-fade-up rounded-2xl border border-stone-300/70 bg-white/70 p-4 shadow-sm">
-          <h2 className="mb-3 font-display text-xl font-semibold">Composite over time</h2>
+        <section className="animate-fade-up rounded-2xl border border-line bg-surface p-4">
+          <h2 className="mb-3 font-display text-xl font-semibold text-foreground">
+            Composite over time
+          </h2>
           <div className="h-72 w-full">
             <ResponsiveContainer>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#d6d3d1" />
-                <XAxis dataKey="i" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend />
+                <CartesianGrid strokeDasharray="3 3" stroke="#242b38" />
+                <XAxis dataKey="i" tick={{ fontSize: 11, fill: '#98a1b3' }} stroke="#242b38" />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fontSize: 11, fill: '#98a1b3' }}
+                  stroke="#242b38"
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: '#12151c',
+                    border: '1px solid #242b38',
+                    borderRadius: 12,
+                    color: '#f2f4f8',
+                  }}
+                  labelStyle={{ color: '#98a1b3' }}
+                  cursor={{ stroke: '#22d3ee', strokeOpacity: 0.4 }}
+                />
+                <Legend wrapperStyle={{ color: '#98a1b3', fontSize: 12 }} />
                 {labels.map((label, idx) => (
                   <Line
                     key={label}
                     type="monotone"
                     dataKey={`${label} hand`}
-                    stroke={idx === 0 ? '#1f5c45' : '#b45309'}
+                    stroke={idx === 0 ? '#22d3ee' : '#7285ff'}
                     strokeWidth={2}
                     dot={false}
                     connectNulls
@@ -122,7 +141,7 @@ export function VideoAnalyze() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <p className="mt-2 text-xs text-ink-muted">
+          <p className="mt-2 text-xs text-muted">
             {result.frames.length} sampled frames analyzed
           </p>
         </section>

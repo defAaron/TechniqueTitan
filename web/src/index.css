@@ -1,43 +1,55 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #1c1917;
-  --color-ink-muted: #57534e;
-  --color-paper: #f7f4ef;
-  --color-paper-deep: #ebe4d8;
-  --color-forest: #1f5c45;
-  --color-forest-bright: #2d7a5c;
-  --color-warn: #b45309;
-  --color-critical: #b91c1c;
-  --color-good: #15803d;
-  /* Warm metallic accent, borrowed from pedal/hinge hardware. */
-  --color-brass: #a1793a;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Charcoal ground, electric blue signal, cyan accent. */
+  --color-background: #0b0d12;
+  --color-surface: #12151c;
+  --color-surface-raised: #181d27;
+  --color-foreground: #f2f4f8;
+  --color-muted: #98a1b3;
+  --color-line: #242b38;
+  --color-primary: #4a5cff;
+  --color-primary-bright: #7285ff;
+  --color-accent: #22d3ee;
+  --color-good: #34d399;
+  --color-warn: #fbbf24;
+  --color-critical: #f87171;
+}
+
+:root {
+  --glow-blue: 0 0 24px rgba(74, 92, 255, 0.38);
+  --glow-cyan: 0 0 24px rgba(34, 211, 238, 0.32);
 }
 
 @layer base {
   html {
     @apply antialiased;
+    background-color: var(--color-background);
+    scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
-    @apply m-0 min-h-screen font-body text-ink;
+    @apply m-0 min-h-screen font-body text-foreground;
     background:
-      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(31, 92, 69, 0.12), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(180, 83, 9, 0.08), transparent),
-      linear-gradient(180deg, var(--color-paper) 0%, var(--color-paper-deep) 100%);
+      radial-gradient(ellipse 70% 50% at 12% -8%, rgba(74, 92, 255, 0.2), transparent 70%),
+      radial-gradient(ellipse 55% 45% at 96% 0%, rgba(34, 211, 238, 0.12), transparent 70%),
+      var(--color-background);
+    background-repeat: no-repeat;
   }
 
   #root {
     @apply min-h-screen;
   }
 
-  /* Fraunces reads tighter and warmer at display sizes. */
   h1,
   h2,
   h3 {
-    font-optical-sizing: auto;
+    @apply font-display;
+    letter-spacing: -0.025em;
     text-wrap: balance;
   }
 
@@ -46,31 +58,99 @@
   }
 
   ::selection {
-    background: rgba(31, 92, 69, 0.18);
+    background: rgba(34, 211, 238, 0.3);
+    color: var(--color-foreground);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-forest);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333d4e;
   }
 }
 
-/* Alternating white/black band used as a keybed divider. */
+/* Faint engineering grid, used behind the hero and closing CTA. */
+.tech-grid {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility glow-blue {
+  box-shadow: var(--glow-blue);
+}
+
+@utility glow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+
+/* Horizontal signal rule used as a section divider. */
+.accent-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.45);
+  opacity: 0.55;
+}
+
+.accent-line--blue {
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  box-shadow: 0 0 14px rgba(74, 92, 255, 0.5);
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, var(--color-primary-bright), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Alternating band used as a keybed motif along the hero's bottom edge. */
 .keybed {
   background: repeating-linear-gradient(
     90deg,
-    rgba(247, 244, 239, 0.9) 0 14px,
-    rgba(28, 25, 23, 0.85) 14px 18px
+    rgba(34, 211, 238, 0.55) 0 14px,
+    rgba(11, 13, 18, 0.9) 14px 18px
   );
 }
 
 /*
- * Scroll-driven parallax: the background image is taller than the stage and
- * translates downward as the page scrolls, so it lags behind the text (which
- * moves with normal document scroll). Pure CSS via animation-timeline: scroll().
+ * Full-bleed hero + scroll-driven parallax. Breaks out of the constrained
+ * main column so the piano still spans the full viewport width. The image
+ * translates downward as the page scrolls, lagging behind the text.
  */
 .hero-parallax {
-  min-height: min(72vh, 40rem);
+  /* Break out of the padded max-w-6xl main column to span the full viewport. */
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  /* Cancel main's top padding so the image meets the header edge-to-edge. */
+  margin-top: -2.5rem;
+  min-height: min(82vh, 46rem);
+}
+
+@media (min-width: 640px) {
+  .hero-parallax {
+    margin-top: -3.5rem;
+  }
 }
 
 .hero-parallax__media {
@@ -85,10 +165,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center right;
+  object-position: center;
   transform: scale(1.08);
-  transform-origin: center right;
+  transform-origin: center center;
   will-change: transform;
+  /* Drain the warm cast so the blue scrim above sets the hero's temperature. */
+  filter: saturate(0.4) contrast(1.08) brightness(0.72);
   animation-name: hero-parallax-bg;
   animation-timing-function: linear;
   animation-fill-mode: both;
@@ -134,12 +216,26 @@
   }
 }
 
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 .animate-fade-up {
   animation: fade-up 0.55s ease-out both;
 }
 
 .animate-pulse-soft {
   animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+.animate-float-soft {
+  animation: float-soft 6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -149,7 +245,8 @@
   }
 
   .animate-fade-up,
-  .animate-pulse-soft {
+  .animate-pulse-soft,
+  .animate-float-soft {
     animation: none;
   }
 }

@@ -9,7 +9,7 @@ export function CoachingTips({ hand }: Props) {
   const { coaching } = hand
   if (coaching.encouragement) {
     return (
-      <div className="animate-fade-up rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-900">
+      <div className="animate-fade-up rounded-2xl border border-good/40 bg-good/10 px-4 py-3 text-sm text-good">
         {coaching.encouragement}
       </div>
     )
@@ -25,26 +25,28 @@ export function CoachingTips({ hand }: Props) {
         <div
           className="rounded-2xl border px-4 py-3 text-sm"
           style={{
-            borderColor: severityColor(primary.severity),
+            borderColor: `color-mix(in srgb, ${severityColor(primary.severity)} 45%, transparent)`,
             background:
               primary.severity === 'critical'
-                ? 'rgba(185, 28, 28, 0.06)'
-                : 'rgba(180, 83, 9, 0.08)',
+                ? 'rgba(248, 113, 113, 0.1)'
+                : 'rgba(251, 191, 36, 0.1)',
           }}
         >
-          <p className="mb-1 font-semibold">
-            Focus first:{' '}
-            {CRITERION_LABELS[primary.criterion] ?? primary.criterion}
+          <p
+            className="mb-1 font-semibold"
+            style={{ color: severityColor(primary.severity) }}
+          >
+            Focus first: {CRITERION_LABELS[primary.criterion] ?? primary.criterion}
           </p>
-          <p className="text-ink-muted">{primary.problem}</p>
-          <p className="mt-1 text-ink">{primary.fix}</p>
+          <p className="text-muted">{primary.problem}</p>
+          <p className="mt-1 text-foreground">{primary.fix}</p>
         </div>
       )}
       {extras.length > 0 && (
-        <ul className="space-y-2 text-sm text-ink-muted">
+        <ul className="space-y-2 text-sm text-muted">
           {extras.map((tip) => (
             <li key={`${tip.criterion}-${tip.priority}`}>
-              <span className="font-medium text-ink">
+              <span className="font-medium text-foreground">
                 {CRITERION_LABELS[tip.criterion] ?? tip.criterion}
               </span>
               {' — '}

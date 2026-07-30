@@ -61,30 +61,33 @@ const steps = [
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-forest">
-      <span
-        aria-hidden="true"
-        className="h-3 w-6 rounded-sm bg-[repeating-linear-gradient(90deg,var(--color-forest)_0_3px,transparent_3px_6px)]"
-      />
+    <p className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary-bright">
+      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
       {children}
     </p>
   )
 }
 
+function Divider({ blue = false }: { blue?: boolean }) {
+  return (
+    <div aria-hidden="true" className={`accent-line ${blue ? 'accent-line--blue' : ''}`} />
+  )
+}
+
 export function HomePage() {
   return (
-    <div className="space-y-24 sm:space-y-32">
+    <div className="space-y-20 sm:space-y-24">
       <Hero />
 
       <Reveal as="section" aria-labelledby="problem-heading">
         <Eyebrow>The problem</Eyebrow>
         <h2
           id="problem-heading"
-          className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
         >
           Technique drifts in the hours nobody is watching.
         </h2>
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-muted">
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
           Posture faults are small, gradual, and invisible from the bench. They do
           not announce themselves until they cost you speed, tone, or comfort.
         </p>
@@ -93,18 +96,22 @@ export function HomePage() {
             <Reveal
               key={item.title}
               delay={0.08 * i}
-              className="relative overflow-hidden rounded-2xl border border-stone-300/70 bg-white/60 p-5"
+              className="relative overflow-hidden rounded-2xl border border-line bg-surface p-5 transition-all duration-300 hover:border-warn/50"
             >
               <span
                 aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-warn/70 to-transparent"
+                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-warn/80 to-transparent"
               />
-              <h3 className="font-display text-lg font-semibold text-ink">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{item.body}</p>
+              <h3 className="font-display text-lg font-semibold text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{item.body}</p>
             </Reveal>
           ))}
         </div>
       </Reveal>
+
+      <Divider blue />
 
       <Reveal as="section" aria-labelledby="solution-heading">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -112,17 +119,17 @@ export function HomePage() {
             <Eyebrow>The solution</Eyebrow>
             <h2
               id="solution-heading"
-              className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+              className="mt-5 font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
             >
               A second pair of eyes on every practice session.
             </h2>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-ink-muted">
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted">
               Technique Titan turns an ordinary camera into a posture instrument. It
               measures the same five things a teacher watches for, scores them
               consistently, and hands back the one correction that matters most right
               now — no wearables, no special hardware.
             </p>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-ink-muted">
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted">
               Live mode prefers browser-side landmark detection and posts only compact
               landmarks to the API, so your video stays on your device.
             </p>
@@ -130,9 +137,9 @@ export function HomePage() {
           <Reveal
             direction="right"
             delay={0.1}
-            className="rounded-3xl border border-forest/20 bg-gradient-to-br from-forest/[0.08] to-white/50 p-6 sm:p-8"
+            className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.14] via-surface to-surface p-6 shadow-[0_0_40px_rgba(74,92,255,0.12)] sm:p-8"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
               Scored every frame
             </p>
             <ul className="mt-5 space-y-3">
@@ -145,12 +152,12 @@ export function HomePage() {
               ].map((label, i) => (
                 <li
                   key={label}
-                  className="flex items-center gap-3 border-b border-stone-300/50 pb-3 last:border-0 last:pb-0"
+                  className="flex items-center gap-3 border-b border-line pb-3 last:border-0 last:pb-0"
                 >
-                  <span className="font-display text-sm font-bold tabular-nums text-forest/60">
+                  <span className="font-display text-sm font-bold tabular-nums text-accent/70">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span className="text-sm font-medium text-ink">{label}</span>
+                  <span className="text-sm font-medium text-foreground">{label}</span>
                 </li>
               ))}
             </ul>
@@ -158,11 +165,13 @@ export function HomePage() {
         </div>
       </Reveal>
 
+      <Divider />
+
       <Reveal as="section" aria-labelledby="how-heading">
         <Eyebrow>How it works</Eyebrow>
         <h2
           id="how-heading"
-          className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
         >
           Four steps, start to coaching.
         </h2>
@@ -172,25 +181,27 @@ export function HomePage() {
               as="li"
               key={step.n}
               delay={0.08 * i}
-              className="relative rounded-2xl border border-stone-300/70 bg-white/60 p-5"
+              className="group relative rounded-2xl border border-line bg-surface p-5 transition-all duration-300 hover:border-primary/50 hover:glow-blue"
             >
-              <span className="font-display text-3xl font-bold tabular-nums text-forest/25">
+              <span className="font-display text-3xl font-bold tabular-nums text-primary/40 transition-colors group-hover:text-primary/70">
                 {step.n}
               </span>
-              <h3 className="mt-2 font-display text-lg font-semibold text-forest">
+              <h3 className="mt-2 font-display text-lg font-semibold text-accent">
                 {step.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{step.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
             </Reveal>
           ))}
         </ol>
       </Reveal>
 
+      <Divider blue />
+
       <Reveal as="section" aria-labelledby="features-heading">
         <Eyebrow>Key features</Eyebrow>
         <h2
           id="features-heading"
-          className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
         >
           Five criteria, measured the same way every time.
         </h2>
@@ -199,11 +210,13 @@ export function HomePage() {
         </div>
       </Reveal>
 
+      <Divider />
+
       <Reveal as="section" aria-labelledby="modes-heading">
         <Eyebrow>Start practicing</Eyebrow>
         <h2
           id="modes-heading"
-          className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
         >
           Pick the mode that fits your session.
         </h2>
@@ -212,21 +225,56 @@ export function HomePage() {
             <Reveal key={card.to} delay={0.08 * i}>
               <Link
                 to={card.to}
-                className="group flex h-full flex-col rounded-2xl border border-stone-300/70 bg-white/65 p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-forest/40 hover:bg-white hover:shadow-md"
+                className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:bg-surface-raised hover:glow-cyan"
               >
-                <h3 className="font-display text-xl font-semibold text-forest">
+                <h3 className="font-display text-xl font-semibold text-accent">
                   {card.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-muted">{card.body}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{card.body}</p>
                 <span
                   aria-hidden="true"
-                  className="mt-4 text-sm font-semibold text-forest transition-transform group-hover:translate-x-0.5"
+                  className="mt-4 text-sm font-semibold text-foreground transition-transform group-hover:translate-x-0.5"
                 >
                   Open →
                 </span>
               </Link>
             </Reveal>
           ))}
+        </div>
+      </Reveal>
+
+      <Reveal
+        as="section"
+        aria-labelledby="cta-heading"
+        className="tech-grid relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-b from-primary/[0.12] to-surface px-6 py-14 text-center sm:px-10"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
+        />
+        <h2
+          id="cta-heading"
+          className="mx-auto max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
+        >
+          Ready to see what your hands are actually doing?
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
+          Start with a single photo. No account, no installation, no special hardware —
+          just the camera you already have.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link
+            to="/photo"
+            className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-primary-bright hover:glow-blue"
+          >
+            Analyze a photo
+          </Link>
+          <Link
+            to="/about"
+            className="rounded-full border border-accent/40 bg-accent/5 px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:border-accent hover:bg-accent/15"
+          >
+            How the scoring works
+          </Link>
         </div>
       </Reveal>
     </div>

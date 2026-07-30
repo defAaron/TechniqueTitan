@@ -38,13 +38,17 @@ export function PhotoAnalyze() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Photo review</h1>
-        <p className="mt-1 text-sm text-ink-muted">{CAPTURE}</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+          Photo review
+        </h1>
+        <p className="mt-1 text-sm text-muted">{CAPTURE}</p>
       </header>
 
-      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-stone-400/80 bg-white/50 px-6 py-10 text-center transition hover:border-forest hover:bg-white">
-        <span className="font-medium">Drop a JPEG or PNG, or click to browse</span>
-        <span className="text-xs text-ink-muted">Max 8 MB</span>
+      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-surface/60 px-6 py-10 text-center transition-all duration-300 hover:border-accent/60 hover:bg-surface-raised hover:glow-cyan">
+        <span className="font-medium text-foreground">
+          Drop a JPEG or PNG, or click to browse
+        </span>
+        <span className="text-xs text-muted">Max 8 MB</span>
         <input
           type="file"
           accept="image/png,image/jpeg"
@@ -55,12 +59,12 @@ export function PhotoAnalyze() {
       </label>
 
       {busy && (
-        <p className="animate-pulse-soft text-sm font-medium text-forest">
+        <p className="animate-pulse-soft text-sm font-medium text-accent">
           Detecting landmarks and scoring…
         </p>
       )}
       {error && (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="rounded-xl border border-critical/40 bg-critical/10 px-4 py-3 text-sm text-critical">
           {error}
         </p>
       )}

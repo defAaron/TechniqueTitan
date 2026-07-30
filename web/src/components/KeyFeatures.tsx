@@ -76,11 +76,11 @@ export function KeyFeatures() {
   const current = CRITERIA[active]
 
   return (
-    <div className="rounded-3xl border border-stone-300/70 bg-white/70 p-6 shadow-sm backdrop-blur-sm sm:p-8">
+    <div className="rounded-3xl border border-line bg-surface/80 p-6 backdrop-blur-sm sm:p-8">
       <div
         role="tablist"
         aria-label="Key features"
-        className="flex flex-wrap gap-1.5 border-b border-stone-300/60 pb-4"
+        className="flex flex-wrap gap-1.5 border-b border-line pb-4"
       >
         {CRITERIA.map((criterion, i) => {
           const selected = i === active
@@ -99,11 +99,11 @@ export function KeyFeatures() {
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKeyDown(e, i)}
               className={[
-                'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
-                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest',
+                'rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                 selected
-                  ? 'bg-forest text-paper shadow-sm'
-                  : 'text-ink-muted hover:bg-stone-200/70 hover:text-ink',
+                  ? 'bg-primary text-foreground shadow-[0_0_18px_rgba(74,92,255,0.45)]'
+                  : 'text-muted hover:bg-surface-raised hover:text-foreground',
               ].join(' ')}
             >
               {CRITERION_LABELS[criterion.key] ?? criterion.key}
@@ -119,24 +119,28 @@ export function KeyFeatures() {
         tabIndex={0}
         className="pt-6"
       >
-        <h3 className="font-display text-2xl font-bold tracking-tight text-forest">
+        <h3 className="font-display text-2xl font-bold tracking-tight text-accent">
           {CRITERION_LABELS[current.key] ?? current.key}
         </h3>
-        <p className="mt-2 max-w-xl text-base leading-relaxed text-ink-muted">
+        <p className="mt-2 max-w-xl text-base leading-relaxed text-muted">
           {current.measures}
         </p>
         <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-stone-300/60 bg-paper/70 px-4 py-3">
-            <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
+          <div className="rounded-2xl border border-line bg-background/60 px-4 py-3">
+            <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
               What it catches
             </dt>
-            <dd className="mt-1.5 text-sm leading-relaxed text-ink">{current.watch}</dd>
+            <dd className="mt-1.5 text-sm leading-relaxed text-foreground">
+              {current.watch}
+            </dd>
           </div>
-          <div className="rounded-2xl border border-forest/25 bg-forest/[0.06] px-4 py-3">
-            <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-forest">
+          <div className="rounded-2xl border border-accent/30 bg-accent/[0.08] px-4 py-3">
+            <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
               The coaching cue
             </dt>
-            <dd className="mt-1.5 text-sm leading-relaxed text-ink">{current.cue}</dd>
+            <dd className="mt-1.5 text-sm leading-relaxed text-foreground">
+              {current.cue}
+            </dd>
           </div>
         </dl>
       </div>

@@ -91,14 +91,14 @@ export function drawHandOverlays(
     }
     for (const [x, y] of pts) {
       ctx.beginPath()
-      ctx.fillStyle = '#fff'
+      ctx.fillStyle = '#f2f4f8'
       ctx.arc(x, y, 3.5, 0, Math.PI * 2)
       ctx.fill()
       ctx.strokeStyle = hand.color
       ctx.stroke()
     }
     if (hand.marker && pts[0]) {
-      ctx.font = 'bold 18px Figtree, sans-serif'
+      ctx.font = 'bold 18px "Space Grotesk", sans-serif'
       ctx.fillStyle = hand.color
       ctx.fillText(hand.marker, pts[0][0] - 8, pts[0][1] + 28)
     }
@@ -108,12 +108,12 @@ export function drawHandOverlays(
 export function severityHex(severity: string): string {
   switch (severity) {
     case 'good':
-      return '#15803d'
+      return '#34d399'
     case 'warning':
-      return '#b45309'
+      return '#fbbf24'
     case 'critical':
-      return '#b91c1c'
+      return '#f87171'
     default:
-      return '#78716c'
+      return '#98a1b3'
   }
 }

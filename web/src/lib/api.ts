@@ -156,6 +156,6 @@ export function severityColor(severity: string): string {
     case 'critical':
       return 'var(--color-critical)'
     default:
-      return 'var(--color-ink-muted)'
+      return 'var(--color-muted)'
   }
 }
