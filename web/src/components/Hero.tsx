@@ -49,19 +49,27 @@ export function Hero() {
 
       <div className="hero-parallax__content relative z-[2] mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24 lg:py-32">
         <div className="max-w-2xl">
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-accent backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-accent" />
-            Computer vision for pianists
-          </p>
+          <div className="mb-6 flex items-center gap-3">
+            <img
+              src="/icon-192.png"
+              alt=""
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-xl shadow-md ring-1 ring-accent/35"
+            />
+            <p className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Technique Titan
+            </p>
+          </div>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">
             Catch collapsed wrists{' '}
             <span className="text-gradient">before they become habit.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
-            Technique Titan measures five posture criteria from a standard camera —
-            wrist height, finger curve, thumb, lateral bend, and hand arch — then
-            returns plain-language coaching.
+            Measures five posture criteria from a standard camera — wrist height,
+            finger curve, thumb, lateral bend, and hand arch — then returns
+            plain-language coaching.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">

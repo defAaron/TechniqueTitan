@@ -759,7 +759,11 @@ def live_mode(config: dict, coaching_config: dict) -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Technique Titan", layout="wide")
+    st.set_page_config(
+        page_title="Technique Titan",
+        page_icon=str(Path(__file__).resolve().parent / "assets" / "brand" / "icon.png"),
+        layout="wide",
+    )
     st.title("Technique Titan")
     st.write("Piano hand posture review")
 

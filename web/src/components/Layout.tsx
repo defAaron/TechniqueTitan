@@ -36,12 +36,13 @@ export function Layout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-line bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <NavLink to="/" className="group flex items-center gap-3">
-            <span
-              aria-hidden="true"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-primary/40 bg-primary/10 font-display text-sm font-bold text-accent transition-shadow group-hover:glow-cyan"
-            >
-              TT
-            </span>
+            <img
+              src="/icon-192.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-lg shadow-sm ring-1 ring-primary/30 transition-shadow group-hover:glow-cyan"
+            />
             <span>
               <span className="block font-display text-lg font-bold tracking-tight text-foreground">
                 Technique Titan

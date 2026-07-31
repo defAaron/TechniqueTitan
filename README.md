@@ -189,22 +189,28 @@ For each detected hand the pipeline:
 
 ```
 technique_titan/
-├── app.py                    # Streamlit UI (interim; photo, video, live)
 ├── api/                      # FastAPI product backend
 ├── web/                      # React + TypeScript + Tailwind product UI
-├── config/scoring.yaml       # Tunable thresholds and weights
-├── config/coaching.yaml      # Plain-language coaching templates
+├── src/technique_titan/      # Core library (detect → features → score → coach)
+│   ├── detection/
+│   ├── geometry/
+│   ├── features/
+│   ├── batch/                # Bulk folder processor CLI
+│   ├── analysis.py
+│   ├── scoring.py
+│   └── coaching.py
+├── assets/brand/             # Master brand icon (favicons derived in web/public)
+├── config/                   # scoring.yaml + coaching.yaml
 ├── data/                     # Raw intake + processed outputs
-├── docs/                     # PRD, roadmap, scoring formulas, deploy guide
-├── src/technique_titan/
-│   ├── detection/            # MediaPipe wrapper (HandDetector)
-│   ├── geometry/             # Vectors, angles, normalization
-│   ├── features/             # One module per posture criterion
-│   ├── analysis.py           # Single-frame / multi-hand analysis + overlays
-│   ├── scoring.py            # Metric → score → severity mapping
-│   ├── coaching.py           # Prioritized template coaching + tip highlights
-│   └── batch/                # Bulk folder processor CLI
-└── tests/                    # Unit tests (geometry, features, analysis, API)
+├── docs/                     # PRD, roadmap, scoring, deploy
+├── tests/
+├── app.py                    # Streamlit UI (Cloud entrypoint)
+├── Dockerfile                # API image (Railway)
+├── railway.toml
+├── pyproject.toml
+├── requirements.txt          # Streamlit Cloud
+├── requirements-api.txt      # Docker / API
+└── requirements-dev.txt      # Local tests
 ```
 
 ### Tech stack
