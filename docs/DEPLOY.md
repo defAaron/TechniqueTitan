@@ -53,9 +53,12 @@ docker run --rm -p 8000:8000 -e CORS_ORIGINS=* technique-titan-api
 1. Create a Railway project from this GitHub repo.
 2. Railway uses [`Dockerfile`](../Dockerfile) + [`railway.toml`](../railway.toml).
 3. Set env vars:
-   - `CORS_ORIGINS` — your Vercel origin(s), comma-separated (or `*` for public demos)
-   - `RATE_LIMIT_MAX` — default `60` POSTs per window
+   - `CORS_ORIGINS` — your Vercel origin(s), comma-separated (prefer explicit origins; `*` disables credentials)
+   - `TRUST_PROXY` — set `1` on Railway/behind a reverse proxy so rate limits use `X-Forwarded-For`
    - `RATE_LIMIT_WINDOW` — default `60` seconds
+   - `RATE_LIMIT_MAX` — heavy uploads (`/analyze/image`, `/analyze/video`); default `60` per window
+   - `RATE_LIMIT_FRAME_MAX` — live JPEG frames (`/analyze/frame`); default `120` per window
+   - `RATE_LIMIT_LANDMARKS_MAX` — browser landmark scoring (`/score/landmarks`); default `360` per window (~6 Hz)
 4. Healthcheck: `GET /v1/health`
 
 API endpoints:

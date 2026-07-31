@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Hero } from '../components/Hero'
 import { KeyFeatures } from '../components/KeyFeatures'
+import { PipelineFlow } from '../components/PipelineFlow'
 import { Reveal } from '../components/Reveal'
+import { VideoPreview } from '../components/VideoPreview'
 
 const cards = [
   {
@@ -79,6 +81,10 @@ export function HomePage() {
     <div className="space-y-20 sm:space-y-24">
       <Hero />
 
+      <VideoPreview />
+
+      <Divider blue />
+
       <Reveal as="section" aria-labelledby="problem-heading">
         <Eyebrow>The problem</Eyebrow>
         <h2
@@ -137,7 +143,7 @@ export function HomePage() {
           <Reveal
             direction="right"
             delay={0.1}
-            className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.14] via-surface to-surface p-6 shadow-[0_0_40px_rgba(74,92,255,0.12)] sm:p-8"
+            className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.14] via-surface to-surface p-6 glow-blue sm:p-8"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
               Scored every frame
@@ -175,7 +181,14 @@ export function HomePage() {
         >
           Four steps, start to coaching.
         </h2>
-        <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
+          Capture in, coaching out — here is the processing path from a camera frame
+          to a prioritized tip.
+        </p>
+        <div className="mt-10">
+          <PipelineFlow />
+        </div>
+        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
             <Reveal
               as="li"

@@ -22,6 +22,7 @@ export function LivePractice() {
   const rafRef = useRef<number>(0)
   const lastSendRef = useRef(0)
   const inFlightRef = useRef(false)
+  const backoffUntilRef = useRef(0)
 
   const [running, setRunning] = useState(false)
   const [mode, setMode] = useState<Mode>('landmarks')
@@ -89,7 +90,13 @@ export function LivePractice() {
     paintFrame(lastResultsRef.current)
 
     const now = performance.now()
-    const interval = mode === 'landmarks' ? 250 : 400
+    if (now < backoffUntilRef.current) {
+      rafRef.current = requestAnimationFrame(() => void tick())
+      return
+    }
+
+    // Landmarks ~4 Hz; frames ~2 Hz — matches API per-path budgets.
+    const interval = mode === 'landmarks' ? 250 : 500
     if (!inFlightRef.current && now - lastSendRef.current >= interval) {
       lastSendRef.current = now
       inFlightRef.current = true
@@ -101,6 +108,7 @@ export function LivePractice() {
               imageWidth: video.videoWidth,
               imageHeight: video.videoHeight,
             })
+            setError(null)
             applyResults(res)
           } else {
             lastResultsRef.current = {
@@ -124,12 +132,21 @@ export function LivePractice() {
             )
             if (blob) {
               const res = await analyzeFrame(blob, false)
+              setError(null)
               applyResults(res)
             }
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Live analysis failed')
+        const message =
+          err instanceof Error ? err.message : 'Live analysis failed'
+        if (message.toLowerCase().includes('rate limit')) {
+          // Pause briefly instead of spamming the API / sticky red error.
+          backoffUntilRef.current = performance.now() + 2000
+          setStatus('Rate limited — pausing briefly…')
+        } else {
+          setError(message)
+        }
       } finally {
         inFlightRef.current = false
       }
@@ -141,6 +158,7 @@ export function LivePractice() {
   async function startCamera() {
     setError(null)
     setHands([])
+    backoffUntilRef.current = 0
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -196,7 +214,7 @@ export function LivePractice() {
               className={[
                 'rounded-full px-3 py-1.5 font-medium transition-all duration-200',
                 mode === value
-                  ? 'bg-primary text-foreground shadow-[0_0_18px_rgba(74,92,255,0.45)]'
+                  ? 'bg-primary text-foreground glow-blue'
                   : 'text-muted hover:text-foreground',
               ].join(' ')}
             >

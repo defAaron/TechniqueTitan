@@ -102,7 +102,7 @@ export function KeyFeatures() {
                 'rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
                 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                 selected
-                  ? 'bg-primary text-foreground shadow-[0_0_18px_rgba(74,92,255,0.45)]'
+                  ? 'bg-primary text-foreground glow-blue'
                   : 'text-muted hover:bg-surface-raised hover:text-foreground',
               ].join(' ')}
             >

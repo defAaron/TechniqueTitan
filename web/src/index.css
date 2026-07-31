@@ -4,24 +4,25 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  /* Charcoal ground, electric blue signal, cyan accent. */
-  --color-background: #0b0d12;
-  --color-surface: #12151c;
-  --color-surface-raised: #181d27;
-  --color-foreground: #f2f4f8;
-  --color-muted: #98a1b3;
-  --color-line: #242b38;
-  --color-primary: #4a5cff;
-  --color-primary-bright: #7285ff;
-  --color-accent: #22d3ee;
-  --color-good: #34d399;
-  --color-warn: #fbbf24;
-  --color-critical: #f87171;
+  /* Plum palette — #403D88 · #8B639B · #AF719D · #F8B2B2 */
+  --color-background: #110f1e;
+  --color-surface: #1a1730;
+  --color-surface-raised: #221e3d;
+  --color-foreground: #faf5f7;
+  --color-muted: #c4a8bc;
+  --color-line: #352f5c;
+  --color-primary: #403d88;
+  --color-primary-bright: #8b639b;
+  --color-secondary: #af719d;
+  --color-accent: #f8b2b2;
+  --color-good: #86efac;
+  --color-warn: #fcd34d;
+  --color-critical: #fca5a5;
 }
 
 :root {
-  --glow-blue: 0 0 24px rgba(74, 92, 255, 0.38);
-  --glow-cyan: 0 0 24px rgba(34, 211, 238, 0.32);
+  --glow-blue: 0 0 24px rgba(64, 61, 136, 0.42);
+  --glow-cyan: 0 0 24px rgba(248, 178, 178, 0.34);
 }
 
 @layer base {
@@ -35,8 +36,8 @@
   body {
     @apply m-0 min-h-screen font-body text-foreground;
     background:
-      radial-gradient(ellipse 70% 50% at 12% -8%, rgba(74, 92, 255, 0.2), transparent 70%),
-      radial-gradient(ellipse 55% 45% at 96% 0%, rgba(34, 211, 238, 0.12), transparent 70%),
+      radial-gradient(ellipse 70% 50% at 12% -8%, rgba(64, 61, 136, 0.28), transparent 70%),
+      radial-gradient(ellipse 55% 45% at 96% 0%, rgba(248, 178, 178, 0.12), transparent 70%),
       var(--color-background);
     background-repeat: no-repeat;
   }
@@ -58,7 +59,7 @@
   }
 
   ::selection {
-    background: rgba(34, 211, 238, 0.3);
+    background: rgba(248, 178, 178, 0.28);
     color: var(--color-foreground);
   }
 
@@ -82,15 +83,15 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #333d4e;
+    background: #4a4268;
   }
 }
 
 /* Faint engineering grid, used behind the hero and closing CTA. */
 .tech-grid {
   background-image:
-    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+    linear-gradient(to right, rgba(175, 113, 157, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(175, 113, 157, 0.08) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
@@ -106,17 +107,17 @@
 .accent-line {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-  box-shadow: 0 0 14px rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 14px rgba(248, 178, 178, 0.4);
   opacity: 0.55;
 }
 
 .accent-line--blue {
   background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
-  box-shadow: 0 0 14px rgba(74, 92, 255, 0.5);
+  box-shadow: 0 0 14px rgba(64, 61, 136, 0.5);
 }
 
 .text-gradient {
-  background: linear-gradient(100deg, var(--color-primary-bright), var(--color-accent));
+  background: linear-gradient(100deg, var(--color-secondary), var(--color-accent));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -126,8 +127,8 @@
 .keybed {
   background: repeating-linear-gradient(
     90deg,
-    rgba(34, 211, 238, 0.55) 0 14px,
-    rgba(11, 13, 18, 0.9) 14px 18px
+    rgba(248, 178, 178, 0.55) 0 14px,
+    rgba(17, 15, 30, 0.9) 14px 18px
   );
 }
 
@@ -169,8 +170,8 @@
   transform: scale(1.08);
   transform-origin: center center;
   will-change: transform;
-  /* Drain the warm cast so the blue scrim above sets the hero's temperature. */
-  filter: saturate(0.4) contrast(1.08) brightness(0.72);
+  /* Tint the hero photo toward the plum palette. */
+  filter: saturate(0.55) contrast(1.06) brightness(0.74) sepia(0.15) hue-rotate(260deg);
   animation-name: hero-parallax-bg;
   animation-timing-function: linear;
   animation-fill-mode: both;

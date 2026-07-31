@@ -91,7 +91,7 @@ export function drawHandOverlays(
     }
     for (const [x, y] of pts) {
       ctx.beginPath()
-      ctx.fillStyle = '#f2f4f8'
+      ctx.fillStyle = '#faf5f7'
       ctx.arc(x, y, 3.5, 0, Math.PI * 2)
       ctx.fill()
       ctx.strokeStyle = hand.color
@@ -108,12 +108,12 @@ export function drawHandOverlays(
 export function severityHex(severity: string): string {
   switch (severity) {
     case 'good':
-      return '#34d399'
+      return '#86efac'
     case 'warning':
-      return '#fbbf24'
+      return '#fcd34d'
     case 'critical':
-      return '#f87171'
+      return '#fca5a5'
     default:
-      return '#98a1b3'
+      return '#c4a8bc'
   }
 }

@@ -33,7 +33,7 @@ export function Hero() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_65%_60%_at_18%_25%,rgba(74,92,255,0.4),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_65%_60%_at_18%_25%,rgba(64,61,136,0.45),transparent_70%)]"
       />
       <div aria-hidden="true" className="tech-grid pointer-events-none absolute inset-0 z-[1] opacity-60" />
 
@@ -68,12 +68,12 @@ export function Hero() {
             <SpecularButton
               size="lg"
               radius={18}
-              tint="#4a5cff"
-              tintOpacity={0.18}
+              tint="#403D88"
+              tintOpacity={0.22}
               blur={8}
-              textColor="#f2f4f8"
-              lineColor="#22d3ee"
-              baseColor="#4a5cff"
+              textColor="#faf5f7"
+              lineColor="#F8B2B2"
+              baseColor="#8B639B"
               intensity={1}
               shineSize={10}
               shineFade={40}

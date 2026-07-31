@@ -1,6 +1,8 @@
-# Virtual environments
+# Virtual environments (any name)
 .venv/
 venv/
+venv*/
+.venv*/
 
 # Python
 __pycache__/
@@ -9,9 +11,30 @@ __pycache__/
 dist/
 build/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# OS
+# Secrets / local env (keep *.example tracked)
+.env
+.env.*
+!.env.example
+web/.env
+web/.env.*
+!web/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+
+# OS / IDE
 .DS_Store
+.idea/
+.vscode/
+.cursor/
 
 # Generated batch outputs (reproducible from data/raw/)
 data/processed/
@@ -20,12 +43,7 @@ data/processed/
 data/raw/**
 !data/raw/.gitkeep
 
-# IDE
-.idea/
-.vscode/
-
 # Frontend
 web/node_modules/
 web/dist/
-web/.env
-web/.env.local
+web/dist-ssr/

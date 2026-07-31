@@ -196,7 +196,6 @@ technique_titan/
 ├── config/coaching.yaml      # Plain-language coaching templates
 ├── data/                     # Raw intake + processed outputs
 ├── docs/                     # PRD, roadmap, scoring formulas, deploy guide
-├── scripts/                  # Early webcam prototypes
 ├── src/technique_titan/
 │   ├── detection/            # MediaPipe wrapper (HandDetector)
 │   ├── geometry/             # Vectors, angles, normalization
@@ -289,7 +288,6 @@ python -m technique_titan.batch.process_folder \
 
 - Scoring thresholds live in `config/scoring.yaml` — tune without code changes.
 - The batch CLI is for bulk data; the Streamlit UI is for one-at-a-time review.
-- Legacy prototypes are preserved under `legacy/pycharm/` and `scripts/`.
 
 ---
 

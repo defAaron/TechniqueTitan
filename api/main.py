@@ -21,7 +21,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from api.deps import get_coaching_config, get_scoring_config, get_static_detector
-from api.rate_limit import RateLimiter, client_ip
+from api.rate_limit import build_limiters_from_env, client_ip, limiter_bucket
 from api.routes.analyze import router as analyze_router
 from api.schemas import CRITERION_LABELS, PublicConfigResponse
 
@@ -46,30 +46,32 @@ _cors_origins = os.environ.get(
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
 ).split(",")
 _cors_origins = [o.strip() for o in _cors_origins if o.strip()]
+_cors_wildcard = "*" in _cors_origins
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_cors_origins if "*" not in _cors_origins else ["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    # Browsers forbid Access-Control-Allow-Origin: * with credentials.
+    allow_origins=["*"] if _cors_wildcard else _cors_origins,
+    allow_credentials=not _cors_wildcard,
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
-_rate_limiter = RateLimiter(
-    max_requests=int(os.environ.get("RATE_LIMIT_MAX", "60")),
-    window_seconds=int(os.environ.get("RATE_LIMIT_WINDOW", "60")),
-)
+_rate_limiters = build_limiters_from_env()
 
 
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     path = request.url.path
     if path.startswith("/v1/") and request.method == "POST":
+        limiter = _rate_limiters[limiter_bucket(path)]
         try:
-            _rate_limiter.check(client_ip(request))
+            limiter.check(client_ip(request))
         except HTTPException as exc:
             return JSONResponse(
-                status_code=exc.status_code, content={"detail": exc.detail}
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+                headers=dict(exc.headers) if exc.headers else None,
             )
     return await call_next(request)
 

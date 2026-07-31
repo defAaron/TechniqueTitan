@@ -9,18 +9,15 @@ This roadmap turns the PRD into a phased, milestone-based delivery plan. Each ph
 **definition of done (DoD)**. Durations assume a small team (roughly 1–2 engineers) and are
 estimates, not commitments.
 
-### Baseline (what exists today)
-The repository currently contains a proven hand-landmarking prototype and a
-bulk geometry pipeline:
+### Baseline (historical)
+Early work started from standalone webcam MediaPipe prototypes. The active
+codebase is now the installable package plus product surfaces:
 
-- `scripts/live_webcam_demo.py` — live webcam → MediaPipe Hands → drawn landmarks + FPS overlay
-- `scripts/hand_detector_prototype.py` — early `handDetector` class
-- `src/technique_titan/` — installable package (detection, geometry, features, scoring, batch CLI)
+- `src/technique_titan/` — detection, geometry, features, scoring, coaching, batch CLI
+- `api/` + `web/` — FastAPI backend and React UI
+- `app.py` — Streamlit interim UI
 - `tests/` — unit tests with synthetic landmark fixtures
 - `config/scoring.yaml` — tunable scoring thresholds
-
-There is **no feedback engine, persistence layer, UI, or CI yet.** The roadmap
-builds outward from this baseline.
 
 ---
 
@@ -31,7 +28,7 @@ builds outward from this baseline.
 - Establish tooling, structure, and a data-collection strategy before building features.
 
 **Key Deliverables**
-- Project structure (`src/`, `tests/`, `data/`, `docs/`, `scripts/`, `config/`) with the existing prototype refactored into a clean, importable detection module (evolving `scripts/hand_detector_prototype.py`; originals preserved in `scripts/` and `legacy/`).
+- Project structure (`src/`, `tests/`, `data/`, `docs/`, `config/`) with detection encapsulated in `src/technique_titan/detection/hand_detector.py`.
 - Dependency manifests pinned to the versions already in the `venv` (`requirements.txt` and/or `pyproject.toml`): Python 3.9+, MediaPipe ~0.10.x, OpenCV ~4.x, NumPy ~2.x.
 - Tooling: formatter + linter (e.g., black/ruff), pre-commit hooks, and a minimal CI pipeline that runs lint + tests.
 - Test harness with at least one smoke test that loads a sample image and extracts landmarks.

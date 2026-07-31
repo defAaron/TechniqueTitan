@@ -109,30 +109,30 @@ export function VideoAnalyze() {
           <div className="h-72 w-full">
             <ResponsiveContainer>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#242b38" />
-                <XAxis dataKey="i" tick={{ fontSize: 11, fill: '#98a1b3' }} stroke="#242b38" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#352f5c" />
+                <XAxis dataKey="i" tick={{ fontSize: 11, fill: '#c4a8bc' }} stroke="#352f5c" />
                 <YAxis
                   domain={[0, 100]}
-                  tick={{ fontSize: 11, fill: '#98a1b3' }}
-                  stroke="#242b38"
+                  tick={{ fontSize: 11, fill: '#c4a8bc' }}
+                  stroke="#352f5c"
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#12151c',
-                    border: '1px solid #242b38',
+                    background: '#1a1730',
+                    border: '1px solid #352f5c',
                     borderRadius: 12,
-                    color: '#f2f4f8',
+                    color: '#faf5f7',
                   }}
-                  labelStyle={{ color: '#98a1b3' }}
-                  cursor={{ stroke: '#22d3ee', strokeOpacity: 0.4 }}
+                  labelStyle={{ color: '#c4a8bc' }}
+                  cursor={{ stroke: '#F8B2B2', strokeOpacity: 0.4 }}
                 />
-                <Legend wrapperStyle={{ color: '#98a1b3', fontSize: 12 }} />
+                <Legend wrapperStyle={{ color: '#c4a8bc', fontSize: 12 }} />
                 {labels.map((label, idx) => (
                   <Line
                     key={label}
                     type="monotone"
                     dataKey={`${label} hand`}
-                    stroke={idx === 0 ? '#22d3ee' : '#7285ff'}
+                    stroke={idx === 0 ? '#F8B2B2' : '#8B639B'}
                     strokeWidth={2}
                     dot={false}
                     connectNulls
