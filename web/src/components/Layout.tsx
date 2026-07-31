@@ -48,7 +48,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 Technique Titan
               </span>
               <span className="block text-xs text-muted">
-                Piano posture analysis, measured
+                Your virtual piano technique coach, re-imagined
               </span>
             </span>
           </NavLink>

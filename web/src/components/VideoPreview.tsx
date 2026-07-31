@@ -28,7 +28,7 @@ export function VideoPreview() {
             See the pipeline in action
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
-            A short walkthrough of capture, landmark detection, scoring, and coaching.
+            A short video walking through my journey of creating this project: the inspiration, landmark detection, and coaching pipeline behind the project.
           </p>
         </div>
         <a

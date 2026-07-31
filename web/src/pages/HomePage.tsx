@@ -182,7 +182,7 @@ export function HomePage() {
           Four steps, start to coaching.
         </h2>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
-          Capture in, coaching out — here is the processing path from a camera frame
+          Capture in, coaching out — here is the full processing workflow from a camera frame
           to a prioritized tip.
         </p>
         <div className="mt-10">

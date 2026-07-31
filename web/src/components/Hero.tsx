@@ -63,13 +63,11 @@ export function Hero() {
           </div>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">
-            Catch collapsed wrists{' '}
-            <span className="text-gradient">before they become habit.</span>
+            Catch bad hand technique{' '}
+            <span className="text-gradient">before it becomes a habit.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
-            Measures five posture criteria from a standard camera — wrist height,
-            finger curve, thumb, lateral bend, and hand arch — then returns
-            plain-language coaching.
+            Every pianist struggles with bad hand technique. It's impossible to measure and track how your hands are doing while playing. That's what Technique Titan is built for: catching your hand posture mistakes while you play.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
