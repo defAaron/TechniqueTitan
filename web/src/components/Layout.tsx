@@ -32,7 +32,7 @@ const social = [
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-clip">
       <header className="sticky top-0 z-40 border-b border-line bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <NavLink to="/" className="group flex items-center gap-3">
@@ -94,7 +94,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div aria-hidden="true" className="accent-line" />
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 overflow-x-clip px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
         {children}
       </main>
 
