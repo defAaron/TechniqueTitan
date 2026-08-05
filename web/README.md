@@ -1,6 +1,8 @@
 # Technique Titan — Web UI
 
-React + TypeScript + Vite + Tailwind frontend for Technique Titan.
+React 19 + TypeScript + Vite 8 + Tailwind 4 product frontend for Technique Titan.
+
+Primary user-facing surface. Talks to the FastAPI backend under `/v1/*`.
 
 ## Develop
 
@@ -17,6 +19,16 @@ Open http://localhost:5173. Requests to `/v1/*` proxy to the API (see `vite.conf
 
 For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.example`).
 
+## Routes
+
+| Path | Page | Behavior |
+|---|---|---|
+| `/` | Home | Marketing: hero, problem/solution, pipeline, mode cards |
+| `/photo` | Photo analyze | Upload JPEG/PNG → `POST /v1/analyze/image` |
+| `/video` | Video analyze | Upload MP4/MOV → `POST /v1/analyze/video` + Recharts timeline |
+| `/live` | Live practice | Browser MediaPipe → `POST /v1/score/landmarks`, or JPEG → `/v1/analyze/frame` |
+| `/about` | About | Scoring overview |
+
 ## Scripts
 
 | Command | Purpose |
@@ -26,16 +38,33 @@ For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.exa
 | `npm run preview` | Serve the production build |
 | `npm run lint` | Oxlint |
 
+## Stack
+
+| Package | Role |
+|---|---|
+| React 19 / React Router 7 | UI + routing |
+| TanStack Query 5 | Query client provider (ready for caching) |
+| `@mediapipe/tasks-vision` | In-browser hand landmarks (live) |
+| Recharts | Video posture timeline |
+| OGL | Specular WebGL button effect |
+| Tailwind CSS 4 | Styling via `@tailwindcss/vite` |
+
 ## Layout
 
 ```
 web/
 ├── public/           # Static assets (icons, hero image, webmanifest)
 ├── src/
-│   ├── components/   # Shared UI
+│   ├── components/   # Shared UI (Layout, ScorePanel, CoachingTips, Hero, …)
 │   ├── pages/        # Route screens
 │   └── lib/          # API client + MediaPipe helper
 ├── index.html
 ├── vite.config.ts
+├── .env.example      # VITE_API_BASE_URL
 └── vercel.json       # SPA rewrite for Vercel
 ```
+
+## Deploy
+
+Root Directory = `web` on Vercel. Set `VITE_API_BASE_URL` to the Railway API origin
+and allow that Vercel origin in API `CORS_ORIGINS`. Full steps: [docs/DEPLOY.md](../docs/DEPLOY.md).

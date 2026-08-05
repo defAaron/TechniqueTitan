@@ -1,5 +1,9 @@
 # Data intake
 
+Batch dataset layout for the Technique Titan CLI
+(`python -m technique_titan.batch.process_folder`). Requires the package
+installed (`pip install -e .`) and preferably Python 3.11.
+
 Drop your raw hand images anywhere under `raw/` (subfolders are fine and are
 preserved in the output names — grouping by posture type is a handy
 convention, e.g. `raw/collapsed_wrist/`, `raw/good_posture/`).
@@ -11,7 +15,7 @@ so scores can be compared against your judgments.
 Then run one command from the project root:
 
 ```bash
-.venv/bin/python -m technique_titan.batch.process_folder \
+python -m technique_titan.batch.process_folder \
   --input data/raw --output data/processed --labels data/labels.csv
 ```
 

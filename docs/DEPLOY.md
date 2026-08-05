@@ -1,39 +1,28 @@
 # Website deployment
 
-How to get Technique Titan in front of users: interim Streamlit demo, then the
-React + FastAPI product stack.
+How to get Technique Titan in front of users: the React + FastAPI product stack
+(primary), plus the interim Streamlit Cloud demo.
 
 ## Architecture
 
-| Surface | Stack | Host |
-|---|---|---|
-| Interim demo | Streamlit (`app.py`) | Streamlit Community Cloud |
-| Product API | FastAPI + MediaPipe | Railway (Docker) |
-| Product UI | React + TypeScript + Tailwind | Vercel |
+| Surface | Stack | Host | Role |
+|---|---|---|---|
+| Product UI | React 19 + TypeScript + Vite + Tailwind 4 | Vercel | Primary |
+| Product API | FastAPI + MediaPipe + OpenCV | Railway (Docker) | Primary |
+| Interim demo | Streamlit (`app.py`) | Streamlit Community Cloud | Optional / research |
 
-Live camera on the product UI runs in the **browser** (MediaPipe or JPEG frame
-upload). It does **not** use server-side OpenCV `VideoCapture`.
-
----
-
-## Phase 0 — Streamlit Community Cloud (public photo + video)
-
-1. Push `main` with `requirements.txt`, `packages.txt`, and `.python-version` = `3.11`.
-2. Open [share.streamlit.io](https://share.streamlit.io) → **New app**.
-3. Repo: `defAaron/TechniqueTitan`, branch: `main`, main file: `app.py`.
-4. Advanced settings → Python version **3.11**.
-5. Deploy. Share the `*.streamlit.app` URL publicly.
-
-Live mode shows a local-only warning on Cloud. Prefer Photo / Video there.
-
-Retire this app once the React UI has photo + video + live parity.
+The React UI already has **photo + video + live** parity with Streamlit. Live
+camera on the product UI runs in the **browser** (MediaPipe Hands → landmark
+scoring, or JPEG frame upload). It does **not** use server-side OpenCV
+`VideoCapture`.
 
 ---
 
-## Phase 1 — API on Railway
+## Product API on Railway
+
+### Local
 
 ```bash
-# Local
 pip install -e ".[api]"
 # or: pip install -r requirements-api.txt && pip install -e . --no-deps
 uvicorn api.main:app --reload --port 8000
@@ -61,46 +50,75 @@ docker run --rm -p 8000:8000 -e CORS_ORIGINS=* technique-titan-api
    - `RATE_LIMIT_LANDMARKS_MAX` — browser landmark scoring (`/score/landmarks`); default `360` per window (~6 Hz)
 4. Healthcheck: `GET /v1/health`
 
-API endpoints:
+### API endpoints
 
-- `POST /v1/analyze/image`
-- `POST /v1/analyze/frame`
-- `POST /v1/analyze/video`
-- `POST /v1/score/landmarks`
-- `GET /v1/health`
-- `GET /v1/config/public`
+| Method | Path | Notes |
+|---|---|---|
+| `POST` | `/v1/analyze/image` | JPEG/PNG, max 8 MB |
+| `POST` | `/v1/analyze/frame` | Live JPEG frames, max 8 MB |
+| `POST` | `/v1/analyze/video` | MP4/MOV/AVI, max 40 MB; `stride` 1–30; `max_frames` 1–300 |
+| `POST` | `/v1/score/landmarks` | Browser MediaPipe landmarks (≤2 hands) |
+| `GET` | `/v1/health` | Healthcheck |
+| `GET` | `/v1/config/public` | Criterion labels + supported modes |
 
 ---
 
-## Phase 2–3 — React UI on Vercel
+## Product UI on Vercel
+
+### Local
 
 ```bash
+# Terminal 1 — API on :8000
+uvicorn api.main:app --reload --port 8000
+
+# Terminal 2
 cd web
 npm install
 npm run dev          # proxies /v1 → localhost:8000
 ```
 
-Production:
+Open http://localhost:5173
+
+Routes: `/` (home), `/photo`, `/video`, `/live`, `/about`.
+
+### Production
 
 1. Deploy the `web/` directory to Vercel (Root Directory = `web`).
 2. Set `VITE_API_BASE_URL` to your Railway API origin (no trailing slash), e.g.
-   `https://technique-titan-api.up.railway.app`.
+   `https://technique-titan-api.up.railway.app`. See [`web/.env.example`](../web/.env.example).
 3. Ensure Railway `CORS_ORIGINS` includes the Vercel URL.
 4. [`web/vercel.json`](../web/vercel.json) rewrites SPA routes to `index.html`.
 
-Live routes:
+### Live routes (client behavior)
 
-- **Landmarks (fast)** — MediaPipe Hands in-browser → `POST /v1/score/landmarks`
-- **Frame upload** — canvas JPEG → `POST /v1/analyze/frame`
+| Mode | Client | API |
+|---|---|---|
+| **Landmarks (fast)** | `@mediapipe/tasks-vision` in-browser | `POST /v1/score/landmarks` |
+| **Frame upload** | Canvas JPEG | `POST /v1/analyze/frame` |
 
 ---
 
-## Phase 4 — Hygiene checklist
+## Streamlit Community Cloud (interim)
+
+Optional public demo for photo + video. Prefer the React app for new users.
+
+1. Push `main` with `requirements.txt`, `packages.txt`, and `.python-version` = `3.11`.
+2. Open [share.streamlit.io](https://share.streamlit.io) → **New app**.
+3. Repo: `defAaron/TechniqueTitan`, branch: `main`, main file: `app.py`.
+4. Advanced settings → Python version **3.11**.
+5. Deploy. Share the `*.streamlit.app` URL publicly.
+
+Live mode shows a local-only warning on Cloud (no server webcam). Prefer Photo /
+Video there, or use the React Live page for hosted real-time feedback.
+
+---
+
+## Hygiene checklist
 
 - [ ] Custom domain on Vercel (+ optional API subdomain)
 - [ ] Confirm rate limits under real traffic
-- [ ] CI green on `main` (`.github/workflows/ci.yml`)
-- [ ] Unpublish Streamlit Cloud when React is primary
+- [ ] CI green on `main` (`.github/workflows/ci.yml` — pytest + web build)
+- [ ] Point public links at the Vercel UI; unpublish Streamlit Cloud when unused
 - [ ] Optional: Sentry on API + web
 
 ---

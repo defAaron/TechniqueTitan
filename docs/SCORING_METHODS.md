@@ -1,5 +1,7 @@
 # Scoring Methods
 
+**Last updated:** 2026-08-05
+
 Documents each criterion's landmark inputs and formula (PRD FR-SC-6). All
 measurements are computed on **normalized landmarks**: translated so the wrist
 (landmark 0) is the origin, and scaled so the palm span (distance from index
@@ -11,6 +13,10 @@ Scores are mapped from raw metrics via `config/scoring.yaml`: each criterion
 has an `ideal` range (scores 100) and a `limit` range (scores 0 at its edges),
 with linear falloff in between. Severity bands: score >= 80 is **good**,
 \>= 50 is **warning**, below is **critical** (all configurable).
+
+Plain-language coaching for non-good criteria is generated separately from
+`config/coaching.yaml` (`src/technique_titan/coaching.py`) and does not change
+these formulas.
 
 ## Landmark index reference
 
