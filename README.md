@@ -219,7 +219,7 @@ technique_titan/
 ├── assets/brand/             # Master brand icon (favicons derived in web/public)
 ├── config/                   # scoring.yaml + coaching.yaml
 ├── data/                     # Raw intake + processed outputs
-├── docs/                     # PRD, roadmap, scoring, deploy
+├── docs/                     # PRD, roadmap, scoring, deploy, error history
 ├── tests/
 ├── app.py                    # Streamlit UI (interim / Cloud demo)
 ├── Dockerfile                # API image (Railway)
@@ -322,6 +322,7 @@ python -m technique_titan.batch.process_folder \
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan |
 | [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md) | Formulas and landmark inputs per criterion |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Railway + Vercel + Streamlit Cloud deploy guide |
+| [docs/errors.md](docs/errors.md) | Chronological error history — agents must check before new work |
 | [web/README.md](web/README.md) | React UI develop / build notes |
 | [data/README.md](data/README.md) | Dataset intake for batch runs |
 

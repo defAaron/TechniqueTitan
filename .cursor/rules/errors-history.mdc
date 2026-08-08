@@ -1,0 +1,15 @@
+---
+description: Before any task, consult docs/errors.md so known failures are not repeated
+alwaysApply: true
+---
+
+# Error history (mandatory)
+
+Before starting a new task in this repository:
+
+1. Read [`docs/errors.md`](docs/errors.md).
+2. Check the **Quick checklist** against your planned changes (Python/MediaPipe/OpenCV pins, headless vs full OpenCV, API on :8000, Vite `VITE_API_BASE_URL`, rate limits, CORS, venv ignores, live UI hold-last-result, full-bleed layout, etc.).
+3. Do not reintroduce a fixed failure mode from that log.
+4. When you fix a new significant error, append an `E##` entry to `docs/errors.md` and update the checklist if it may recur.
+
+Also see [`AGENTS.md`](AGENTS.md).
