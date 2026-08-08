@@ -3,3 +3,9 @@
 opencv-python==4.10.0.84
 pytest>=8.0
 httpx>=0.27
+
+# Scoring calibration notebooks (notebooks/scoring_tuning.ipynb)
+jupyter>=1.0
+ipykernel>=6.29
+pandas>=2.2
+matplotlib>=3.8
