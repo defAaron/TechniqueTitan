@@ -109,7 +109,7 @@ estimates, not commitments.
 - **Video analysis** with posture timeline (`/video` + Recharts). ✅
 - **Live camera** in the browser: landmarks (fast) or frame upload (`/live`). ✅
 - Marketing home, about page, brand assets. ✅
-- Deploy path: Railway (API Docker) + Vercel (SPA). ✅ See [DEPLOY.md](./DEPLOY.md).
+- Deploy path: Render (API Docker) + Vercel (SPA). ✅ See [DEPLOY.md](./DEPLOY.md).
 - Streamlit retained as interim / research surface. ✅
 
 ### 3b — Persistence & polish (next)

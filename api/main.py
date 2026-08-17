@@ -20,7 +20,7 @@ if str(_SRC) not in sys.path:
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from api.deps import get_coaching_config, get_scoring_config, get_static_detector
+from api.deps import get_coaching_config, get_scoring_config
 from api.rate_limit import build_limiters_from_env, client_ip, limiter_bucket
 from api.routes.analyze import router as analyze_router
 from api.schemas import CRITERION_LABELS, PublicConfigResponse
@@ -28,9 +28,10 @@ from api.schemas import CRITERION_LABELS, PublicConfigResponse
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    # YAML configs only — MediaPipe loads lazily on first analyze request so
+    # /v1/health is fast for Render deploy health checks.
     get_scoring_config()
     get_coaching_config()
-    get_static_detector()
     yield
 
 

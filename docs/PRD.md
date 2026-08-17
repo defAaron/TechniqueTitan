@@ -222,4 +222,4 @@ it to a normalized score, and assigns a severity band.
 - Landmark extraction: MediaPipe Hands + OpenCV in `src/technique_titan/detection/hand_detector.py`.
 - Product surfaces: React (`web/`) + FastAPI (`api/`); Streamlit interim (`app.py`).
 - Live browser path: `@mediapipe/tasks-vision` → `POST /v1/score/landmarks`.
-- Deploy: Railway (API Docker), Vercel (web), optional Streamlit Community Cloud — see [DEPLOY.md](./DEPLOY.md).
+- Deploy: Render (API Docker), Vercel (web), optional Streamlit Community Cloud — see [DEPLOY.md](./DEPLOY.md).

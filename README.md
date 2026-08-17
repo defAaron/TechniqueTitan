@@ -222,8 +222,8 @@ technique_titan/
 ├── docs/                     # PRD, roadmap, scoring, deploy, error history
 ├── tests/
 ├── app.py                    # Streamlit UI (interim / Cloud demo)
-├── Dockerfile                # API image (Railway)
-├── railway.toml
+├── Dockerfile                # API image (Render)
+├── render.yaml               # Render Blueprint (optional)
 ├── pyproject.toml
 ├── requirements.txt          # Streamlit Cloud
 ├── requirements-api.txt      # Docker / API
@@ -243,7 +243,7 @@ technique_titan/
 | Product UI | React 19 + TypeScript + Vite 8 + Tailwind 4 |
 | Charts / WebGL | Recharts, OGL |
 | Interim UI | Streamlit `1.30+` |
-| Deploy | Railway (API Docker), Vercel (web), Streamlit Cloud (interim) |
+| Deploy | Render (API Docker), Vercel (web), Streamlit Cloud (interim) |
 | CI | GitHub Actions (pytest + `npm run build`) |
 | Tests | pytest + httpx |
 
@@ -276,12 +276,12 @@ OpenAPI docs: `http://127.0.0.1:8000/docs` when the API is running.
 
 ## Deployment
 
-See **[docs/DEPLOY.md](docs/DEPLOY.md)** for Railway + Vercel + Streamlit Cloud.
+See **[docs/DEPLOY.md](docs/DEPLOY.md)** for Render + Vercel + Streamlit Cloud.
 
 | Surface | Host |
 |---|---|
-| Product UI (`web/`) | Vercel |
-| Product API (`api/`) | Railway (Docker) |
+| Product UI (`web/`) | [Vercel](https://technique-titan.vercel.app) |
+| Product API (`api/`) | [Render](https://technique-titan-api.onrender.com) (Docker) |
 | Interim demo (`app.py`) | Streamlit Community Cloud |
 
 Live camera does **not** work on Streamlit Cloud (no webcam on the server). Use
@@ -321,7 +321,7 @@ python -m technique_titan.batch.process_folder \
 | [docs/PRD.md](docs/PRD.md) | Product requirements and personas |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan |
 | [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md) | Formulas and landmark inputs per criterion |
-| [docs/DEPLOY.md](docs/DEPLOY.md) | Railway + Vercel + Streamlit Cloud deploy guide |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Render + Vercel + Streamlit Cloud deploy guide |
 | [docs/errors.md](docs/errors.md) | Chronological error history — agents must check before new work |
 | [web/README.md](web/README.md) | React UI develop / build notes |
 | [data/README.md](data/README.md) | Dataset intake for batch runs |

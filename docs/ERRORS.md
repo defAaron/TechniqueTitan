@@ -26,8 +26,8 @@ new significant error, append an entry here in the same format.
 | npm | Always from **`web/`**, never repo root. |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
-| Railway CORS | Set **`CORS_ORIGINS`** to the Vercel origin. Never pair `*` with `allow_credentials=True`. |
-| Trust proxy | Set **`TRUST_PROXY=1`** only behind Railway/reverse proxy. |
+| Render CORS | Set **`CORS_ORIGINS`** to the Vercel origin (`https://technique-titan.vercel.app`). Never pair `*` with `allow_credentials=True`. |
+| Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
 | Streamlit state | Persist incrementally across reruns; don’t rely on `finally` after Stop. |
 | Live UI | Hold last good scores between async responses; keep camera + primary feedback co-visible. |
@@ -35,7 +35,7 @@ new significant error, append an entry here in the same format.
 | Assets | Don’t reference `/hero-*.jpg|mp4` unless files exist under `web/public/`. |
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
 | Tests | Synthetic hand fixtures must be non-collinear for plane fits. |
-| Railway gone | UI **Load failed** / **Failed to fetch** = API host 404 `Application not found`. Recreate the Railway public domain; update `VITE_API_BASE_URL` if it changed and redeploy Vercel. |
+| API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
 
 ---
 
@@ -305,6 +305,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E23 — API migrated Railway → Render
+| | |
+|---|---|
+| **When** | 2026-08-17 |
+| **Stage** | Production deploy |
+| **Symptom** | Railway subscription ended; production UI could not reach API |
+| **Root cause** | API host was `techniquetitan-production.up.railway.app`; service removed when Railway plan lapsed |
+| **Fix** | Deploy API to Render (`technique-titan-api.onrender.com`); set Vercel `VITE_API_BASE_URL`; `CORS_ORIGINS` + `TRUST_PROXY=1` on Render; add `render.yaml`; defer MediaPipe init so `/v1/health` passes deploy checks |
+| **Prevention** | Document production API URL in `DEPLOY.md` / `.env.example`; smoke-test `/v1/health` after any host change |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -319,7 +331,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E23 — Short title
+### E24 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

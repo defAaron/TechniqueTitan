@@ -16,7 +16,7 @@ function isNetworkError(err: unknown): boolean {
 export function formatApiError(err: unknown, fallback: string): string {
   if (isNetworkError(err)) {
     return API_BASE
-      ? 'Cannot reach the analysis API. The backend may be down — check Railway /v1/health, then retry.'
+      ? 'Cannot reach the analysis API. It may be waking up (Render free tier) — check /v1/health, then retry.'
       : 'Cannot reach the analysis API. Start it locally on port 8000, then retry.'
   }
   if (err instanceof Error && err.message) return err.message

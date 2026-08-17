@@ -66,5 +66,6 @@ web/
 
 ## Deploy
 
-Root Directory = `web` on Vercel. Set `VITE_API_BASE_URL` to the Railway API origin
-and allow that Vercel origin in API `CORS_ORIGINS`. Full steps: [docs/DEPLOY.md](../docs/DEPLOY.md).
+Root Directory = `web` on Vercel. Set `VITE_API_BASE_URL` to the Render API origin
+(`https://technique-titan-api.onrender.com`) and allow the Vercel origin in API
+`CORS_ORIGINS`. Full steps: [docs/DEPLOY.md](../docs/DEPLOY.md).

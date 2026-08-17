@@ -1,0 +1,13 @@
+# Render Blueprint — Technique Titan API (Docker).
+# Dashboard: New → Blueprint → connect this repo, or mirror these settings manually.
+services:
+  - type: web
+    name: technique-titan-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /v1/health
+    envVars:
+      - key: CORS_ORIGINS
+        value: https://technique-titan.vercel.app
+      - key: TRUST_PROXY
+        value: "1"

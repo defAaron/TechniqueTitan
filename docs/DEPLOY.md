@@ -7,8 +7,8 @@ How to get Technique Titan in front of users: the React + FastAPI product stack
 
 | Surface | Stack | Host | Role |
 |---|---|---|---|
-| Product UI | React 19 + TypeScript + Vite + Tailwind 4 | Vercel | Primary |
-| Product API | FastAPI + MediaPipe + OpenCV | Railway (Docker) | Primary |
+| Product UI | React 19 + TypeScript + Vite + Tailwind 4 | [Vercel](https://technique-titan.vercel.app) | Primary |
+| Product API | FastAPI + MediaPipe + OpenCV | [Render](https://technique-titan-api.onrender.com) (Docker) | Primary |
 | Interim demo | Streamlit (`app.py`) | Streamlit Community Cloud | Optional / research |
 
 The React UI already has **photo + video + live** parity with Streamlit. Live
@@ -16,9 +16,18 @@ camera on the product UI runs in the **browser** (MediaPipe Hands → landmark
 scoring, or JPEG frame upload). It does **not** use server-side OpenCV
 `VideoCapture`.
 
+**Production URLs**
+
+| Service | URL |
+|---|---|
+| UI | `https://technique-titan.vercel.app` |
+| API | `https://technique-titan-api.onrender.com` |
+| API health | `https://technique-titan-api.onrender.com/v1/health` |
+| API docs | `https://technique-titan-api.onrender.com/docs` |
+
 ---
 
-## Product API on Railway
+## Product API on Render
 
 ### Local
 
@@ -37,18 +46,35 @@ docker build -t technique-titan-api .
 docker run --rm -p 8000:8000 -e CORS_ORIGINS=* technique-titan-api
 ```
 
-### Railway
+### Render (production)
 
-1. Create a Railway project from this GitHub repo.
-2. Railway uses [`Dockerfile`](../Dockerfile) + [`railway.toml`](../railway.toml).
-3. Set env vars:
-   - `CORS_ORIGINS` — your Vercel origin(s), comma-separated (prefer explicit origins; `*` disables credentials)
-   - `TRUST_PROXY` — set `1` on Railway/behind a reverse proxy so rate limits use `X-Forwarded-For`
-   - `RATE_LIMIT_WINDOW` — default `60` seconds
-   - `RATE_LIMIT_MAX` — heavy uploads (`/analyze/image`, `/analyze/video`); default `60` per window
-   - `RATE_LIMIT_FRAME_MAX` — live JPEG frames (`/analyze/frame`); default `120` per window
-   - `RATE_LIMIT_LANDMARKS_MAX` — browser landmark scoring (`/score/landmarks`); default `360` per window (~6 Hz)
-4. Healthcheck: `GET /v1/health`
+The live API is deployed from this repo’s root [`Dockerfile`](../Dockerfile).
+Optional infrastructure-as-code: [`render.yaml`](../render.yaml).
+
+1. [render.com](https://render.com) → **New** → **Web Service** (or **Blueprint** from `render.yaml`).
+2. Connect **`defAaron/TechniqueTitan`**, branch **`main`**, **Root Directory** blank (repo root).
+3. **Runtime:** Docker · **Health Check Path:** `/v1/health` · **Instance type:** Free (or Starter for always-on).
+4. Environment variables:
+
+| Variable | Production value |
+|---|---|
+| `CORS_ORIGINS` | `https://technique-titan.vercel.app` (or `*` for a public demo) |
+| `TRUST_PROXY` | `1` |
+
+Optional rate-limit overrides (defaults are fine):
+
+| Variable | Default |
+|---|---|
+| `RATE_LIMIT_WINDOW` | `60` |
+| `RATE_LIMIT_MAX` | `60` |
+| `RATE_LIMIT_FRAME_MAX` | `120` |
+| `RATE_LIMIT_LANDMARKS_MAX` | `360` |
+
+Do **not** set `PORT` — Render injects it.
+
+**Free tier notes:** services spin down after **15 minutes** without traffic; the
+next request can take **30–60 seconds** (cold start). First Docker build is slow
+(MediaPipe + OpenCV). Upgrade to **Starter** ($7/mo) for always-on and faster wake-ups.
 
 ### API endpoints
 
@@ -60,6 +86,9 @@ docker run --rm -p 8000:8000 -e CORS_ORIGINS=* technique-titan-api
 | `POST` | `/v1/score/landmarks` | Browser MediaPipe landmarks (≤2 hands) |
 | `GET` | `/v1/health` | Healthcheck |
 | `GET` | `/v1/config/public` | Criterion labels + supported modes |
+
+Opening the API root `/` returns `{"detail":"Not Found"}` — expected. The product
+UI lives on Vercel.
 
 ---
 
@@ -84,23 +113,26 @@ Routes: `/` (home), `/photo`, `/video`, `/live`, `/about`.
 ### Production
 
 1. Deploy the `web/` directory to Vercel (Root Directory = `web`).
-2. Set `VITE_API_BASE_URL` to your Railway API origin (no trailing slash), e.g.
-   `https://technique-titan-api.up.railway.app`. See [`web/.env.example`](../web/.env.example).
-3. Ensure Railway `CORS_ORIGINS` includes the Vercel URL.
-4. [`web/vercel.json`](../web/vercel.json) rewrites SPA routes to `index.html`.
+2. Set `VITE_API_BASE_URL` to the Render API origin (no trailing slash):
+
+   `https://technique-titan-api.onrender.com`
+
+   See [`web/.env.example`](../web/.env.example).
+3. Ensure Render `CORS_ORIGINS` includes the Vercel URL.
+4. **Redeploy** after changing env vars (Vite bakes them at build time).
+5. [`web/vercel.json`](../web/vercel.json) rewrites SPA routes to `index.html`.
 
 ### “Load failed” / API unreachable
 
 Safari shows **Load failed** (Chrome: **Failed to fetch**) when the UI cannot talk to
 the API. Confirm:
 
-1. Railway `GET /v1/health` returns `{"status":"ok",...}`.
-2. If the edge returns `Application not found` (`x-railway-fallback: true`), the
-   service or public domain is gone — **Generate Domain** again (or redeploy the
-   GitHub repo), then update Vercel `VITE_API_BASE_URL` if the hostname changed
-   and **redeploy** the UI.
-3. `CORS_ORIGINS` includes the Vercel origin, e.g. `https://technique-titan.vercel.app`
-   (no trailing slash). `*` is fine for a public demo (credentials disabled).
+1. Render `GET /v1/health` returns `{"status":"ok",...}`.
+2. On the **free** tier, the service may be **cold** — wait up to ~60s on the first
+   request after idle, then retry.
+3. `VITE_API_BASE_URL` points at Render (not Vercel `/v1/...`) and the UI was
+   **redeployed** after setting it.
+4. `CORS_ORIGINS` includes `https://technique-titan.vercel.app` (no trailing slash).
 
 ### Live routes (client behavior)
 
@@ -128,6 +160,8 @@ Video there, or use the React Live page for hosted real-time feedback.
 
 ## Hygiene checklist
 
+- [x] API on Render (`technique-titan-api.onrender.com`)
+- [x] UI on Vercel (`technique-titan.vercel.app`) with `VITE_API_BASE_URL` set
 - [ ] Custom domain on Vercel (+ optional API subdomain)
 - [ ] Confirm rate limits under real traffic
 - [ ] CI green on `main` (`.github/workflows/ci.yml` — pytest + web build)

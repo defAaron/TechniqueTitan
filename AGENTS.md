@@ -8,7 +8,7 @@
 
 ## Related docs
 
-- [`docs/DEPLOY.md`](docs/DEPLOY.md) — Vercel / Railway / Streamlit deploy
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — Vercel / Render / Streamlit deploy
 - [`docs/PRD.md`](docs/PRD.md) — product requirements
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased delivery
 - [`README.md`](README.md) — setup and architecture
