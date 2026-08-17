@@ -3,6 +3,7 @@ import { CoachingTips } from '../components/CoachingTips'
 import { ScorePanel } from '../components/ScorePanel'
 import {
   analyzeFrame,
+  formatApiError,
   scoreLandmarks,
   type AnalyzeResponse,
   type HandResult,
@@ -138,8 +139,7 @@ export function LivePractice() {
           }
         }
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Live analysis failed'
+        const message = formatApiError(err, 'Live analysis failed')
         if (message.toLowerCase().includes('rate limit')) {
           // Pause briefly instead of spamming the API / sticky red error.
           backoffUntilRef.current = performance.now() + 2000

@@ -89,6 +89,19 @@ Routes: `/` (home), `/photo`, `/video`, `/live`, `/about`.
 3. Ensure Railway `CORS_ORIGINS` includes the Vercel URL.
 4. [`web/vercel.json`](../web/vercel.json) rewrites SPA routes to `index.html`.
 
+### “Load failed” / API unreachable
+
+Safari shows **Load failed** (Chrome: **Failed to fetch**) when the UI cannot talk to
+the API. Confirm:
+
+1. Railway `GET /v1/health` returns `{"status":"ok",...}`.
+2. If the edge returns `Application not found` (`x-railway-fallback: true`), the
+   service or public domain is gone — **Generate Domain** again (or redeploy the
+   GitHub repo), then update Vercel `VITE_API_BASE_URL` if the hostname changed
+   and **redeploy** the UI.
+3. `CORS_ORIGINS` includes the Vercel origin, e.g. `https://technique-titan.vercel.app`
+   (no trailing slash). `*` is fine for a public demo (credentials disabled).
+
 ### Live routes (client behavior)
 
 | Mode | Client | API |

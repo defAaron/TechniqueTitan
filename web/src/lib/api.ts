@@ -2,6 +2,46 @@
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
+function isNetworkError(err: unknown): boolean {
+  if (!(err instanceof TypeError)) return false
+  const message = err.message.toLowerCase()
+  return (
+    message === 'load failed' ||
+    message === 'failed to fetch' ||
+    message.includes('networkerror') ||
+    message.includes('network request failed')
+  )
+}
+
+export function formatApiError(err: unknown, fallback: string): string {
+  if (isNetworkError(err)) {
+    return API_BASE
+      ? 'Cannot reach the analysis API. The backend may be down — check Railway /v1/health, then retry.'
+      : 'Cannot reach the analysis API. Start it locally on port 8000, then retry.'
+  }
+  if (err instanceof Error && err.message) return err.message
+  return fallback
+}
+
+async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, init)
+  } catch (err) {
+    throw new Error(formatApiError(err, 'Request failed'))
+  }
+}
+
+export async function pingApi(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/v1/health`, { method: 'GET' })
+    if (!res.ok) return false
+    const body = (await res.json()) as { status?: string }
+    return body.status === 'ok'
+  } catch {
+    return false
+  }
+}
+
 export const CRITERION_LABELS: Record<string, string> = {
   wrist_height: 'Wrist height',
   finger_curvature: 'Finger curvature',
@@ -84,7 +124,7 @@ export async function analyzeImage(
   const form = new FormData()
   form.append('file', file)
   form.append('include_overlay', String(includeOverlay))
-  const res = await fetch(`${API_BASE}/v1/analyze/image`, {
+  const res = await apiFetch(`${API_BASE}/v1/analyze/image`, {
     method: 'POST',
     body: form,
   })
@@ -99,7 +139,7 @@ export async function analyzeFrame(
   const form = new FormData()
   form.append('file', blob, 'frame.jpg')
   form.append('include_overlay', String(includeOverlay))
-  const res = await fetch(`${API_BASE}/v1/analyze/frame`, {
+  const res = await apiFetch(`${API_BASE}/v1/analyze/frame`, {
     method: 'POST',
     body: form,
   })
@@ -116,7 +156,7 @@ export async function analyzeVideo(
   form.append('file', file)
   form.append('stride', String(stride))
   form.append('max_frames', String(maxFrames))
-  const res = await fetch(`${API_BASE}/v1/analyze/video`, {
+  const res = await apiFetch(`${API_BASE}/v1/analyze/video`, {
     method: 'POST',
     body: form,
   })
@@ -128,7 +168,7 @@ export async function scoreLandmarks(
   hands: LandmarkHand[],
   opts?: { includeOverlay?: boolean; imageWidth?: number; imageHeight?: number },
 ): Promise<AnalyzeResponse> {
-  const res = await fetch(`${API_BASE}/v1/score/landmarks`, {
+  const res = await apiFetch(`${API_BASE}/v1/score/landmarks`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

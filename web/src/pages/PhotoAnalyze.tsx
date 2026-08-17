@@ -4,6 +4,7 @@ import { OverlayImage } from '../components/OverlayImage'
 import { ScorePanel } from '../components/ScorePanel'
 import {
   analyzeImage,
+  formatApiError,
   overlayDataUrl,
   type AnalyzeResponse,
 } from '../lib/api'
@@ -29,7 +30,7 @@ export function PhotoAnalyze() {
       setResult(res)
       if (res.message && !res.hands.length) setError(res.message)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Analysis failed')
+      setError(formatApiError(err, 'Analysis failed'))
     } finally {
       setBusy(false)
     }

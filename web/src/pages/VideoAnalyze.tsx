@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { analyzeVideo, type VideoAnalyzeResponse } from '../lib/api'
+import { analyzeVideo, formatApiError, type VideoAnalyzeResponse } from '../lib/api'
 
 export function VideoAnalyze() {
   const [busy, setBusy] = useState(false)
@@ -43,7 +43,7 @@ export function VideoAnalyze() {
       setResult(res)
       if (res.message && !res.frames.length) setError(res.message)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Video analysis failed')
+      setError(formatApiError(err, 'Video analysis failed'))
     } finally {
       setBusy(false)
     }

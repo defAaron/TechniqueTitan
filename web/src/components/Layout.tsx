@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { ApiStatusBanner } from './ApiStatusBanner'
 
 const links = [
   { to: '/', label: 'Home', end: true },
@@ -93,6 +94,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
         <div aria-hidden="true" className="accent-line" />
       </header>
+      <ApiStatusBanner />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
         {children}

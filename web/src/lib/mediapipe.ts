@@ -9,21 +9,50 @@ import type { LandmarkHand } from './api'
 
 let landmarkerPromise: Promise<HandLandmarker> | null = null
 
+async function createLandmarker(
+  vision: Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>,
+  delegate: 'GPU' | 'CPU',
+): Promise<HandLandmarker> {
+  return HandLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath:
+        'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+      delegate,
+    },
+    runningMode: 'VIDEO',
+    numHands: 2,
+  })
+}
+
 async function getLandmarker(): Promise<HandLandmarker> {
   if (!landmarkerPromise) {
     landmarkerPromise = (async () => {
-      const vision = await FilesetResolver.forVisionTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/wasm',
-      )
-      return HandLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath:
-            'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-          delegate: 'GPU',
-        },
-        runningMode: 'VIDEO',
-        numHands: 2,
-      })
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.32/wasm',
+        )
+        try {
+          return await createLandmarker(vision, 'GPU')
+        } catch {
+          return await createLandmarker(vision, 'CPU')
+        }
+      } catch (err) {
+        landmarkerPromise = null
+        const message =
+          err instanceof Error ? err.message.toLowerCase() : ''
+        if (
+          message === 'load failed' ||
+          message === 'failed to fetch' ||
+          message.includes('network')
+        ) {
+          throw new Error(
+            'Could not load hand tracking (MediaPipe). Check your network and try again.',
+          )
+        }
+        throw err instanceof Error
+          ? err
+          : new Error('Could not initialize hand tracking.')
+      }
     })()
   }
   return landmarkerPromise

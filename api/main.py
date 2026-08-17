@@ -43,7 +43,8 @@ app = FastAPI(
 
 _cors_origins = os.environ.get(
     "CORS_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,"
+    "https://technique-titan.vercel.app",
 ).split(",")
 _cors_origins = [o.strip() for o in _cors_origins if o.strip()]
 _cors_wildcard = "*" in _cors_origins

@@ -35,6 +35,7 @@ new significant error, append an entry here in the same format.
 | Assets | Don’t reference `/hero-*.jpg|mp4` unless files exist under `web/public/`. |
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
 | Tests | Synthetic hand fixtures must be non-collinear for plane fits. |
+| Railway gone | UI **Load failed** / **Failed to fetch** = API host 404 `Application not found`. Recreate the Railway public domain; update `VITE_API_BASE_URL` if it changed and redeploy Vercel. |
 
 ---
 
@@ -292,6 +293,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E22 — Production UI “Load failed”
+| | |
+|---|---|
+| **When** | 2026-08-17 |
+| **Stage** | Vercel UI + Railway API production |
+| **Symptom** | Photo / video / live show **Load failed** (Safari) or **Failed to fetch** (Chrome) |
+| **Root cause** | Vercel bundle posts to `https://techniquetitan-production.up.railway.app`, but Railway’s edge returned 404 `Application not found` (`x-railway-fallback: true`) — service or public domain gone. No CORS on that fallback, so the browser surfaces a TypeError. |
+| **Fix** | Restore the Railway API (redeploy + Generate Domain). If the hostname changed, set Vercel `VITE_API_BASE_URL` and redeploy. UI maps the TypeError to an API-unreachable message and banners when `/v1/health` fails. |
+| **Prevention** | After any Railway domain change, update `VITE_API_BASE_URL` and redeploy Vercel. Smoke-check `/v1/health` before assuming the UI is broken. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -306,7 +319,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E22 — Short title
+### E23 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |
