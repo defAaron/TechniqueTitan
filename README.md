@@ -1,9 +1,9 @@
 # Technique Titan
 
-AI-powered piano hand posture analysis from a standard camera. Technique Titan
-detects hand landmarks, measures five technique criteria with geometry-based
-scoring, and returns prioritized coaching through a React product UI (plus a
-FastAPI backend), with Streamlit and a batch CLI for demos and research.
+AI piano posture coach that turns a laptop camera into on-demand technique
+feedback. Detects 21 MediaPipe landmarks per hand, scores five geometry-based
+criteria (0–100), and returns prioritized coaching via a React + FastAPI
+product — plus Streamlit and a batch CLI for demos and research.
 
 **Repository:** [github.com/defAaron/TechniqueTitan](https://github.com/defAaron/TechniqueTitan)
 
