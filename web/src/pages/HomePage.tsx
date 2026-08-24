@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Hero } from '../components/Hero'
-import { KeyFeatures } from '../components/KeyFeatures'
-import { PipelineFlow } from '../components/PipelineFlow'
-import { Reveal } from '../components/Reveal'
-import { VideoPreview } from '../components/VideoPreview'
+import { Hero, KeyFeatures, PipelineFlow, VideoPreview } from '../components/marketing'
+import { Reveal } from '../components/ui'
 
 const cards = [
   {

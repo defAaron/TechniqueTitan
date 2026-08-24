@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import SpecularButton from './SpecularButton'
+import SpecularButton from '../ui/SpecularButton'
 
 const stats = [
   { value: '5', label: 'Posture criteria scored' },

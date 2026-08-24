@@ -41,9 +41,13 @@ service-account*.json
 # Generated batch outputs (reproducible from data/raw/)
 data/processed/
 
-# Raw test images (keep folder structure via .gitkeep)
+# Raw labeled images (keep folder structure via .gitkeep)
 data/raw/**
 !data/raw/.gitkeep
+
+# Local smoke / ad-hoc images (not the labeled severity set)
+data/fixtures/**
+!data/fixtures/.gitkeep
 
 # Frontend
 web/node_modules/

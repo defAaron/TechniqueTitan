@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CoachingTips } from '../components/CoachingTips'
-import { ScorePanel } from '../components/ScorePanel'
+import { CoachingTips, ScorePanel } from '../components/analyze'
 import {
   analyzeFrame,
   formatApiError,

@@ -1,5 +1,5 @@
-import type { HandResult } from '../lib/api'
-import { CRITERION_LABELS, severityColor } from '../lib/api'
+import type { HandResult } from '../../lib/api'
+import { CRITERION_LABELS, severityColor } from '../../lib/api'
 
 interface Props {
   hand: HandResult

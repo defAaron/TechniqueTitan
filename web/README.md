@@ -55,7 +55,11 @@ For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.exa
 web/
 ├── public/           # Static assets (icons, hero image, webmanifest)
 ├── src/
-│   ├── components/   # Shared UI (Layout, ScorePanel, CoachingTips, Hero, …)
+│   ├── components/
+│   │   ├── layout/     # App chrome
+│   │   ├── marketing/  # Landing-page sections
+│   │   ├── analyze/    # Score / overlay / coaching panels
+│   │   └── ui/         # Shared primitives
 │   ├── pages/        # Route screens
 │   └── lib/          # API client + MediaPipe helper
 ├── index.html

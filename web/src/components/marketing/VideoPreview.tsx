@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Reveal } from './Reveal'
+import { Reveal } from '../ui/Reveal'
 
 const YOUTUBE_ID = 'WdPEZ5SGXdc'
 const YOUTUBE_WATCH = `https://www.youtube.com/watch?v=${YOUTUBE_ID}`

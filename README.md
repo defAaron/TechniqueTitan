@@ -212,8 +212,16 @@ Frame-upload mode (`POST /v1/analyze/frame`) is available as a fallback.
 
 ```
 technique_titan/
-├── api/                      # FastAPI product backend
-├── web/                      # React + TypeScript + Tailwind product UI
+├── api/                      # FastAPI product backend (uvicorn api.main:app)
+├── web/                      # React + TypeScript + Tailwind product UI (Vercel root)
+│   └── src/
+│       ├── components/
+│       │   ├── layout/       # chrome (Layout, ApiStatusBanner)
+│       │   ├── marketing/    # landing (Hero, KeyFeatures, PipelineFlow, VideoPreview)
+│       │   ├── analyze/      # results (ScorePanel, CoachingTips, OverlayImage)
+│       │   └── ui/           # primitives (Reveal, SpecularButton)
+│       ├── pages/
+│       └── lib/
 ├── src/technique_titan/      # Core library (detect → features → score → coach)
 │   ├── detection/
 │   ├── geometry/
@@ -224,11 +232,23 @@ technique_titan/
 │   └── coaching.py
 ├── assets/brand/             # Master brand icon (favicons derived in web/public)
 ├── config/                   # scoring.yaml + coaching.yaml
-├── data/                     # Raw intake + processed outputs
-├── docs/                     # PRD, roadmap, scoring, deploy, error history
+├── data/
+│   ├── raw/                  # Labeled set: excellent|good|warning|critical
+│   ├── fixtures/             # Local smoke images (not labeled)
+│   └── processed/            # Batch outputs (gitignored)
+├── docs/
+│   ├── archive/              # Research notes / historical artifacts
+│   ├── PRD.md
+│   ├── ROADMAP.md
+│   ├── SCORING_METHODS.md
+│   ├── DEPLOY.md
+│   └── errors.md
 ├── tests/
-├── app.py                    # Streamlit UI (interim / Cloud demo)
-├── Dockerfile                # API image (Render)
+│   ├── engine/               # Core library unit tests
+│   └── api/                  # FastAPI tests
+├── notebooks/
+├── app.py                    # Streamlit UI (interim / Cloud demo) — keep at repo root
+├── Dockerfile                # API image (Render) — keep at repo root
 ├── render.yaml               # Render Blueprint (optional)
 ├── pyproject.toml
 ├── requirements.txt          # Streamlit Cloud

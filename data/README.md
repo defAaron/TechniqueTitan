@@ -13,6 +13,10 @@ overall posture quality:
 - `raw/warning/`
 - `raw/critical/`
 
+Ad-hoc smoke images (not part of the labeled set) live in `fixtures/`
+(for example `fixtures/smoke_test/` and `fixtures/test_one.jpg`). Keep
+severity folders under `raw/` for expert-labeled batch runs only.
+
 ## Labeling (Notion)
 
 **The classification table lives in Notion**, not in git. Page title:
@@ -25,7 +29,7 @@ Columns match `labels_template.csv`:
 
 **Agents:** use the Notion MCP (`user-notion`) to search for `techniquetitan`,
 `notion-fetch` the page table, and `notion-update-page` to complete labeling.
-See [`AGENTS.md`](../../AGENTS.md) for the full MCP workflow.
+See [`AGENTS.md`](../AGENTS.md) for the full MCP workflow.
 
 **Humans:** edit the table in Notion directly.
 

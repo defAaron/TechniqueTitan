@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { pingApi } from '../lib/api'
+import { pingApi } from '../../lib/api'
 
 /** Warn when the FastAPI backend is unreachable (cold start or Render down). */
 export function ApiStatusBanner() {

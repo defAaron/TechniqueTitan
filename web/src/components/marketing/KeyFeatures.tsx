@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { CRITERION_LABELS } from '../lib/api'
+import { CRITERION_LABELS } from '../../lib/api'
 
 interface Criterion {
   key: keyof typeof CRITERION_LABELS | string

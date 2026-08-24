@@ -35,6 +35,7 @@ new significant error, append an entry here in the same format.
 | Assets | Don’t reference `/hero-*.jpg|mp4` unless files exist under `web/public/`. |
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
 | Tests | Synthetic hand fixtures must be non-collinear for plane fits. |
+| Filenames | Git-tracked names must match import and markdown-link **case** (Linux/CI is case-sensitive; macOS often is not). |
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
 
 ---
@@ -317,6 +318,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E24 — macOS hid case-mismatched paths that would fail on Linux CI
+| | |
+|---|---|
+| **When** | 2026-08-24 |
+| **Stage** | Repo hygiene / directory reorganization |
+| **Symptom** | Git tracked camelCase web files (`overlayImage.tsx`) and `docs/ERRORS.md` while TypeScript imports and markdown links used PascalCase / `errors.md`. Fine on macOS; Vite resolve and GitHub links break on Linux. |
+| **Root cause** | Default macOS disk is case-insensitive, so `git status` does not flag case-only drift. |
+| **Fix** | Two-step `git mv` to PascalCase components grouped under `layout/`, `marketing/`, `analyze/`, `ui/`; rename `docs/ERRORS.md` → `docs/errors.md`; park research binary in `docs/archive/`. |
+| **Prevention** | Git-tracked paths must match import and markdown-link case exactly. After a case rename, confirm with `git ls-files` (not Finder/`ls`). |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -331,7 +344,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E24 — Short title
+### E25 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

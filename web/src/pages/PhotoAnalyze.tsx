@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { CoachingTips } from '../components/CoachingTips'
-import { OverlayImage } from '../components/OverlayImage'
-import { ScorePanel } from '../components/ScorePanel'
+import { CoachingTips, OverlayImage, ScorePanel } from '../components/analyze'
 import {
   analyzeImage,
   formatApiError,
