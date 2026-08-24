@@ -38,7 +38,7 @@ estimates, not commitments.
 - Dependency manifests: `pyproject.toml`, `requirements.txt`, `requirements-api.txt`, `requirements-dev.txt`, `web/package-lock.json`. Practical runtime: **Python 3.11**, MediaPipe `0.10.21`, OpenCV `4.10.x`, NumPy `>=1.26,<2`. ✅
 - CI pipeline: GitHub Actions runs pytest (Python 3.11) and `npm run build` (Node 22). ✅ (Python lint/pre-commit deferred; web lint via local `oxlint`)
 - Test harness with landmark fixtures and API/engine tests. ✅
-- Data intake layout + labeling template (`data/README.md`, `labels_template.csv`). ✅
+- Data intake layout + labeling (`data/README.md`; live classification table in Notion `techniquetitan`, schema in `labels_template.csv`). ✅
 - Sample raw images under `data/raw/` for batch smoke runs. ✅
 
 **Definition of Done**
@@ -60,7 +60,7 @@ estimates, not commitments.
 - Composite score with documented weighting. ✅
 - Externally configurable thresholds (`config/scoring.yaml`). ✅
 - Unit tests against fixed landmark fixtures. ✅
-- Validation against expert-labeled set — **in progress** as labels are collected via batch + `labels.csv`.
+- Validation against expert-labeled set — **in progress** as labels are collected in the Notion classification table (export to `labels.csv` for batch merge).
 
 **Definition of Done**
 - All five criteria produce scores + severities. ✅

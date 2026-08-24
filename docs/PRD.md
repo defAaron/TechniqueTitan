@@ -207,7 +207,7 @@ it to a normalized score, and assigns a severity band.
 | # | Question | Current decision / status |
 |---|---|---|
 | 1 | **Camera angle dependence.** Mandate angle, multi-angle, or infer? | Still open. Docs note side-view preference for wrist height; batch `outliers.csv` helps flag artifacts. |
-| 2 | **Ground-truth labeling.** Who labels, how many samples? | Still open. `data/labels_template.csv` + batch merge exist; expert set not complete. |
+| 2 | **Ground-truth labeling.** Who labels, how many samples? | Classification table in Notion (`techniquetitan`); agents label via Notion MCP; export to `data/labels.csv` for batch merge. Expert set in progress (~33 images in `data/raw/`). |
 | 3 | **Per-criterion thresholds.** Vary by skill/age/hand size? | Defaults in `scoring.yaml`; skill-level profiles deferred. |
 | 4 | **Local vs. cloud processing.** | Live prefers on-device landmarks; photo/video upload to API. No media retention yet. |
 | 5 | **Two-hand handling.** | **Resolved for v1:** simultaneous two-hand detection + per-hand scores. |

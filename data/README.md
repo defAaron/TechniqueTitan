@@ -5,12 +5,34 @@ Batch dataset layout for the Technique Titan CLI
 installed (`pip install -e .`) and preferably Python 3.11.
 
 Drop your raw hand images anywhere under `raw/` (subfolders are fine and are
-preserved in the output names — grouping by posture type is a handy
-convention, e.g. `raw/collapsed_wrist/`, `raw/good_posture/`).
+preserved in the output names). For this project, images are grouped by
+overall posture quality:
 
-Optionally add a `labels.csv` in this folder (see `labels_template.csv`) with
-your expert severity labels; they get merged into `processed/batch_summary.csv`
-so scores can be compared against your judgments.
+- `raw/excellent/` — numbered `1.png`, `2.png`, …
+- `raw/good/`
+- `raw/warning/`
+- `raw/critical/`
+
+## Labeling (Notion)
+
+**The classification table lives in Notion**, not in git. Page title:
+`techniquetitan` — https://app.notion.com/p/3c68fa97c1488038b113e233ad10f278
+
+Columns match `labels_template.csv`:
+
+`filename`, `hand`, `wrist_height`, `finger_curvature`, `thumb_position`,
+`wrist_lateral`, `hand_arch`, `notes`
+
+**Agents:** use the Notion MCP (`user-notion`) to search for `techniquetitan`,
+`notion-fetch` the page table, and `notion-update-page` to complete labeling.
+See [`AGENTS.md`](../../AGENTS.md) for the full MCP workflow.
+
+**Humans:** edit the table in Notion directly.
+
+**Batch merge:** export the Notion table to `data/labels.csv` (same column
+headers as `labels_template.csv`) before running the batch command below.
+Labels get merged into `processed/batch_summary.csv` so scores can be compared
+against expert judgments.
 
 Then run one command from the project root:
 
@@ -27,5 +49,6 @@ Both hands are detected and scored separately. Outputs land in `processed/`:
 - `outliers.csv` — auto-flagged rows worth a manual look
 - `failed/failures.csv` — images with no detectable hand, with reasons
 
-Note: `labels.csv` is still merged by `filename`, so a label row currently
-applies to every hand from that image; per-hand labels are future work.
+Note: `labels.csv` is merged by `filename`, so a label row currently applies to
+every hand from that image; per-hand labels are future work. `labels_template.csv`
+in this folder is a **schema reference** only — keep the live labels in Notion.

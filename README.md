@@ -128,14 +128,20 @@ pip install -e .
 # For tests: pip install -r requirements-dev.txt
 ```
 
-Drop images into `data/raw/` (subfolders OK), then:
+Drop images into `data/raw/` (subfolders OK; e.g. `excellent/1.png`, `good/2.png`),
+then:
 
 ```bash
 python -m technique_titan.batch.process_folder \
   --input data/raw \
   --output data/processed \
-  --labels data/labels.csv   # optional
+  --labels data/labels.csv   # optional — export from Notion labeling table
 ```
+
+**Expert labels** are maintained in the **Notion** page `techniquetitan` (classification
+table). Agents with Notion MCP can read/update that table to complete labeling;
+export to `data/labels.csv` when running batch scoring. See [data/README.md](data/README.md)
+and [AGENTS.md](AGENTS.md).
 
 Outputs:
 
