@@ -1,0 +1,34 @@
+filename,hand,wrist_height,finger_curvature,thumb_position,wrist_lateral,hand_arch,notes
+excellent/1.png,right,warning,good,good,good,good,noticeably flat wrist bridge
+excellent/2.png,both,good,good,good,good,good,n/a
+excellent/3.png,right,good,good,good,good,good,increased roundness would improve the overall posture
+excellent/4.png,both,good,good,good,good,good,n/a
+excellent/5.png,both,good,good,good,good,good,n/a
+excellent/6.png,right,good,good,good,good,good,n/a
+excellent/7.png,right,good,good,warning,warning,good,thumb slightly flared; some ulnar deviation
+excellent/8.png,right,good,good,good,good,good,n/a
+excellent/9.png,both,good,good,good,good,good,n/a
+excellent/10.png,right,good,good,good,good,good,wrist a touch high
+excellent/11.png,left,good,good,good,good,good,n/a
+good/1.png,right,good,good,good,warning,warning,ulnar deviation and flattened arch
+good/2.png,left,warning,good,warning,good,good,dropped wrist; thumb not fully on its side
+good/3.png,right,good,good,good,good,good,"side view; fingers curved, could be rounder"
+good/4.png,both,good,good,good,good,good,right hand in focus; left arm visible
+good/5.png,right,good,good,good,good,good,thumb on the key; fingers slightly less round than excellent set
+good/6.png,both,good,good,good,good,good,right hand foreground; solid overall posture
+good/7.png,right,good,good,good,warning,good,slight sideways wrist while index plays
+good/8.png,both,good,good,good,good,good,top-down view; strong knuckle arch
+good/9.png,right,good,good,good,good,warning,1-3-5 triad; arch a bit flat
+warning/1.png,both,warning,good,warning,warning,good,"top-down; thumbs a bit tucked, some lateral bend"
+warning/2.png,both,warning,good,good,good,warning,player leaning in; wrist and arch slightly collapsed
+warning/3.png,right,warning,good,good,warning,warning,wrist slightly off the key line; mild lateral bend
+warning/4.png,right,warning,good,good,good,warning,wrist a bit high relative to the knuckles
+warning/5.png,right,warning,critical,critical,warning,critical,clenched fingers with pinky flying
+critical/1.png,right,critical,warning,good,warning,warning,wrist too high; over-clawed fingers
+critical/2.png,both,warning,warning,warning,warning,critical,both hands collapsed/flat through the knuckle bridge
+critical/3.png,right,critical,good,warning,good,warning,wrist dropped below the knuckle line
+critical/4.png,both,good,good,good,warning,critical,collapsed knuckle bridge
+critical/5.png,right,critical,good,good,critical,critical,overstretched reach; wrist and arch collapsed
+critical/6.png,right,critical,critical,critical,warning,critical,clenched fist with pinky isolated
+critical/7.png,both,critical,good,warning,warning,warning,thumbs hooked across; wrist collapsed
+critical/8.png,both,critical,good,good,critical,warning,collapsed wrist with strong lateral bend
