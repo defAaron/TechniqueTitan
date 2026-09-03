@@ -77,6 +77,7 @@ class VideoFrameScore(BaseModel):
 class VideoAnalyzeResponse(BaseModel):
     frames: List[VideoFrameScore]
     timeline: Dict[str, List[Optional[float]]]
+    fps: float = 0.0
     message: Optional[str] = None
 
 

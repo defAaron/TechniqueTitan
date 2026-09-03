@@ -190,6 +190,8 @@ def analyze_video_bytes(
 
     frames_out: List[VideoFrameScore] = []
     timeline: dict[str, list[Optional[float]]] = {}
+    raw_fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    fps = raw_fps if raw_fps > 1.0 else 30.0
     frame_idx = 0
     analyzed = 0
 
@@ -220,7 +222,8 @@ def analyze_video_bytes(
         return VideoAnalyzeResponse(
             frames=[],
             timeline={},
+            fps=fps,
             message="No frames could be analyzed from that video.",
         )
 
-    return VideoAnalyzeResponse(frames=frames_out, timeline=timeline)
+    return VideoAnalyzeResponse(frames=frames_out, timeline=timeline, fps=fps)

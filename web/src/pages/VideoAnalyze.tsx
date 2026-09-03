@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   CartesianGrid,
   Legend,
@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { VideoLandmarkReplay } from '../components/analyze'
 import { PageHeader } from '../components/layout'
 import { analyzeVideo, formatApiError, type VideoAnalyzeResponse } from '../lib/api'
 
@@ -17,6 +18,18 @@ export function VideoAnalyze() {
   const [stride, setStride] = useState(5)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<VideoAnalyzeResponse | null>(null)
+  const [clipFile, setClipFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!clipFile) {
+      setPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(clipFile)
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [clipFile])
 
   const chartData = useMemo(() => {
     if (!result) return []
@@ -36,6 +49,7 @@ export function VideoAnalyze() {
     setBusy(true)
     setError(null)
     setResult(null)
+    setClipFile(file)
     try {
       if (file.size > 40 * 1024 * 1024) {
         throw new Error('Video is too large (max 40 MB).')
@@ -55,8 +69,8 @@ export function VideoAnalyze() {
   return (
     <div className="space-y-10">
       <PageHeader eyebrow="Video" title="Video review">
-        Upload a short clip; frames are sampled to build a posture timeline. Prefer under
-        ~30 seconds.
+        Upload a short clip; frames are sampled to build a posture timeline and a landmark
+        replay. Prefer under ~30 seconds.
       </PageHeader>
 
       <div className="flex flex-col gap-6 border border-white/10 bg-zinc-950 p-6 sm:flex-row sm:items-end">
@@ -97,50 +111,61 @@ export function VideoAnalyze() {
         </p>
       )}
 
-      {result && chartData.length > 0 && (
-        <section className="animate-fade-up border border-white/10 bg-zinc-950 p-5">
-          <h2 className="mb-4 font-cinematic text-2xl font-normal text-white">
-            Composite over time
-          </h2>
-          <div className="h-72 w-full">
-            <ResponsiveContainer>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-                <XAxis dataKey="i" tick={{ fontSize: 12, fill: '#9a9a9a' }} stroke="#2a2a2a" />
-                <YAxis
-                  domain={[0, 100]}
-                  tick={{ fontSize: 12, fill: '#9a9a9a' }}
-                  stroke="#2a2a2a"
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: '#0c0c0c',
-                    border: '1px solid #2a2a2a',
-                    borderRadius: 0,
-                    color: '#ffffff',
-                  }}
-                  labelStyle={{ color: '#9a9a9a' }}
-                  cursor={{ stroke: '#ffffff', strokeOpacity: 0.35 }}
-                />
-                <Legend wrapperStyle={{ color: '#9a9a9a', fontSize: 13 }} />
-                {labels.map((label, idx) => (
-                  <Line
-                    key={label}
-                    type="monotone"
-                    dataKey={`${label} hand`}
-                    stroke={idx === 0 ? '#ffffff' : '#9a9a9a'}
-                    strokeWidth={2}
-                    dot={false}
-                    connectNulls
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <p className="mt-3 font-body text-sm text-white/40">
-            {result.frames.length} sampled frames analyzed
-          </p>
-        </section>
+      {result && (
+        <div className="space-y-10">
+          {chartData.length > 0 && (
+            <section className="animate-fade-up border border-white/10 bg-zinc-950 p-5">
+              <h2 className="mb-4 font-cinematic text-2xl font-normal text-white">
+                Composite over time
+              </h2>
+              <div className="h-72 w-full">
+                <ResponsiveContainer>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                    <XAxis
+                      dataKey="i"
+                      tick={{ fontSize: 12, fill: '#9a9a9a' }}
+                      stroke="#2a2a2a"
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      tick={{ fontSize: 12, fill: '#9a9a9a' }}
+                      stroke="#2a2a2a"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: '#0c0c0c',
+                        border: '1px solid #2a2a2a',
+                        borderRadius: 0,
+                        color: '#ffffff',
+                      }}
+                      labelStyle={{ color: '#9a9a9a' }}
+                      cursor={{ stroke: '#ffffff', strokeOpacity: 0.35 }}
+                    />
+                    <Legend wrapperStyle={{ color: '#9a9a9a', fontSize: 13 }} />
+                    {labels.map((label, idx) => (
+                      <Line
+                        key={label}
+                        type="monotone"
+                        dataKey={`${label} hand`}
+                        stroke={idx === 0 ? '#ffffff' : '#9a9a9a'}
+                        strokeWidth={2}
+                        dot={false}
+                        connectNulls
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="mt-3 font-body text-sm text-white/40">
+                {result.frames.length} sampled frames analyzed
+              </p>
+            </section>
+          )}
+          {previewUrl && (
+            <VideoLandmarkReplay src={previewUrl} frames={result.frames} fps={result.fps} />
+          )}
+        </div>
       )}
     </div>
   )

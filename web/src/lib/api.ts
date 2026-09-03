@@ -94,6 +94,7 @@ export interface VideoFrameScore {
 export interface VideoAnalyzeResponse {
   frames: VideoFrameScore[]
   timeline: Record<string, Array<number | null>>
+  fps?: number
   message: string | null
 }
 
