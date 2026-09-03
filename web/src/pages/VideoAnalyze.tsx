@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { PageHeader } from '../components/layout'
 import { analyzeVideo, formatApiError, type VideoAnalyzeResponse } from '../lib/api'
 
 export function VideoAnalyze() {
@@ -52,20 +53,15 @@ export function VideoAnalyze() {
   const labels = result ? Object.keys(result.timeline).sort() : []
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
-          Video review
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Upload a short clip; frames are sampled to build a posture timeline. Prefer under
-          ~30 seconds.
-        </p>
-      </header>
+    <div className="space-y-10">
+      <PageHeader eyebrow="Video" title="Video review">
+        Upload a short clip; frames are sampled to build a posture timeline. Prefer under
+        ~30 seconds.
+      </PageHeader>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:flex-row sm:items-end">
-        <label className="flex-1 text-sm">
-          <span className="mb-1 block font-medium text-foreground">
+      <div className="flex flex-col gap-6 border border-white/10 bg-zinc-950 p-6 sm:flex-row sm:items-end">
+        <label className="flex-1 text-base">
+          <span className="mb-2 block font-body text-sm uppercase tracking-[0.3em] text-white/50">
             Analyze every Nth frame
           </span>
           <input
@@ -74,11 +70,11 @@ export function VideoAnalyze() {
             max={15}
             value={stride}
             onChange={(e) => setStride(Number(e.target.value))}
-            className="w-full accent-accent"
+            className="w-full accent-white"
           />
-          <span className="text-xs text-muted">Stride: {stride}</span>
+          <span className="font-body text-sm text-white/40">Stride: {stride}</span>
         </label>
-        <label className="cursor-pointer rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-foreground transition-all duration-200 hover:bg-primary-bright hover:glow-blue">
+        <label className="cursor-pointer border border-white/30 px-8 py-3 text-center font-body text-sm uppercase tracking-[0.3em] text-white/80 transition-all duration-500 hover:border-white hover:text-white">
           Choose video
           <input
             type="file"
@@ -91,48 +87,48 @@ export function VideoAnalyze() {
       </div>
 
       {busy && (
-        <p className="animate-pulse-soft text-sm font-medium text-accent">
+        <p className="animate-pulse-soft font-body text-base text-white/60">
           Analyzing frames… this can take a minute for longer clips.
         </p>
       )}
       {error && (
-        <p className="rounded-xl border border-critical/40 bg-critical/10 px-4 py-3 text-sm text-critical">
+        <p className="border border-critical/40 bg-critical/10 px-4 py-3 text-base text-critical">
           {error}
         </p>
       )}
 
       {result && chartData.length > 0 && (
-        <section className="animate-fade-up rounded-2xl border border-line bg-surface p-4">
-          <h2 className="mb-3 font-display text-xl font-semibold text-foreground">
+        <section className="animate-fade-up border border-white/10 bg-zinc-950 p-5">
+          <h2 className="mb-4 font-cinematic text-2xl font-normal text-white">
             Composite over time
           </h2>
           <div className="h-72 w-full">
             <ResponsiveContainer>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#352f5c" />
-                <XAxis dataKey="i" tick={{ fontSize: 11, fill: '#c4a8bc' }} stroke="#352f5c" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                <XAxis dataKey="i" tick={{ fontSize: 12, fill: '#9a9a9a' }} stroke="#2a2a2a" />
                 <YAxis
                   domain={[0, 100]}
-                  tick={{ fontSize: 11, fill: '#c4a8bc' }}
-                  stroke="#352f5c"
+                  tick={{ fontSize: 12, fill: '#9a9a9a' }}
+                  stroke="#2a2a2a"
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#1a1730',
-                    border: '1px solid #352f5c',
-                    borderRadius: 12,
-                    color: '#faf5f7',
+                    background: '#0c0c0c',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: 0,
+                    color: '#ffffff',
                   }}
-                  labelStyle={{ color: '#c4a8bc' }}
-                  cursor={{ stroke: '#F8B2B2', strokeOpacity: 0.4 }}
+                  labelStyle={{ color: '#9a9a9a' }}
+                  cursor={{ stroke: '#ffffff', strokeOpacity: 0.35 }}
                 />
-                <Legend wrapperStyle={{ color: '#c4a8bc', fontSize: 12 }} />
+                <Legend wrapperStyle={{ color: '#9a9a9a', fontSize: 13 }} />
                 {labels.map((label, idx) => (
                   <Line
                     key={label}
                     type="monotone"
                     dataKey={`${label} hand`}
-                    stroke={idx === 0 ? '#F8B2B2' : '#8B639B'}
+                    stroke={idx === 0 ? '#ffffff' : '#9a9a9a'}
                     strokeWidth={2}
                     dot={false}
                     connectNulls
@@ -141,7 +137,7 @@ export function VideoAnalyze() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-3 font-body text-sm text-white/40">
             {result.frames.length} sampled frames analyzed
           </p>
         </section>

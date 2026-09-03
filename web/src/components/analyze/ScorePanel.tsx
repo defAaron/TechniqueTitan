@@ -8,50 +8,49 @@ interface Props {
 
 export function ScorePanel({ hand, compact = false }: Props) {
   return (
-    <section className="animate-fade-up rounded-2xl border border-line bg-surface/80 p-4 backdrop-blur-sm">
-      <header className="mb-3 flex items-baseline justify-between gap-2">
-        <h3 className="font-display text-lg font-semibold tracking-tight text-foreground">
+    <section className="animate-fade-up border border-white/10 bg-zinc-950 p-5">
+      <header className="mb-4 flex items-baseline justify-between gap-2">
+        <h3 className="font-cinematic text-xl font-normal tracking-tight text-white">
           {hand.label} hand
         </h3>
-        <span className="text-xs text-muted">
+        <span className="font-body text-sm uppercase tracking-widest text-white/40">
           {(hand.confidence * 100).toFixed(0)}% conf.
         </span>
       </header>
 
       <p
-        className={`mb-3 font-display font-bold tracking-tight ${compact ? 'text-3xl' : 'text-4xl'}`}
+        className={`mb-4 font-cinematic font-normal tracking-tight ${compact ? 'text-4xl' : 'text-5xl'}`}
         style={{ color: severityColor(hand.composite_severity) }}
       >
         {hand.composite_score != null ? Math.round(hand.composite_score) : '—'}
-        <span className="ml-1 text-sm font-medium text-muted">/ 100</span>
+        <span className="ml-1 font-body text-base font-light text-white/40">/ 100</span>
       </p>
 
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {Object.entries(CRITERION_LABELS).map(([key, label]) => {
           const score = hand.scores[key]
           const sev = hand.severities[key] ?? 'unknown'
           const pct = typeof score === 'number' ? score : 0
           return (
-            <li key={key} className="grid grid-cols-[1fr_auto_2.5rem] items-center gap-2 text-sm">
-              <span className="truncate text-muted">
+            <li key={key} className="grid grid-cols-[1fr_auto_2.5rem] items-center gap-2 text-base">
+              <span className="truncate text-white/50">
                 {compact ? label.replace(' deviation', '') : label}
               </span>
               <span
-                className="text-xs font-semibold uppercase tracking-wide"
+                className="font-body text-sm font-medium uppercase tracking-wide"
                 style={{ color: severityColor(sev) }}
               >
                 {sev}
               </span>
-              <span className="text-right tabular-nums text-foreground">
+              <span className="text-right tabular-nums text-white">
                 {typeof score === 'number' ? Math.round(score) : '—'}
               </span>
-              <div className="col-span-3 h-1.5 overflow-hidden rounded-full bg-line">
+              <div className="col-span-3 h-px overflow-hidden bg-white/10">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
+                  className="h-full transition-all duration-500"
                   style={{
                     width: `${pct}%`,
                     background: severityColor(sev),
-                    boxShadow: `0 0 10px ${severityColor(sev)}`,
                   }}
                 />
               </div>

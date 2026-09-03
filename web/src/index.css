@@ -1,45 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-cinematic: "Playfair Display", ui-serif, Georgia, serif;
 
-  /* Plum palette — #403D88 · #8B639B · #AF719D · #F8B2B2 */
-  --color-background: #110f1e;
-  --color-surface: #1a1730;
-  --color-surface-raised: #221e3d;
-  --color-foreground: #faf5f7;
-  --color-muted: #c4a8bc;
-  --color-line: #352f5c;
-  --color-primary: #403d88;
-  --color-primary-bright: #8b639b;
-  --color-secondary: #af719d;
-  --color-accent: #f8b2b2;
+  --color-background: #000000;
+  --color-surface: #0c0c0c;
+  --color-surface-raised: #161616;
+  --color-foreground: #ffffff;
+  --color-muted: #9a9a9a;
+  --color-line: #2a2a2a;
+  --color-primary: #ffffff;
+  --color-primary-bright: #e8e8e8;
+  --color-secondary: #a3a3a3;
+  --color-accent: #ffffff;
   --color-good: #86efac;
   --color-warn: #fcd34d;
   --color-critical: #fca5a5;
 }
 
 :root {
-  --glow-blue: 0 0 24px rgba(64, 61, 136, 0.42);
-  --glow-cyan: 0 0 24px rgba(248, 178, 178, 0.34);
+  --glow-blue: 0 0 24px rgba(255, 255, 255, 0.12);
+  --glow-cyan: 0 0 24px rgba(255, 255, 255, 0.12);
 }
 
 @layer base {
   html {
     @apply antialiased;
-    background-color: var(--color-background);
+    background-color: #000;
+    font-size: 18px;
     scroll-behavior: smooth;
     color-scheme: dark;
   }
 
   body {
-    @apply m-0 min-h-screen font-body text-foreground;
-    background:
-      radial-gradient(ellipse 70% 50% at 12% -8%, rgba(64, 61, 136, 0.28), transparent 70%),
-      radial-gradient(ellipse 55% 45% at 96% 0%, rgba(248, 178, 178, 0.12), transparent 70%),
-      var(--color-background);
-    background-repeat: no-repeat;
+    @apply m-0 min-h-screen font-body text-base text-foreground;
+    background: #000;
   }
 
   #root {
@@ -49,8 +46,8 @@
   h1,
   h2,
   h3 {
-    @apply font-display;
-    letter-spacing: -0.025em;
+    @apply font-cinematic font-normal;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
 
@@ -59,31 +56,30 @@
   }
 
   ::selection {
-    background: rgba(248, 178, 178, 0.28);
-    color: var(--color-foreground);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid #fff;
     outline-offset: 2px;
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--color-background);
+    background: #000;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-line);
-    border-radius: 999px;
+    background: #2a2a2a;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #4a4268;
+    background: #3f3f3f;
   }
 }
 
@@ -247,7 +243,57 @@
 
   .animate-fade-up,
   .animate-pulse-soft,
-  .animate-float-soft {
+  .animate-float-soft,
+  .landing-shimmer {
     animation: none;
   }
+}
+
+/* Cinematic shell (Figma Make: Piano Performance Landing Page). */
+html.cinema,
+html.cinema body,
+html.landing,
+html.landing body {
+  background: #000;
+}
+
+html.cinema body,
+html.landing body {
+  background-image: none;
+}
+
+html.landing::-webkit-scrollbar,
+html.landing body::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+@keyframes landing-shimmer {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.landing-shimmer {
+  animation: landing-shimmer 2.5s ease-in-out infinite;
+}
+
+.landing-grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+.landing-vert {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }

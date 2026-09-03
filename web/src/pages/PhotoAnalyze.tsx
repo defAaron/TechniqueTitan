@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CoachingTips, OverlayImage, ScorePanel } from '../components/analyze'
+import { PageHeader } from '../components/layout'
 import {
   analyzeImage,
   formatApiError,
@@ -8,7 +9,7 @@ import {
 } from '../lib/api'
 
 const CAPTURE =
-  'Capture tips: side or ¾ view, good lighting, hand fully in frame, roughly forearm height.'
+  'Side or ¾ view, good lighting, hand fully in frame, roughly forearm height.'
 
 export function PhotoAnalyze() {
   const [busy, setBusy] = useState(false)
@@ -35,19 +36,18 @@ export function PhotoAnalyze() {
   }
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
-          Photo review
-        </h1>
-        <p className="mt-1 text-sm text-muted">{CAPTURE}</p>
-      </header>
+    <div className="space-y-10">
+      <PageHeader eyebrow="Photo" title="Photo review">
+        {CAPTURE}
+      </PageHeader>
 
-      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-surface/60 px-6 py-10 text-center transition-all duration-300 hover:border-accent/60 hover:bg-surface-raised hover:glow-cyan">
-        <span className="font-medium text-foreground">
+      <label className="flex cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-white/20 bg-zinc-950 px-6 py-16 text-center transition-colors duration-500 hover:border-white/50">
+        <span className="font-cinematic text-xl text-white">
           Drop a JPEG or PNG, or click to browse
         </span>
-        <span className="text-xs text-muted">Max 8 MB</span>
+        <span className="font-body text-sm uppercase tracking-[0.2em] text-white/40">
+          Max 8 MB
+        </span>
         <input
           type="file"
           accept="image/png,image/jpeg"
@@ -58,18 +58,18 @@ export function PhotoAnalyze() {
       </label>
 
       {busy && (
-        <p className="animate-pulse-soft text-sm font-medium text-accent">
+        <p className="animate-pulse-soft font-body text-base text-white/60">
           Detecting landmarks and scoring…
         </p>
       )}
       {error && (
-        <p className="rounded-xl border border-critical/40 bg-critical/10 px-4 py-3 text-sm text-critical">
+        <p className="border border-critical/40 bg-critical/10 px-4 py-3 text-base text-critical">
           {error}
         </p>
       )}
 
       {result && (
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
           <OverlayImage
             src={overlayDataUrl(result.overlay_png_base64)}
             caption={
@@ -81,11 +81,11 @@ export function PhotoAnalyze() {
                 : 'Uploaded image'
             }
           />
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[...result.hands]
               .sort((a, b) => a.label.localeCompare(b.label))
               .map((hand) => (
-                <div key={hand.label} className="space-y-3">
+                <div key={hand.label} className="space-y-4">
                   <ScorePanel hand={hand} compact />
                   <CoachingTips hand={hand} />
                 </div>

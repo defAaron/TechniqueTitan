@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CoachingTips, ScorePanel } from '../components/analyze'
+import { PageHeader } from '../components/layout'
 import {
   analyzeFrame,
   formatApiError,
@@ -186,19 +187,14 @@ export function LivePractice() {
   }
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
-          Live practice
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Browser camera with real-time overlays. Preferred path sends landmarks only
-          (MediaPipe in-browser); frame upload posts JPEGs to the API.
-        </p>
-      </header>
+    <div className="space-y-10">
+      <PageHeader eyebrow="Live" title="Live practice">
+        Browser camera with real-time overlays. Preferred path sends landmarks only
+        (MediaPipe in-browser); frame upload posts JPEGs to the API.
+      </PageHeader>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex rounded-full border border-line bg-surface p-1 text-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex border border-white/15 text-sm">
           {(
             [
               ['landmarks', 'Landmarks (fast)'],
@@ -211,10 +207,10 @@ export function LivePractice() {
               disabled={running}
               onClick={() => setMode(value)}
               className={[
-                'rounded-full px-3 py-1.5 font-medium transition-all duration-200',
+                'px-4 py-2.5 font-body uppercase tracking-[0.18em] transition-colors duration-300',
                 mode === value
-                  ? 'bg-primary text-foreground glow-blue'
-                  : 'text-muted hover:text-foreground',
+                  ? 'bg-white text-black'
+                  : 'text-white/50 hover:text-white',
               ].join(' ')}
             >
               {label}
@@ -225,7 +221,7 @@ export function LivePractice() {
           <button
             type="button"
             onClick={() => void startCamera()}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-primary-bright hover:glow-blue"
+            className="border border-white/30 px-8 py-2.5 font-body text-sm uppercase tracking-[0.3em] text-white/80 transition-all duration-500 hover:border-white hover:text-white"
           >
             Start camera
           </button>
@@ -233,36 +229,36 @@ export function LivePractice() {
           <button
             type="button"
             onClick={stopCamera}
-            className="rounded-full border border-critical/50 bg-critical/10 px-5 py-2 text-sm font-semibold text-critical transition-colors hover:bg-critical/20"
+            className="border border-critical/50 bg-critical/10 px-8 py-2.5 font-body text-sm uppercase tracking-[0.3em] text-critical transition-colors hover:bg-critical/20"
           >
             Stop
           </button>
         )}
-        <span className="text-xs text-muted">{status}</span>
+        <span className="font-body text-sm text-white/40">{status}</span>
       </div>
 
       {error && (
-        <p className="rounded-xl border border-critical/40 bg-critical/10 px-4 py-3 text-sm text-critical">
+        <p className="border border-critical/40 bg-critical/10 px-4 py-3 text-base text-critical">
           {error}
         </p>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="relative min-h-72 overflow-hidden rounded-2xl border border-line bg-background">
+      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+        <div className="relative min-h-72 overflow-hidden border border-white/10 bg-black">
           <video ref={videoRef} playsInline muted className="hidden" />
           <canvas ref={canvasRef} className="block w-full" />
           {!running && (
-            <div className="tech-grid absolute inset-0 flex items-center justify-center text-sm text-muted">
+            <div className="absolute inset-0 flex items-center justify-center font-body text-base text-white/40">
               Camera preview will appear here
             </div>
           )}
         </div>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
           {hands.length === 0 && running && (
-            <p className="text-sm text-muted">Waiting for a visible hand…</p>
+            <p className="font-body text-base text-white/50">Waiting for a visible hand…</p>
           )}
           {hands.map((hand) => (
-            <div key={hand.label} className="space-y-3">
+            <div key={hand.label} className="space-y-4">
               <ScorePanel hand={hand} compact />
               <CoachingTips hand={hand} />
             </div>

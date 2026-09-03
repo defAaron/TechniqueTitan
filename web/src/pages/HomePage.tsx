@@ -1,292 +1,205 @@
 import { Link } from 'react-router-dom'
-import { Hero, KeyFeatures, PipelineFlow, VideoPreview } from '../components/marketing'
-import { Reveal } from '../components/ui'
+import { CinematicFooter } from '../components/layout'
+import { CinematicHero } from '../components/marketing'
+import { CRITERION_LABELS } from '../lib/api'
 
-const cards = [
+const CLOSE_UP_IMG = '/landing/keys-close.jpg'
+const WIDE_IMG = '/landing/keys-wide.jpg'
+const PIANIST_IMG = '/landing/pianist.jpg'
+
+const criteria = [
+  {
+    n: '01',
+    key: 'wrist_height',
+    body: 'Where your wrist sits relative to the knuckle line.',
+  },
+  {
+    n: '02',
+    key: 'finger_curvature',
+    body: 'How much curve each long finger holds on the key.',
+  },
+  {
+    n: '03',
+    key: 'thumb_position',
+    body: 'How far the thumb sits from the rest of the hand.',
+  },
+  {
+    n: '04',
+    key: 'wrist_lateral',
+    body: 'Sideways bend of the wrist against the forearm.',
+  },
+  {
+    n: '05',
+    key: 'hand_arch',
+    body: 'The height of the arch across your knuckle bridge.',
+  },
+] as const
+
+const modes = [
   {
     to: '/photo',
     title: 'Photo review',
-    body: 'Upload a single still of your hand on the keys for per-criterion scores and coaching.',
+    meta: 'Still frame · seconds',
+    img: CLOSE_UP_IMG,
+    alt: 'Close-up of piano keys',
   },
   {
     to: '/video',
     title: 'Video timeline',
-    body: 'Analyze a short practice clip and see how posture holds up over time.',
+    meta: 'Practice clip · over time',
+    img: WIDE_IMG,
+    alt: 'Piano keyboard in warm light',
   },
   {
     to: '/live',
     title: 'Live practice',
-    body: 'Use your browser camera for real-time feedback while you play.',
+    meta: 'Browser camera · real-time',
+    img: PIANIST_IMG,
+    alt: 'Grand piano on a concert stage',
   },
 ]
-
-const problems = [
-  {
-    title: 'Bad habits set in quietly',
-    body: 'A wrist that drops below the keys feels normal after a week. By the time it hurts, it is muscle memory.',
-  },
-  {
-    title: 'Feedback arrives once a week',
-    body: 'Your teacher catches it at the lesson. The other six days of practice reinforce whatever your hand was already doing.',
-  },
-  {
-    title: 'You cannot watch your hands and play',
-    body: 'Mirrors and phone recordings only help if you know exactly what to look for, frame by frame.',
-  },
-]
-
-const steps = [
-  {
-    n: '01',
-    title: 'Capture',
-    body: 'Bring a still photo, a short practice clip, or your live browser camera — whichever fits the moment.',
-  },
-  {
-    n: '02',
-    title: 'Detect',
-    body: 'MediaPipe locates the 21 hand landmarks, and geometry turns those points into measurable angles and distances.',
-  },
-  {
-    n: '03',
-    title: 'Score',
-    body: 'Each of the five criteria is scored and banded — good, warning, or critical — so problems are visible at a glance.',
-  },
-  {
-    n: '04',
-    title: 'Coach',
-    body: 'Tips come back prioritized and in plain language, so you know which single thing to fix first.',
-  },
-]
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary-bright">
-      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
-      {children}
-    </p>
-  )
-}
-
-function Divider({ blue = false }: { blue?: boolean }) {
-  return (
-    <div aria-hidden="true" className={`accent-line ${blue ? 'accent-line--blue' : ''}`} />
-  )
-}
 
 export function HomePage() {
   return (
-    <div className="space-y-20 sm:space-y-24">
-      <Hero />
+    <div className="bg-black">
+      <CinematicHero />
 
-      <VideoPreview />
-
-      <Divider blue />
-
-      <Reveal as="section" aria-labelledby="problem-heading">
-        <Eyebrow>The problem</Eyebrow>
-        <h2
-          id="problem-heading"
-          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
-        >
-          Technique drifts in the hours nobody is watching.
-        </h2>
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
-          Posture faults are small, gradual, and invisible from the bench. They do
-          not announce themselves until they cost you speed, tone, or comfort.
-        </p>
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {problems.map((item, i) => (
-            <Reveal
-              key={item.title}
-              delay={0.08 * i}
-              className="relative overflow-hidden rounded-2xl border border-line bg-surface p-5 transition-all duration-300 hover:border-warn/50"
-            >
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-warn/80 to-transparent"
-              />
-              <h3 className="font-display text-lg font-semibold text-foreground">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{item.body}</p>
-            </Reveal>
-          ))}
-        </div>
-      </Reveal>
-
-      <Divider blue />
-
-      <Reveal as="section" aria-labelledby="solution-heading">
-        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div>
-            <Eyebrow>The solution</Eyebrow>
-            <h2
-              id="solution-heading"
-              className="mt-5 font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
-            >
-              A second pair of eyes on every practice session.
-            </h2>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted">
-              Technique Titan turns an ordinary camera into a posture instrument. It
-              measures the same five things a teacher watches for, scores them
-              consistently, and hands back the one correction that matters most right
-              now — no wearables, no special hardware.
+      <section
+        id="criteria"
+        className="mx-auto max-w-6xl bg-black px-6 pb-24 pt-32 text-white sm:px-10"
+      >
+        <div className="mb-24 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-6">
+          <div className="hidden pt-2 lg:col-span-1 lg:block">
+            <span className="landing-vert font-body text-sm uppercase tracking-widest text-white/30">
+              01
+            </span>
+          </div>
+          <div className="lg:col-span-5">
+            <p className="mb-6 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+              Scoring
             </p>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted">
-              Live mode prefers browser-side landmark detection and posts only compact
-              landmarks to the API, so your video stays on your device.
+            <h2
+              className="mb-8 font-cinematic font-normal leading-tight text-white"
+              style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+            >
+              Five
+              <br />
+              <em className="italic text-white/60">Criteria</em>
+            </h2>
+            <p className="max-w-sm font-body text-base font-light leading-relaxed text-white/50">
+              An ordinary camera, 21 hand landmarks, and the same five checks a teacher
+              watches for — scored good, warning, or critical on every frame.
             </p>
           </div>
-          <Reveal
-            direction="right"
-            delay={0.1}
-            className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.14] via-surface to-surface p-6 glow-blue sm:p-8"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-              Scored every frame
-            </p>
-            <ul className="mt-5 space-y-3">
-              {[
-                'Wrist height',
-                'Finger curvature',
-                'Thumb position',
-                'Wrist lateral deviation',
-                'Overall hand arch',
-              ].map((label, i) => (
-                <li
-                  key={label}
-                  className="flex items-center gap-3 border-b border-line pb-3 last:border-0 last:pb-0"
+          <div className="lg:col-span-6">
+            <div>
+              {criteria.map((item) => (
+                <Link
+                  key={item.key}
+                  to="/about"
+                  className="group flex cursor-pointer items-center gap-6 border-b border-white/10 py-5 transition-colors duration-300 hover:border-white/30"
                 >
-                  <span className="font-display text-sm font-bold tabular-nums text-accent/70">
-                    {String(i + 1).padStart(2, '0')}
+                  <span className="w-12 flex-shrink-0 font-body text-sm text-white/30">
+                    {item.n}
                   </span>
-                  <span className="text-sm font-medium text-foreground">{label}</span>
-                </li>
+                  <div className="flex-1">
+                    <p className="font-cinematic text-base text-white transition-colors group-hover:text-white/80">
+                      {CRITERION_LABELS[item.key]}
+                    </p>
+                    <p className="mt-0.5 font-body text-sm text-white/40">{item.body}</p>
+                  </div>
+                  <span className="text-sm text-white/20 transition-colors group-hover:text-white/60">
+                    →
+                  </span>
+                </Link>
               ))}
-            </ul>
-          </Reveal>
+            </div>
+          </div>
         </div>
-      </Reveal>
 
-      <Divider />
-
-      <Reveal as="section" aria-labelledby="how-heading">
-        <Eyebrow>How it works</Eyebrow>
-        <h2
-          id="how-heading"
-          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
-        >
-          Four steps, start to coaching.
-        </h2>
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
-          Capture in, coaching out — here is the full processing workflow from a camera frame
-          to a prioritized tip.
-        </p>
-        <div className="mt-10">
-          <PipelineFlow />
+        <div className="mb-24 flex items-center gap-8">
+          <div className="h-px flex-1 bg-white/10" />
+          <blockquote
+            className="max-w-md text-center font-cinematic text-white/50 italic"
+            style={{ fontSize: '1.25rem', lineHeight: 1.7 }}
+          >
+            Technique drifts in the hours nobody is watching.
+          </blockquote>
+          <div className="h-px flex-1 bg-white/10" />
         </div>
-        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, i) => (
-            <Reveal
-              as="li"
-              key={step.n}
-              delay={0.08 * i}
-              className="group relative rounded-2xl border border-line bg-surface p-5 transition-all duration-300 hover:border-primary/50 hover:glow-blue"
+
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-6">
+          <div className="lg:col-span-5">
+            <div className="relative overflow-hidden bg-zinc-900" style={{ aspectRatio: '4/5' }}>
+              <img
+                src={WIDE_IMG}
+                alt="Piano keyboard detail in moody light"
+                width={2400}
+                height={1600}
+                className="h-full w-full object-cover"
+                style={{ filter: 'grayscale(20%) contrast(1.1)' }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
+                }}
+              />
+            </div>
+          </div>
+          <div className="hidden lg:col-span-1 lg:block" />
+          <div className="lg:col-span-6">
+            <p className="mb-6 font-body text-sm uppercase tracking-[0.4em] text-white/30">
+              About
+            </p>
+            <h3
+              className="mb-6 font-cinematic font-normal text-white"
+              style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}
             >
-              <span className="font-display text-3xl font-bold tabular-nums text-primary/40 transition-colors group-hover:text-primary/70">
-                {step.n}
-              </span>
-              <h3 className="mt-2 font-display text-lg font-semibold text-accent">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
-            </Reveal>
-          ))}
-        </ol>
-      </Reveal>
-
-      <Divider blue />
-
-      <Reveal as="section" aria-labelledby="features-heading">
-        <Eyebrow>Key features</Eyebrow>
-        <h2
-          id="features-heading"
-          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
-        >
-          Five criteria, measured the same way every time.
-        </h2>
-        <div className="mt-10">
-          <KeyFeatures />
+              Technique Titan
+            </h3>
+            <p className="mb-4 font-body text-base font-light leading-relaxed text-white/50">
+              A second pair of eyes on every practice session. It measures wrist height,
+              finger curvature, thumb position, wrist line, and hand arch — then returns
+              the one correction that matters most right now.
+            </p>
+            <p className="mb-10 font-body text-base font-light leading-relaxed text-white/40">
+              No account, no wearables, no special hardware. Live mode keeps video on your
+              device and posts only compact landmarks to the API.
+            </p>
+            <Link
+              to="/about"
+              className="border-b border-white/20 pb-1 font-body text-sm uppercase tracking-[0.4em] text-white/60 transition-all duration-300 hover:border-white hover:text-white"
+            >
+              How scoring works
+            </Link>
+          </div>
         </div>
-      </Reveal>
+      </section>
 
-      <Divider />
-
-      <Reveal as="section" aria-labelledby="modes-heading">
-        <Eyebrow>Start practicing</Eyebrow>
-        <h2
-          id="modes-heading"
-          className="mt-5 max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
-        >
-          Pick the mode that fits your session.
-        </h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {cards.map((card, i) => (
-            <Reveal key={card.to} delay={0.08 * i}>
-              <Link
-                to={card.to}
-                className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:bg-surface-raised hover:glow-cyan"
-              >
-                <h3 className="font-display text-xl font-semibold text-accent">
-                  {card.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{card.body}</p>
-                <span
-                  aria-hidden="true"
-                  className="mt-4 text-sm font-semibold text-foreground transition-transform group-hover:translate-x-0.5"
-                >
-                  Open →
-                </span>
+      <section id="start" className="border-t border-white/10 bg-black px-6 py-24 sm:px-10">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {modes.map((mode) => (
+              <Link key={mode.to} to={mode.to} className="group" aria-label={mode.title}>
+                <div className="mb-4 overflow-hidden bg-zinc-900" style={{ aspectRatio: '1/1' }}>
+                  <img
+                    src={mode.img}
+                    alt={mode.alt}
+                    width={2400}
+                    height={1600}
+                    className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
+                  />
+                </div>
+                <p className="mb-1 font-cinematic text-base text-white">{mode.title}</p>
+                <p className="font-body text-sm text-white/40">{mode.meta}</p>
               </Link>
-            </Reveal>
-          ))}
+            ))}
+          </div>
         </div>
-      </Reveal>
+      </section>
 
-      <Reveal
-        as="section"
-        aria-labelledby="cta-heading"
-        className="tech-grid relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-b from-primary/[0.12] to-surface px-6 py-14 text-center sm:px-10"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
-        />
-        <h2
-          id="cta-heading"
-          className="mx-auto max-w-2xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl"
-        >
-          Ready to see what your hands are actually doing?
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
-          Start with a single photo. No account, no installation, no special hardware —
-          just the camera you already have.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link
-            to="/photo"
-            className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-primary-bright hover:glow-blue"
-          >
-            Analyze a photo
-          </Link>
-          <Link
-            to="/about"
-            className="rounded-full border border-accent/40 bg-accent/5 px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:border-accent hover:bg-accent/15"
-          >
-            How the scoring works
-          </Link>
-        </div>
-      </Reveal>
+      <CinematicFooter />
     </div>
   )
 }

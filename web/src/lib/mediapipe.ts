@@ -127,7 +127,7 @@ export function drawHandOverlays(
       ctx.stroke()
     }
     if (hand.marker && pts[0]) {
-      ctx.font = 'bold 18px "Space Grotesk", sans-serif'
+      ctx.font = 'bold 18px Inter, sans-serif'
       ctx.fillStyle = hand.color
       ctx.fillText(hand.marker, pts[0][0] - 8, pts[0][1] + 28)
     }
@@ -143,6 +143,6 @@ export function severityHex(severity: string): string {
     case 'critical':
       return '#fca5a5'
     default:
-      return '#c4a8bc'
+      return '#9a9a9a'
   }
 }

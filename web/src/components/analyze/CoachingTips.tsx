@@ -9,7 +9,7 @@ export function CoachingTips({ hand }: Props) {
   const { coaching } = hand
   if (coaching.encouragement) {
     return (
-      <div className="animate-fade-up rounded-2xl border border-good/40 bg-good/10 px-4 py-3 text-sm text-good">
+      <div className="animate-fade-up border border-good/40 bg-good/10 px-4 py-4 text-base text-good">
         {coaching.encouragement}
       </div>
     )
@@ -20,10 +20,10 @@ export function CoachingTips({ hand }: Props) {
   const extras = coaching.tips.slice(1)
 
   return (
-    <div className="animate-fade-up space-y-3">
+    <div className="animate-fade-up space-y-4">
       {primary && (
         <div
-          className="rounded-2xl border px-4 py-3 text-sm"
+          className="border px-4 py-4 text-base"
           style={{
             borderColor: `color-mix(in srgb, ${severityColor(primary.severity)} 45%, transparent)`,
             background:
@@ -33,20 +33,20 @@ export function CoachingTips({ hand }: Props) {
           }}
         >
           <p
-            className="mb-1 font-semibold"
+            className="mb-2 font-cinematic text-lg"
             style={{ color: severityColor(primary.severity) }}
           >
             Focus first: {CRITERION_LABELS[primary.criterion] ?? primary.criterion}
           </p>
-          <p className="text-muted">{primary.problem}</p>
-          <p className="mt-1 text-foreground">{primary.fix}</p>
+          <p className="font-light text-white/50">{primary.problem}</p>
+          <p className="mt-1 text-white">{primary.fix}</p>
         </div>
       )}
       {extras.length > 0 && (
-        <ul className="space-y-2 text-sm text-muted">
+        <ul className="space-y-2 text-base text-white/50">
           {extras.map((tip) => (
             <li key={`${tip.criterion}-${tip.priority}`}>
-              <span className="font-medium text-foreground">
+              <span className="text-white">
                 {CRITERION_LABELS[tip.criterion] ?? tip.criterion}
               </span>
               {' — '}

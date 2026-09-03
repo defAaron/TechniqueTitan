@@ -1,3 +1,5 @@
+import { PageHeader } from '../components/layout'
+
 const criteria = [
   'Wrist height',
   'Finger curvature',
@@ -36,28 +38,21 @@ const links = [
 
 export function AboutPage() {
   return (
-    <article className="animate-fade-up max-w-2xl">
-      <p className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary-bright">
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
-        Origin story
-      </p>
-      <h1 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground">
-        About
-      </h1>
-      <p className="mt-3 leading-relaxed text-muted">
+    <article className="animate-fade-up max-w-3xl">
+      <PageHeader eyebrow="Origin" title="About">
         Technique Titan started from a gap every serious pianist knows: you spend most of
         your hours practicing alone, but posture only gets corrected once a week — if you
         have a teacher at all.
-      </p>
+      </PageHeader>
 
-      <section aria-labelledby="inspiration-heading" className="mt-10">
-        <h2
-          id="inspiration-heading"
-          className="font-display text-xl font-semibold text-foreground"
-        >
+      <section aria-labelledby="inspiration-heading" className="mt-14">
+        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+          01
+        </p>
+        <h2 id="inspiration-heading" className="font-cinematic text-3xl font-normal text-white">
           The inspiration
         </h2>
-        <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted sm:text-base">
+        <div className="mt-5 space-y-4 font-body text-base font-light leading-relaxed text-white/50">
           <p>
             Good piano technique lives in small details — a wrist that stays level with the
             keys, fingers that hold a natural curve, a thumb that rests on its side instead of
@@ -82,21 +77,21 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section aria-labelledby="creator-heading" className="mt-12">
-        <h2
-          id="creator-heading"
-          className="font-display text-xl font-semibold text-foreground"
-        >
+      <section aria-labelledby="creator-heading" className="mt-16">
+        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+          02
+        </p>
+        <h2 id="creator-heading" className="font-cinematic text-3xl font-normal text-white">
           The creator
         </h2>
-        <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted sm:text-base">
+        <div className="mt-5 space-y-4 font-body text-base font-light leading-relaxed text-white/50">
           <p>
             Technique Titan was built by{' '}
             <a
               href="https://aarondutta.com"
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-accent transition-colors hover:text-primary-bright"
+              className="text-white underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white"
             >
               Aaron Dutta
             </a>
@@ -113,17 +108,17 @@ export function AboutPage() {
           </p>
         </div>
 
-        <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-8 divide-y divide-white/10 border-y border-white/10">
           {links.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 transition-all duration-200 hover:border-accent/50 hover:bg-surface-raised hover:glow-cyan"
+                className="group flex items-center justify-between gap-3 py-4 transition-colors duration-300 hover:text-white"
               >
-                <span className="text-sm font-semibold text-foreground">{link.label}</span>
-                <span className="truncate text-xs text-muted transition-colors group-hover:text-accent">
+                <span className="font-cinematic text-base text-white">{link.label}</span>
+                <span className="truncate font-body text-sm text-white/40 transition-colors group-hover:text-white/70">
                   {link.detail}
                 </span>
               </a>
@@ -132,34 +127,34 @@ export function AboutPage() {
         </ul>
       </section>
 
-      <section aria-labelledby="scoring-heading" className="mt-12">
-        <h2
-          id="scoring-heading"
-          className="font-display text-xl font-semibold text-foreground"
-        >
+      <section aria-labelledby="scoring-heading" className="mt-16">
+        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+          03
+        </p>
+        <h2 id="scoring-heading" className="font-cinematic text-3xl font-normal text-white">
           Under the hood
         </h2>
-        <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
+        <p className="mt-5 font-body text-base font-light leading-relaxed text-white/50">
           Technique Titan detects hand landmarks, scores five piano posture criteria, and
           returns prioritized coaching. The scoring engine is Python (MediaPipe + geometry);
           this site is the React product UI.
         </p>
 
-        <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-8 divide-y divide-white/10 border-y border-white/10">
           {criteria.map((label, i) => (
             <li
               key={label}
-              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-foreground"
+              className="flex items-center gap-6 py-4 font-body text-base text-white"
             >
-              <span className="font-display text-sm font-bold tabular-nums text-accent/70">
+              <span className="w-8 font-body text-sm text-white/30">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              {label}
+              <span className="font-cinematic">{label}</span>
             </li>
           ))}
         </ul>
 
-        <p className="mt-6 text-sm leading-relaxed text-muted">
+        <p className="mt-8 font-body text-base font-light leading-relaxed text-white/40">
           Live mode prefers browser-side MediaPipe Hands and posts compact landmarks to the
           API so video stays on your device. Frame-upload mode is available as a fallback.
         </p>

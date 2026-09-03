@@ -20,7 +20,7 @@ export function ApiStatusBanner() {
   return (
     <div
       role="status"
-      className="border-b border-critical/40 bg-critical/10 px-4 py-2 text-center text-sm text-critical"
+      className="border-b border-critical/40 bg-black/90 px-4 py-2.5 text-center text-sm text-critical backdrop-blur-sm"
     >
       Analysis API is unreachable. Photo, video, and live scoring need the backend — on
       Render free tier the first request after idle can take up to a minute. Check{' '}
