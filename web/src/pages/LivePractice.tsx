@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CoachingTips, ScorePanel } from '../components/analyze'
-import { PageHeader } from '../components/layout'
+import { ScorePanel } from '../components/analyze'
 import {
   analyzeFrame,
   formatApiError,
@@ -186,12 +185,25 @@ export function LivePractice() {
     }
   }
 
+  const leftHand = hands.find((h) => h.label.toLowerCase() === 'left')
+  const rightHand = hands.find((h) => h.label.toLowerCase() === 'right')
+
   return (
-    <div className="space-y-10">
-      <PageHeader eyebrow="Live" title="Live practice">
-        Browser camera with real-time overlays. Preferred path sends landmarks only
-        (MediaPipe in-browser); frame upload posts JPEGs to the API.
-      </PageHeader>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <header>
+          <p className="mb-1 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+            Live
+          </p>
+          <h1 className="font-cinematic text-3xl font-normal tracking-tight text-white sm:text-4xl">
+            Live practice
+          </h1>
+        </header>
+        <p className="max-w-md font-body text-sm font-light text-white/40">
+          Browser camera with real-time overlays. Landmarks stay on-device; frame
+          upload posts JPEGs to the API.
+        </p>
+      </div>
 
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex border border-white/15 text-sm">
@@ -243,28 +255,41 @@ export function LivePractice() {
         </p>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-        <div className="relative min-h-72 overflow-hidden border border-white/10 bg-black">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div className="relative aspect-video min-h-56 overflow-hidden border border-white/10 bg-black">
           <video ref={videoRef} playsInline muted className="hidden" />
-          <canvas ref={canvasRef} className="block w-full" />
+          <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-contain" />
           {!running && (
             <div className="absolute inset-0 flex items-center justify-center font-body text-base text-white/40">
               Camera preview will appear here
             </div>
           )}
         </div>
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
-          {hands.length === 0 && running && (
-            <p className="font-body text-base text-white/50">Waiting for a visible hand…</p>
-          )}
-          {hands.map((hand) => (
-            <div key={hand.label} className="space-y-4">
-              <ScorePanel hand={hand} compact />
-              <CoachingTips hand={hand} />
-            </div>
-          ))}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <HandSlot label="Left" hand={leftHand} running={running} />
+          <HandSlot label="Right" hand={rightHand} running={running} />
         </div>
       </div>
+    </div>
+  )
+}
+
+function HandSlot({
+  label,
+  hand,
+  running,
+}: {
+  label: string
+  hand: HandResult | undefined
+  running: boolean
+}) {
+  if (hand) return <ScorePanel hand={hand} dense />
+
+  return (
+    <div className="flex h-full min-h-48 items-center justify-center border border-white/10 bg-zinc-950 px-4 py-6 text-center">
+      <p className="font-body text-sm text-white/40">
+        {running ? `Waiting for ${label.toLowerCase()} hand…` : `${label} hand`}
+      </p>
     </div>
   )
 }

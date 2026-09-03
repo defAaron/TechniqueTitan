@@ -30,7 +30,7 @@ new significant error, append an entry here in the same format.
 | Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
 | Streamlit state | Persist incrementally across reruns; don’t rely on `finally` after Stop. |
-| Live UI | Hold last good scores between async responses; keep camera + primary feedback co-visible. |
+| Live UI | Hold last good scores between async responses; keep camera + **both hands'** primary feedback co-visible (side by side, not stacked). |
 | Theme tokens | Renaming CSS vars requires updating TS/`getComputedStyle` consumers. |
 | Assets | Don’t reference `/hero-*.jpg|mp4` unless files exist under `web/public/`. |
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
@@ -330,6 +330,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E25 — Live UI: right-hand stats required scroll
+| | |
+|---|---|
+| **When** | 2026-09-02 |
+| **Stage** | React live practice |
+| **Symptom** | With both hands in frame, only the left-hand score card was visible; right-hand stats sat below the fold |
+| **Root cause** | Live feedback column stacked `ScorePanel` + `CoachingTips` per hand in a single `1fr` column |
+| **Fix** | Camera beside a two-column Left/Right grid; dense score cards so both fit in a normal window |
+| **Prevention** | Live practice must keep camera + both hands' scores co-visible, side by side |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -344,7 +356,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E25 — Short title
+### E26 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |
