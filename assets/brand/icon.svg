@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="App Icon / 512">
+<rect width="512" height="512" rx="114" fill="black"/>
+<rect x="0.75" y="0.75" width="510.5" height="510.5" rx="113.25" stroke="white" stroke-opacity="0.22" stroke-width="1.5"/>
+<path id="White Key 1" d="M127 191C127 189.343 128.343 188 130 188H170C171.657 188 173 189.343 173 191V416C173 420.418 169.418 424 165 424H135C130.582 424 127 420.418 127 416V191Z" fill="white"/>
+<path id="White Key 2" d="M180 191C180 189.343 181.343 188 183 188H223C224.657 188 226 189.343 226 191V416C226 420.418 222.418 424 218 424H188C183.582 424 180 420.418 180 416V191Z" fill="white"/>
+<path id="White Key 3" d="M233 191C233 189.343 234.343 188 236 188H276C277.657 188 279 189.343 279 191V416C279 420.418 275.418 424 271 424H241C236.582 424 233 420.418 233 416V191Z" fill="white"/>
+<path id="White Key 4" d="M286 191C286 189.343 287.343 188 289 188H329C330.657 188 332 189.343 332 191V416C332 420.418 328.418 424 324 424H294C289.582 424 286 420.418 286 416V191Z" fill="white"/>
+<path id="White Key 5" d="M339 191C339 189.343 340.343 188 342 188H382C383.657 188 385 189.343 385 191V416C385 420.418 381.418 424 377 424H347C342.582 424 339 420.418 339 416V191Z" fill="white"/>
+<path id="Black Key C#" d="M160.5 188H192.5V321C192.5 323.761 190.261 326 187.5 326H165.5C162.739 326 160.5 323.761 160.5 321V188Z" fill="black"/>
+<path id="Black Key D#" d="M213.5 188H245.5V321C245.5 323.761 243.261 326 240.5 326H218.5C215.739 326 213.5 323.761 213.5 321V188Z" fill="black"/>
+<path id="Black Key F#" d="M319.5 188H351.5V321C351.5 323.761 349.261 326 346.5 326H324.5C321.739 326 319.5 323.761 319.5 321V188Z" fill="black"/>
+<circle id="Contact 1" cx="150" cy="364" r="5" fill="black"/>
+<circle id="Contact 2" cx="203" cy="354" r="5" fill="black"/>
+<circle id="Contact 3" cx="256" cy="346" r="5" fill="black"/>
+<circle id="Contact 4" cx="309" cy="354" r="5" fill="black"/>
+<circle id="Contact 5" cx="362" cy="364" r="5" fill="black"/>
+<g id="Landmark Arch">
+<path id="Vector" d="M168 148C200 116 228 108 256 108C284 108 312 116 348 148" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+</g>
+<line id="Scan 1" x1="169" y1="159" x2="169" y2="173" stroke="white" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>
+<line id="Scan 2" x1="215" y1="133" x2="215" y2="147" stroke="white" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>
+<line id="Scan 3" x1="257" y1="119" x2="257" y2="133" stroke="white" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>
+<line id="Scan 4" x1="301" y1="133" x2="301" y2="147" stroke="white" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>
+<line id="Scan 5" x1="349" y1="159" x2="349" y2="173" stroke="white" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>
+<circle id="Landmark 1" cx="168" cy="148" r="6.5" fill="white"/>
+<circle id="Landmark 2" cx="214" cy="122" r="6" fill="white"/>
+<circle id="Landmark 3" cx="256" cy="108" r="7.5" fill="white"/>
+<circle id="Landmark 4" cx="300" cy="122" r="6" fill="white"/>
+<circle id="Landmark 5" cx="348" cy="148" r="6.5" fill="white"/>
+</g>
+</svg>

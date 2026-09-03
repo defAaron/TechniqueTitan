@@ -35,8 +35,17 @@ export function CinematicNav({
     >
       <Link
         to="/"
-        className="font-body text-sm font-light uppercase tracking-[0.3em] text-white"
+        className="flex items-center gap-3 font-body text-sm font-light uppercase tracking-[0.3em] text-white"
       >
+        {!overlay && (
+          <img
+            src="/icon-192.png"
+            alt=""
+            width={28}
+            height={28}
+            className="h-7 w-7 ring-1 ring-white/25"
+          />
+        )}
         Technique Titan
       </Link>
       <div className="flex flex-wrap justify-end gap-4 font-body text-sm uppercase tracking-widest text-white/60 sm:gap-8">

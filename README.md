@@ -1,47 +1,75 @@
-# Technique Titan
+<a id="readme-top"></a>
 
-AI piano posture coach that turns a laptop camera into on-demand technique
-feedback. Detects 21 MediaPipe landmarks per hand, scores five geometry-based
-criteria (0–100), and returns prioritized coaching via a React + FastAPI
-product — plus Streamlit and a batch CLI for demos and research.
+<br />
+<div align="center">
+  <a href="https://github.com/defAaron/TechniqueTitan">
+    <img src="assets/brand/icon.png" alt="Logo" width="80" height="80">
+  </a>
 
-**Repository:** [github.com/defAaron/TechniqueTitan](https://github.com/defAaron/TechniqueTitan)
+  <h3 align="center">Technique Titan</h3>
 
----
+  <p align="center">
+    AI piano posture coach that turns a laptop camera into on-demand technique feedback.
+    <br />
+    <a href="https://github.com/defAaron/TechniqueTitan/blob/main/docs/PRD.md"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://technique-titan.vercel.app">View Demo</a>
+    &middot;
+    <a href="https://github.com/defAaron/TechniqueTitan/issues/new">Report Bug</a>
+    &middot;
+    <a href="https://github.com/defAaron/TechniqueTitan/issues/new">Request Feature</a>
+  </p>
+</div>
 
-## The problem
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-Good piano technique depends heavily on hand posture. Collapsed wrists, flat
-fingers, and tucked thumbs slow progress and can lead to strain over time. Today,
-posture is corrected almost exclusively during in-person lessons:
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-- Students practice far more hours than they spend with a teacher, so bad habits
-  form between sessions.
-- Feedback is qualitative ("rounder fingers"), which is hard for beginners to
-  internalize or track objectively.
-- Self-taught learners and remote students often get no posture feedback at all.
+[![Product screenshot][product-screenshot]](https://technique-titan.vercel.app)
 
-Manually computing joint angles and vector positions for every training image is
-also tedious and does not scale to large datasets.
+Technique Titan detects 21 MediaPipe landmarks per hand, scores five geometry-based criteria (0–100), and returns prioritized coaching through a React + FastAPI product — plus Streamlit and a batch CLI for demos and research.
 
-## The solution
+Here's why:
+
+* Students practice far more hours than they spend with a teacher, so collapsed wrists, flat fingers, and tucked thumbs form between lessons.
+* Feedback is usually qualitative ("rounder fingers"), which is hard for beginners to internalize or track objectively.
+* Self-taught learners and remote students often get no posture feedback at all.
+* Manually computing joint angles for every training image does not scale to large datasets.
 
 Technique Titan automates the full pipeline:
 
 1. **Detect** 21 hand landmarks per hand with MediaPipe Hands.
-2. **Normalize** coordinates (wrist origin, palm-span scale) so measurements are
-   invariant to camera distance and hand size.
+2. **Normalize** coordinates (wrist origin, palm-span scale) so measurements are invariant to camera distance and hand size.
 3. **Compute** vectors, joint angles, and per-criterion geometric metrics.
-4. **Score** each criterion (0–100) and assign severity bands (good / warning /
-   critical).
+4. **Score** each criterion (0–100) and assign severity bands (good / warning / critical).
 5. **Coach** with plain-language tips from YAML templates, prioritized by severity.
 6. **Present** results in the web UI, Streamlit, or CSV/JSON for bulk analysis.
 
 Both hands are detected and scored independently when visible in frame.
-
----
-
-## Features
 
 | Capability | Status |
 |---|---|
@@ -67,36 +95,84 @@ Both hands are detected and scored independently when visible in frame.
 
 Formulas and landmark inputs are documented in [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md).
 
----
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Quick start
+### Built With
+
+* [![Python][Python]][Python-url]
+* [![React][React.js]][React-url]
+* [![TypeScript][TypeScript]][TypeScript-url]
+* [![FastAPI][FastAPI]][FastAPI-url]
+* [![Vite][Vite]][Vite-url]
+* [![Tailwind CSS][Tailwind]][Tailwind-url]
+* [![MediaPipe][MediaPipe]][MediaPipe-url]
+* [![OpenCV][OpenCV]][OpenCV-url]
+* [![Streamlit][Streamlit]][Streamlit-url]
+
+| Layer | Technology |
+|---|---|
+| Hand detection (server) | MediaPipe Hands `0.10.21` (21 landmarks per hand) |
+| Hand detection (browser live) | `@mediapipe/tasks-vision` |
+| Image/video I/O | OpenCV `4.10` |
+| Math | NumPy `1.26+` (&lt;2) |
+| Scoring / coaching config | PyYAML |
+| Product API | FastAPI + Uvicorn + Pydantic 2 |
+| Product UI | React 19 + TypeScript + Vite 8 + Tailwind 4 |
+| Charts / WebGL | Recharts, OGL |
+| Interim UI | Streamlit `1.30+` |
+| Deploy | Render (API Docker), Vercel (web), Streamlit Cloud (interim) |
+| CI | GitHub Actions (pytest + `npm run build`) |
+| Tests | pytest + httpx |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+To get a local copy up and running, follow these steps.
 
 ### Prerequisites
 
-- **Python 3.11** (MediaPipe `0.10.21` has no wheel for Python 3.13)
-- **Node.js 22+** (for the React UI)
-- macOS, Windows, or Linux
-- Webcam (for live mode)
+* **Python 3.11** (MediaPipe `0.10.21` has no wheel for Python 3.13)
+* **Node.js 22+** (for the React UI)
+* macOS, Windows, or Linux
+* Webcam (for live mode)
 
-### Product stack (recommended)
+### Installation
 
-```bash
-git clone https://github.com/defAaron/TechniqueTitan.git
-cd TechniqueTitan
+The product stack (React UI + FastAPI) is the recommended local setup.
 
-python3.11 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+1. Clone the repo
+   ```sh
+   git clone https://github.com/defAaron/TechniqueTitan.git
+   cd TechniqueTitan
+   ```
+2. Create a Python 3.11 virtualenv and install the package with API extras
+   ```sh
+   python3.11 -m venv .venv
+   source .venv/bin/activate        # Windows: .venv\Scripts\activate
+   pip install -e ".[api]"
+   ```
+3. Start the API on port 8000
+   ```sh
+   uvicorn api.main:app --reload --port 8000
+   ```
+4. Install JS packages and start the React UI
+   ```sh
+   cd web
+   npm install
+   npm run dev
+   ```
+5. Open [http://localhost:5173](http://localhost:5173)
 
-pip install -e ".[api]"
+Vite proxies `/v1/*` to the API. Missing API on `:8000` produces a Vite **502**.
 
-# Terminal 1 — API
-uvicorn api.main:app --reload --port 8000
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# Terminal 2 — React UI
-cd web && npm install && npm run dev
-```
+<!-- USAGE EXAMPLES -->
+## Usage
 
-Open [http://localhost:5173](http://localhost:5173). Vite proxies `/v1/*` to the API.
+### Product UI
 
 | Route | Mode |
 |---|---|
@@ -105,9 +181,11 @@ Open [http://localhost:5173](http://localhost:5173). Vite proxies `/v1/*` to the
 | `/live` | Browser camera → landmarks (fast) or frame upload |
 | `/about` | How the scoring engine works |
 
+Live mode on the React UI prefers **browser-side MediaPipe** (`@mediapipe/tasks-vision`) and posts compact landmarks to `POST /v1/score/landmarks` so video stays on-device. Frame-upload mode (`POST /v1/analyze/frame`) is available as a fallback.
+
 ### Streamlit UI (interim / research)
 
-```bash
+```sh
 pip install -e .
 # Live camera needs the full OpenCV build (not headless):
 pip uninstall opencv-python-headless -y 2>/dev/null
@@ -118,30 +196,25 @@ streamlit run app.py
 
 Open [http://localhost:8501](http://localhost:8501). Sidebar modes: Photo, Video, Live camera.
 
-On macOS, grant camera access under **System Settings → Privacy & Security →
-Camera** for Cursor or Terminal before using live mode.
+On macOS, grant camera access under **System Settings → Privacy & Security → Camera** for Cursor or Terminal before using live mode.
 
 ### Batch processing (testers / datasets)
 
-```bash
+```sh
 pip install -e .
 # For tests: pip install -r requirements-dev.txt
 ```
 
-Drop images into `data/raw/` (subfolders OK; e.g. `excellent/1.png`, `good/2.png`),
-then:
+Drop images into `data/raw/` (subfolders OK; e.g. `excellent/1.png`, `good/2.png`), then:
 
-```bash
+```sh
 python -m technique_titan.batch.process_folder \
   --input data/raw \
   --output data/processed \
   --labels data/labels.csv   # optional — export from Notion labeling table
 ```
 
-**Expert labels** are maintained in the **Notion** page `techniquetitan` (classification
-table). Agents with Notion MCP can read/update that table to complete labeling;
-export to `data/labels.csv` when running batch scoring. See [data/README.md](data/README.md)
-and [AGENTS.md](AGENTS.md).
+**Expert labels** are maintained in the **Notion** page `techniquetitan` (classification table). Agents with Notion MCP can read/update that table to complete labeling; export to `data/labels.csv` when running batch scoring. See [data/README.md](data/README.md) and [AGENTS.md](AGENTS.md).
 
 Outputs:
 
@@ -149,11 +222,7 @@ Outputs:
 - `data/processed/metrics/` — full vectors, angles, and scores per image
 - `data/processed/outliers.csv` — auto-flagged suspicious rows
 
-See [data/README.md](data/README.md) for the data intake guide.
-
----
-
-## How it works
+### How it works
 
 ```mermaid
 flowchart TD
@@ -192,23 +261,13 @@ flowchart TD
 
 For each detected hand the pipeline:
 
-1. Picks world landmarks when available (more stable 3D angles), otherwise image
-   coordinates.
-2. Resolves left/right labels; disambiguates collisions by wrist position when
-   MediaPipe reports the same handedness for both hands.
-3. Computes raw geometry for all five criteria, then maps metrics to scores using
-   thresholds in `config/scoring.yaml`.
+1. Picks world landmarks when available (more stable 3D angles), otherwise image coordinates.
+2. Resolves left/right labels; disambiguates collisions by wrist position when MediaPipe reports the same handedness for both hands.
+3. Computes raw geometry for all five criteria, then maps metrics to scores using thresholds in `config/scoring.yaml`.
 4. Generates prioritized coaching tips from `config/coaching.yaml`.
-5. Colors the skeleton overlay by worst severity (green / orange / red) and tags
-   each hand with `L` or `R`.
+5. Colors the skeleton overlay by worst severity (green / orange / red) and tags each hand with `L` or `R`.
 
-Live mode on the React UI prefers **browser-side MediaPipe** (`@mediapipe/tasks-vision`)
-and posts compact landmarks to `POST /v1/score/landmarks` so video stays on-device.
-Frame-upload mode (`POST /v1/analyze/frame`) is available as a fallback.
-
----
-
-## Technical architecture
+### Architecture
 
 ```
 technique_titan/
@@ -256,25 +315,6 @@ technique_titan/
 └── requirements-dev.txt      # Local tests
 ```
 
-### Tech stack
-
-| Layer | Technology |
-|---|---|
-| Hand detection (server) | MediaPipe Hands `0.10.21` (21 landmarks per hand) |
-| Hand detection (browser live) | `@mediapipe/tasks-vision` |
-| Image/video I/O | OpenCV `4.10` |
-| Math | NumPy `1.26+` (&lt;2) |
-| Scoring / coaching config | PyYAML |
-| Product API | FastAPI + Uvicorn + Pydantic 2 |
-| Product UI | React 19 + TypeScript + Vite 8 + Tailwind 4 |
-| Charts / WebGL | Recharts, OGL |
-| Interim UI | Streamlit `1.30+` |
-| Deploy | Render (API Docker), Vercel (web), Streamlit Cloud (interim) |
-| CI | GitHub Actions (pytest + `npm run build`) |
-| Tests | pytest + httpx |
-
-### Key modules
-
 | Module | Role |
 |---|---|
 | `detection/hand_detector.py` | Wraps MediaPipe; returns landmarks, handedness, confidence |
@@ -298,9 +338,7 @@ technique_titan/
 
 OpenAPI docs: `http://127.0.0.1:8000/docs` when the API is running.
 
----
-
-## Deployment
+### Deployment
 
 See **[docs/DEPLOY.md](docs/DEPLOY.md)** for Render + Vercel + Streamlit Cloud.
 
@@ -310,14 +348,11 @@ See **[docs/DEPLOY.md](docs/DEPLOY.md)** for Render + Vercel + Streamlit Cloud.
 | Product API (`api/`) | [Render](https://technique-titan-api.onrender.com) (Docker) |
 | Interim demo (`app.py`) | Streamlit Community Cloud |
 
-Live camera does **not** work on Streamlit Cloud (no webcam on the server). Use
-the React **Live** page for hosted real-time feedback.
+Live camera does **not** work on Streamlit Cloud (no webcam on the server). Use the React **Live** page for hosted real-time feedback.
 
----
+### Development
 
-## Development
-
-```bash
+```sh
 # Python tests
 pip install -e ".[api]"
 pip install -r requirements-dev.txt
@@ -331,16 +366,14 @@ python -m technique_titan.batch.process_folder \
   --input data/raw --output data/processed
 ```
 
-### Project conventions
+Project conventions:
 
-- Scoring thresholds live in `config/scoring.yaml` — tune without code changes.
-- Coaching copy lives in `config/coaching.yaml` — templates, not an LLM.
-- The batch CLI is for bulk data; the React UI is for interactive review.
-- Prefer Python **3.11** in all environments (CI, Docker, Streamlit Cloud).
+* Scoring thresholds live in `config/scoring.yaml` — tune without code changes.
+* Coaching copy lives in `config/coaching.yaml` — templates, not an LLM.
+* The batch CLI is for bulk data; the React UI is for interactive review.
+* Prefer Python **3.11** in all environments (CI, Docker, Streamlit Cloud).
 
----
-
-## Documentation
+### Documentation
 
 | Document | Description |
 |---|---|
@@ -352,23 +385,74 @@ python -m technique_titan.batch.process_folder \
 | [web/README.md](web/README.md) | React UI develop / build notes |
 | [data/README.md](data/README.md) | Dataset intake for batch runs |
 
----
+_For more examples, please refer to the [Documentation](docs/PRD.md)._
 
-## Roadmap (summary)
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-| Phase | Focus | Status |
-|---|---|---|
-| 0 — Foundation | Project structure, tests, data strategy | Done |
-| 1 — Core detection | Geometry scoring engine | Done |
-| 2 — Feedback engine | Templated coaching + overlays | Done |
-| 3 — Product surface | React UI + API (photo/video/live) | In progress — analyze UX shipped; persistence / progress charts next |
-| 4 — Intelligence | Piano-specific model, teacher/student roles | Planned |
-| 5 — Scale & polish | Perf, a11y, monetization, observability | Planned |
+<!-- ROADMAP -->
+## Roadmap
 
-Full detail in [docs/ROADMAP.md](docs/ROADMAP.md).
+- [x] Phase 0 — Foundation: project structure, tests, data strategy
+- [x] Phase 1 — Core detection: geometry scoring engine
+- [x] Phase 2 — Feedback engine: templated coaching + overlays
+- [x] Phase 3a — Product surface: React UI + API (photo / video / live)
+- [ ] Phase 3b — Persistence: session history and progress charts
+- [ ] Phase 4 — Intelligence
+  - [ ] Piano-specific model
+  - [ ] Teacher / student roles
+- [ ] Phase 5 — Scale & polish: performance, accessibility, monetization, observability
 
----
+See [docs/ROADMAP.md](docs/ROADMAP.md) for full detail, and the [open issues](https://github.com/defAaron/TechniqueTitan/issues) for proposed features and known issues.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- LICENSE -->
 ## License
 
 No license file is specified yet. Contact the repository owner for usage terms.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- CONTACT -->
+## Contact
+
+Aaron — [defAaron](https://github.com/defAaron)
+
+Project Link: [https://github.com/defAaron/TechniqueTitan](https://github.com/defAaron/TechniqueTitan)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+* [MediaPipe Hands](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker)
+* [OpenCV](https://opencv.org/)
+* [FastAPI](https://fastapi.tiangolo.com/)
+* [React](https://react.dev/)
+* [Streamlit](https://streamlit.io/)
+* [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
+* [Img Shields](https://shields.io)
+* [Choose an Open Source License](https://choosealicense.com)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[product-screenshot]: web/public/landing/pianist.jpg
+[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://react.dev/
+[TypeScript]: https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+[FastAPI]: https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white
+[FastAPI-url]: https://fastapi.tiangolo.com/
+[Vite]: https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white
+[Vite-url]: https://vite.dev/
+[Tailwind]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
+[Tailwind-url]: https://tailwindcss.com/
+[MediaPipe]: https://img.shields.io/badge/MediaPipe-009688?style=for-the-badge&logo=google&logoColor=white
+[MediaPipe-url]: https://ai.google.dev/edge/mediapipe
+[OpenCV]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white
+[OpenCV-url]: https://opencv.org/
+[Streamlit]: https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white
+[Streamlit-url]: https://streamlit.io/
