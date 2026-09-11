@@ -1,15 +1,21 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CinematicFooter } from '../components/layout'
 import { CinematicHero } from '../components/marketing'
+import { VideoPreview, type VideoSource } from '../components/ui'
 import { CRITERION_LABELS } from '../lib/api'
 
 const WIDE_IMG = '/landing/keys-wide.jpg'
 const PIANIST_IMG = '/landing/pianist.jpg'
-const PHOTO_MODE_VIDEO = '/landing/photo-mode.mp4'
-const PHOTO_MODE_POSTER = '/landing/photo-mode.jpg'
-const VIDEO_MODE_VIDEO = '/landing/video-mode.mp4'
-const VIDEO_MODE_POSTER = '/landing/video-mode.jpg'
+
+const PHOTO_MODE_SOURCES: readonly VideoSource[] = [
+  { src: '/landing/photo-mode.webm', type: 'video/webm' },
+  { src: '/landing/photo-mode.mp4', type: 'video/mp4' },
+]
+
+const VIDEO_MODE_SOURCES: readonly VideoSource[] = [
+  { src: '/landing/video-mode.webm', type: 'video/webm' },
+  { src: '/landing/video-mode.mp4', type: 'video/mp4' },
+]
 
 const criteria = [
   {
@@ -43,21 +49,19 @@ type Mode = {
   to: string
   title: string
   meta: string
-  img: string
-  alt: string
-  video?: string
   width: number
   height: number
-}
+} & (
+  | { sources: readonly VideoSource[]; img?: never; alt?: never }
+  | { img: string; alt: string; sources?: never }
+)
 
 const modes: Mode[] = [
   {
     to: '/photo',
     title: 'Photo review',
     meta: 'Still frame · seconds',
-    img: PHOTO_MODE_POSTER,
-    video: PHOTO_MODE_VIDEO,
-    alt: 'Photo review scoring a still of a hand on the keys',
+    sources: PHOTO_MODE_SOURCES,
     width: 1280,
     height: 836,
   },
@@ -65,9 +69,7 @@ const modes: Mode[] = [
     to: '/video',
     title: 'Video timeline',
     meta: 'Practice clip · over time',
-    img: VIDEO_MODE_POSTER,
-    video: VIDEO_MODE_VIDEO,
-    alt: 'Video timeline of posture scores over a practice clip',
+    sources: VIDEO_MODE_SOURCES,
     width: 1280,
     height: 794,
   },
@@ -82,43 +84,15 @@ const modes: Mode[] = [
   },
 ]
 
-function usePrefersReducedMotion() {
-  const [reduceMotion, setReduceMotion] = useState(() =>
-    typeof window !== 'undefined'
-      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      : false,
-  )
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const apply = () => setReduceMotion(mq.matches)
-    apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
-  }, [])
-
-  return reduceMotion
-}
-
 function ModeMedia({ mode }: { mode: Mode }) {
-  const reduceMotion = usePrefersReducedMotion()
-  const mediaClass =
-    'pointer-events-none h-full w-full object-cover transition-transform duration-700 group-hover:scale-105'
-
-  if (mode.video && !reduceMotion) {
+  if (mode.sources) {
     return (
-      <video
-        src={mode.video}
-        poster={mode.img}
+      <VideoPreview
+        sources={mode.sources}
         width={mode.width}
         height={mode.height}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
+        className="pointer-events-none h-full w-full object-cover"
         aria-hidden
-        className={mediaClass}
       />
     )
   }
@@ -129,9 +103,7 @@ function ModeMedia({ mode }: { mode: Mode }) {
       alt={mode.alt}
       width={mode.width}
       height={mode.height}
-      className={[mediaClass, mode.video ? '' : 'grayscale group-hover:grayscale-0']
-        .filter(Boolean)
-        .join(' ')}
+      className="pointer-events-none h-full w-full object-cover grayscale transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0"
     />
   )
 }

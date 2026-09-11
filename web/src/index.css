@@ -297,3 +297,21 @@ html.landing body::-webkit-scrollbar {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
 }
+
+/*
+ * Safari paints a native start-playback overlay on <video> even when
+ * autoplay + muted + playsInline are set. Hide the WebKit chrome so looping
+ * previews stay control-free. Sizing stays on Tailwind utilities.
+ */
+.video-preview::-webkit-media-controls,
+.video-preview::-webkit-media-controls-enclosure,
+.video-preview::-webkit-media-controls-start-playback-button,
+.video-preview::-webkit-media-controls-overlay-play-button,
+.video-preview::-webkit-media-controls-overlay-enclosure {
+  display: none !important;
+  -webkit-appearance: none;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
