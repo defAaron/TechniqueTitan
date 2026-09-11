@@ -38,7 +38,6 @@ new significant error, append an entry here in the same format.
 | Filenames | Git-tracked names must match import and markdown-link **case** (Linux/CI is case-sensitive; macOS often is not). |
 | GitHub mermaid | Quote node labels; avoid reserved IDs (`end`, `graph`, `input`); do not use subgraphs with edges that cross groups — GitHub/Safari crashes with `t.render`. |
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
-| Safari looping video | Autoplaying landing previews must use `ui/VideoPreview` (muted + `playsInline` + no `controls` + WebKit control CSS + `play()` retry). Never set `poster` or `controls` on those clips. |
 
 ---
 
@@ -362,9 +361,9 @@ new significant error, append an entry here in the same format.
 | **When** | 2026-09-10 |
 | **Stage** | Landing page UI |
 | **Symptom** | Autoplaying photo/video cards showed Safari’s native play-button / controls overlay even with `autoPlay muted playsInline` |
-| **Root cause** | Safari still paints `::-webkit-media-controls-start-playback-button` on H.264 `<video>` when `play()` has not yet succeeded (clips sit below a 500vh hero) or when `poster`/`controls` are present |
-| **Fix** | Reusable `ui/VideoPreview`: never set `controls` or `poster`; force muted + `playsInline` on the element; hide WebKit media chrome; retry `play()` on mount/`canplay`; offer WebM + MP4 `<source>`s |
-| **Prevention** | Looping previews go through `VideoPreview` only — no `poster`, no `controls`, no hover-to-play |
+| **Root cause** | Safari Low Power Mode (macOS + iOS) always shows a native play overlay on `<video autoplay>` (WebKit 219889, WONTFIX). CSS `::-webkit-media-controls-*` cannot hide it. Nesting the clip in `<a>` and offering WebM first made `play()` fail more often. |
+| **Fix** | Abandoned the canvas/`VideoPreview` workaround. Landing clips are plain `<video>` elements (not wrapped in links); Safari’s play overlay is accepted. |
+| **Prevention** | Don’t wrap landing preview videos in `<a>`. Don’t spend time hiding Safari’s Low Power Mode play button. |
 
 ---
 

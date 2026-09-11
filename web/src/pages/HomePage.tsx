@@ -1,21 +1,12 @@
 import { Link } from 'react-router-dom'
 import { CinematicFooter } from '../components/layout'
 import { CinematicHero } from '../components/marketing'
-import { VideoPreview, type VideoSource } from '../components/ui'
 import { CRITERION_LABELS } from '../lib/api'
 
 const WIDE_IMG = '/landing/keys-wide.jpg'
 const PIANIST_IMG = '/landing/pianist.jpg'
-
-const PHOTO_MODE_SOURCES: readonly VideoSource[] = [
-  { src: '/landing/photo-mode.webm', type: 'video/webm' },
-  { src: '/landing/photo-mode.mp4', type: 'video/mp4' },
-]
-
-const VIDEO_MODE_SOURCES: readonly VideoSource[] = [
-  { src: '/landing/video-mode.webm', type: 'video/webm' },
-  { src: '/landing/video-mode.mp4', type: 'video/mp4' },
-]
+const PHOTO_MODE_VIDEO = '/landing/photo-mode.mp4'
+const VIDEO_MODE_VIDEO = '/landing/video-mode.mp4'
 
 const criteria = [
   {
@@ -52,8 +43,8 @@ type Mode = {
   width: number
   height: number
 } & (
-  | { sources: readonly VideoSource[]; img?: never; alt?: never }
-  | { img: string; alt: string; sources?: never }
+  | { video: string; img?: never; alt?: never }
+  | { img: string; alt: string; video?: never }
 )
 
 const modes: Mode[] = [
@@ -61,17 +52,17 @@ const modes: Mode[] = [
     to: '/photo',
     title: 'Photo review',
     meta: 'Still frame · seconds',
-    sources: PHOTO_MODE_SOURCES,
-    width: 1280,
-    height: 836,
+    video: PHOTO_MODE_VIDEO,
+    width: 3304,
+    height: 2160,
   },
   {
     to: '/video',
     title: 'Video timeline',
     meta: 'Practice clip · over time',
-    sources: VIDEO_MODE_SOURCES,
-    width: 1280,
-    height: 794,
+    video: VIDEO_MODE_VIDEO,
+    width: 3482,
+    height: 2160,
   },
   {
     to: '/live',
@@ -85,14 +76,17 @@ const modes: Mode[] = [
 ]
 
 function ModeMedia({ mode }: { mode: Mode }) {
-  if (mode.sources) {
+  if (mode.video) {
     return (
-      <VideoPreview
-        sources={mode.sources}
+      <video
+        src={mode.video}
         width={mode.width}
         height={mode.height}
-        className="pointer-events-none h-full w-full object-cover"
-        aria-hidden
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="h-full w-full object-cover"
       />
     )
   }
@@ -103,7 +97,7 @@ function ModeMedia({ mode }: { mode: Mode }) {
       alt={mode.alt}
       width={mode.width}
       height={mode.height}
-      className="pointer-events-none h-full w-full object-cover grayscale transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0"
+      className="h-full w-full object-cover grayscale transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0"
     />
   )
 }
@@ -230,16 +224,18 @@ export function HomePage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-3">
             {modes.map((mode) => (
-              <Link key={mode.to} to={mode.to} className="group" aria-label={mode.title}>
+              <article key={mode.to} className="group">
                 <div
                   className="mb-4 overflow-hidden bg-zinc-900"
                   style={{ aspectRatio: `${mode.width} / ${mode.height}` }}
                 >
                   <ModeMedia mode={mode} />
                 </div>
-                <p className="mb-1 font-cinematic text-base text-white">{mode.title}</p>
-                <p className="font-body text-sm text-white/40">{mode.meta}</p>
-              </Link>
+                <Link to={mode.to} className="block">
+                  <p className="mb-1 font-cinematic text-base text-white">{mode.title}</p>
+                  <p className="font-body text-sm text-white/40">{mode.meta}</p>
+                </Link>
+              </article>
             ))}
           </div>
         </div>
