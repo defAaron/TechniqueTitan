@@ -1,11 +1,15 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CinematicFooter } from '../components/layout'
 import { CinematicHero } from '../components/marketing'
 import { CRITERION_LABELS } from '../lib/api'
 
-const CLOSE_UP_IMG = '/landing/keys-close.jpg'
 const WIDE_IMG = '/landing/keys-wide.jpg'
 const PIANIST_IMG = '/landing/pianist.jpg'
+const PHOTO_MODE_VIDEO = '/landing/photo-mode.mp4'
+const PHOTO_MODE_POSTER = '/landing/photo-mode.jpg'
+const VIDEO_MODE_VIDEO = '/landing/video-mode.mp4'
+const VIDEO_MODE_POSTER = '/landing/video-mode.jpg'
 
 const criteria = [
   {
@@ -35,20 +39,37 @@ const criteria = [
   },
 ] as const
 
-const modes = [
+type Mode = {
+  to: string
+  title: string
+  meta: string
+  img: string
+  alt: string
+  video?: string
+  width: number
+  height: number
+}
+
+const modes: Mode[] = [
   {
     to: '/photo',
     title: 'Photo review',
     meta: 'Still frame · seconds',
-    img: CLOSE_UP_IMG,
-    alt: 'Close-up of piano keys',
+    img: PHOTO_MODE_POSTER,
+    video: PHOTO_MODE_VIDEO,
+    alt: 'Photo review scoring a still of a hand on the keys',
+    width: 1280,
+    height: 836,
   },
   {
     to: '/video',
     title: 'Video timeline',
     meta: 'Practice clip · over time',
-    img: WIDE_IMG,
-    alt: 'Piano keyboard in warm light',
+    img: VIDEO_MODE_POSTER,
+    video: VIDEO_MODE_VIDEO,
+    alt: 'Video timeline of posture scores over a practice clip',
+    width: 1280,
+    height: 794,
   },
   {
     to: '/live',
@@ -56,8 +77,64 @@ const modes = [
     meta: 'Browser camera · real-time',
     img: PIANIST_IMG,
     alt: 'Grand piano on a concert stage',
+    width: 2400,
+    height: 1600,
   },
 ]
+
+function usePrefersReducedMotion() {
+  const [reduceMotion, setReduceMotion] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setReduceMotion(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  return reduceMotion
+}
+
+function ModeMedia({ mode }: { mode: Mode }) {
+  const reduceMotion = usePrefersReducedMotion()
+  const mediaClass =
+    'pointer-events-none h-full w-full object-cover transition-transform duration-700 group-hover:scale-105'
+
+  if (mode.video && !reduceMotion) {
+    return (
+      <video
+        src={mode.video}
+        poster={mode.img}
+        width={mode.width}
+        height={mode.height}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden
+        className={mediaClass}
+      />
+    )
+  }
+
+  return (
+    <img
+      src={mode.img}
+      alt={mode.alt}
+      width={mode.width}
+      height={mode.height}
+      className={[mediaClass, mode.video ? '' : 'grayscale group-hover:grayscale-0']
+        .filter(Boolean)
+        .join(' ')}
+    />
+  )
+}
 
 export function HomePage() {
   return (
@@ -179,17 +256,14 @@ export function HomePage() {
 
       <section id="start" className="border-t border-white/10 bg-black px-6 py-24 sm:px-10">
         <div className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-3">
             {modes.map((mode) => (
               <Link key={mode.to} to={mode.to} className="group" aria-label={mode.title}>
-                <div className="mb-4 overflow-hidden bg-zinc-900" style={{ aspectRatio: '1/1' }}>
-                  <img
-                    src={mode.img}
-                    alt={mode.alt}
-                    width={2400}
-                    height={1600}
-                    className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                  />
+                <div
+                  className="mb-4 overflow-hidden bg-zinc-900"
+                  style={{ aspectRatio: `${mode.width} / ${mode.height}` }}
+                >
+                  <ModeMedia mode={mode} />
                 </div>
                 <p className="mb-1 font-cinematic text-base text-white">{mode.title}</p>
                 <p className="font-body text-sm text-white/40">{mode.meta}</p>
