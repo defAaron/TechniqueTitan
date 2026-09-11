@@ -53,11 +53,13 @@ For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.exa
 
 ```
 web/
-├── public/           # Static assets (icons, hero image, webmanifest)
+├── public/
+│   ├── landing/      # Optimized stills + photo/video mode clips
+│   └── …             # Favicons, webmanifest (paths must stay at public root)
 ├── src/
 │   ├── components/
 │   │   ├── layout/     # App chrome
-│   │   ├── marketing/  # Landing-page sections
+│   │   ├── marketing/  # Landing hero
 │   │   ├── analyze/    # Score / overlay / coaching panels
 │   │   └── ui/         # Shared primitives
 │   ├── pages/        # Route screens

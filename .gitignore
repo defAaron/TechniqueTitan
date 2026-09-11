@@ -53,3 +53,14 @@ data/fixtures/**
 web/node_modules/
 web/dist/
 web/dist-ssr/
+
+# Accidental npm at repo root (frontend lives in web/)
+/package.json
+/package-lock.json
+/node_modules/
+
+# Unoptimized source media. Web-served copies live under web/public/.
+assets/source/**
+!assets/source/.gitkeep
+/photo_mode.mp4
+/video_mode.mp4

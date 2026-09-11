@@ -254,10 +254,11 @@ For each detected hand the pipeline:
 technique_titan/
 ├── api/                      # FastAPI product backend (uvicorn api.main:app)
 ├── web/                      # React + TypeScript + Tailwind product UI (Vercel root)
+│   ├── public/landing/       # Optimized landing stills + clips
 │   └── src/
 │       ├── components/
-│       │   ├── layout/       # chrome (Layout, ApiStatusBanner)
-│       │   ├── marketing/    # landing (Hero, KeyFeatures, PipelineFlow, VideoPreview)
+│       │   ├── layout/       # chrome (Layout, CinematicChrome, ApiStatusBanner)
+│       │   ├── marketing/    # landing (CinematicHero)
 │       │   ├── analyze/      # results (ScorePanel, CoachingTips, OverlayImage)
 │       │   └── ui/           # primitives (Reveal, SpecularButton)
 │       ├── pages/
@@ -270,7 +271,9 @@ technique_titan/
 │   ├── analysis.py
 │   ├── scoring.py
 │   └── coaching.py
-├── assets/brand/             # Master brand icon (favicons derived in web/public)
+├── assets/
+│   ├── brand/                # Master brand icon (favicons derived in web/public)
+│   └── source/               # Unoptimized masters (gitignored)
 ├── config/                   # scoring.yaml + coaching.yaml
 ├── data/
 │   ├── raw/                  # Labeled set: excellent|good|warning|critical

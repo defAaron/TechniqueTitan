@@ -38,6 +38,7 @@ new significant error, append an entry here in the same format.
 | Filenames | Git-tracked names must match import and markdown-link **case** (Linux/CI is case-sensitive; macOS often is not). |
 | GitHub mermaid | Quote node labels; avoid reserved IDs (`end`, `graph`, `input`); do not use subgraphs with edges that cross groups — GitHub/Safari crashes with `t.render`. |
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
+| Root clutter | Keep Streamlit/Render entry files at repo root (`app.py`, `Dockerfile`, `requirements*.txt`). Do not commit source `*.mp4` or a root `package-lock.json` — frontend lockfile is `web/package-lock.json`; masters live in `assets/source/` (gitignored). |
 
 ---
 
@@ -367,6 +368,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E28 — Source videos and empty npm lockfile at repo root
+| | |
+|---|---|
+| **When** | 2026-09-11 |
+| **Stage** | Repo hygiene / directory organization |
+| **Symptom** | Root held ~70 MB of unoptimized `photo_mode.mp4` / `video_mode.mp4` plus an empty `package-lock.json` from `npm` run outside `web/` |
+| **Root cause** | Landing masters were committed next to deploy entry files; `npm install` at repo root (see E13) left a lockfile with `"packages": {}` |
+| **Fix** | Untrack the root videos (keep local copies in `assets/source/`); delete the root lockfile; gitignore `assets/source/**` and root `package-lock.json` / `package.json` |
+| **Prevention** | Do not commit source media at repo root. Optimized clips stay in `web/public/landing/`. All npm commands from `web/`. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -381,7 +394,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E27 — Short title
+### E29 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |
