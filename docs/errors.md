@@ -36,6 +36,7 @@ new significant error, append an entry here in the same format.
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
 | Tests | Synthetic hand fixtures must be non-collinear for plane fits. |
 | Filenames | Git-tracked names must match import and markdown-link **case** (Linux/CI is case-sensitive; macOS often is not). |
+| GitHub mermaid | Quote node labels; avoid reserved IDs (`end`, `graph`, `input`); do not use subgraphs with edges that cross groups — GitHub/Safari crashes with `t.render`. |
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
 
 ---
@@ -342,6 +343,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E26 — GitHub README mermaid failed to render
+| | |
+|---|---|
+| **When** | 2026-09-10 |
+| **Stage** | README / GitHub Markdown preview |
+| **Symptom** | `Unable to render rich display` / `undefined is not an object (evaluating 't.render')` on the How it works diagram |
+| **Root cause** | GitHub's Mermaid renderer (especially Safari) crashes on `flowchart` subgraphs named `input`/`output` with edges that cross groups, unquoted `+`/`.` in labels, and chained `A --> B --> C` links |
+| **Fix** | Rewrite as GitHub-documented `graph TD` with quoted labels, no subgraphs, no reserved IDs, one edge per line |
+| **Prevention** | Keep GitHub mermaid diagrams to quoted labels and simple node-to-node edges; skip subgraphs when arrows leave the group |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -356,7 +369,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E26 — Short title
+### E27 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

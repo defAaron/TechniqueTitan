@@ -225,38 +225,19 @@ Outputs:
 ### How it works
 
 ```mermaid
-flowchart TD
-    subgraph input [Input]
-        Photo[Photo upload]
-        Video[Video upload]
-        Live[Live camera]
-        Batch[Batch folder]
-    end
-
-    subgraph engine [Core engine]
-        Detect[MediaPipe hand detection]
-        Norm[Normalize landmarks]
-        Features[Extract vectors and angles]
-        Score[Score 5 criteria]
-        Coach[Templated coaching]
-    end
-
-    subgraph output [Output]
-        Overlay[Annotated skeleton overlay]
-        Panel[Per-hand scores + tips]
-        CSV[batch_summary.csv]
-        JSON[Per-image metrics JSON]
-    end
-
-    Photo --> Detect
-    Video --> Detect
-    Live --> Detect
-    Batch --> Detect
-    Detect --> Norm --> Features --> Score --> Coach
-    Coach --> Overlay
-    Coach --> Panel
-    Score --> CSV
-    Score --> JSON
+graph TD
+    Photo["Photo upload"] --> Detect["MediaPipe hand detection"]
+    Video["Video upload"] --> Detect
+    LiveCam["Live camera"] --> Detect
+    Batch["Batch folder"] --> Detect
+    Detect --> Norm["Normalize landmarks"]
+    Norm --> Features["Extract vectors and angles"]
+    Features --> Score["Score 5 criteria"]
+    Score --> Coach["Templated coaching"]
+    Coach --> Overlay["Annotated skeleton overlay"]
+    Coach --> Panel["Per-hand scores and tips"]
+    Score --> CSV["batch_summary.csv"]
+    Score --> JSON["Per-image metrics JSON"]
 ```
 
 For each detected hand the pipeline:
