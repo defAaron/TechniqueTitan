@@ -1,0 +1,41 @@
+{
+  "seed": 42,
+  "holdout_fraction": 0.3,
+  "train": [
+    "critical/1.png",
+    "critical/2.png",
+    "critical/3.png",
+    "critical/6.png",
+    "critical/7.png",
+    "critical/8.png",
+    "excellent/1.png",
+    "excellent/10.png",
+    "excellent/4.png",
+    "excellent/5.png",
+    "excellent/6.png",
+    "excellent/7.png",
+    "excellent/8.png",
+    "excellent/9.png",
+    "good/4.png",
+    "good/5.png",
+    "good/6.png",
+    "good/7.png",
+    "good/8.png",
+    "good/9.png",
+    "warning/1.png",
+    "warning/3.png",
+    "warning/5.png"
+  ],
+  "holdout": [
+    "critical/4.png",
+    "critical/5.png",
+    "excellent/11.png",
+    "excellent/2.png",
+    "excellent/3.png",
+    "good/1.png",
+    "good/2.png",
+    "good/3.png",
+    "warning/2.png",
+    "warning/4.png"
+  ]
+}

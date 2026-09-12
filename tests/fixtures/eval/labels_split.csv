@@ -1,0 +1,11 @@
+filename,hand,wrist_height,finger_curvature,thumb_position,wrist_lateral,hand_arch,notes
+excellent/1.png,right,good,good,good,good,good,
+excellent/2.png,right,good,good,good,good,good,
+excellent/3.png,right,good,good,good,good,good,
+excellent/4.png,right,good,good,good,good,good,
+good/1.png,right,good,good,good,good,good,
+warning/1.png,right,warning,good,good,good,good,
+warning/2.png,right,warning,good,good,good,good,
+critical/1.png,right,critical,good,good,good,good,
+critical/2.png,right,critical,good,good,good,good,
+critical/3.png,right,critical,good,good,good,good,

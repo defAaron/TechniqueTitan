@@ -28,6 +28,7 @@ jobs:
       - name: System libs for OpenCV
         run: sudo apt-get update && sudo apt-get install -y libgl1
       - name: Tests
+        # pytest covers tests/ including eval harness units; do not batch-score gitignored data/raw
         run: pytest -q
 
   web:

@@ -41,6 +41,9 @@ service-account*.json
 # Generated batch outputs (reproducible from data/raw/)
 data/processed/
 
+# Generated eval reports (frozen split data/eval/holdout_split.json stays tracked)
+data/eval/reports/
+
 # Raw labeled images (keep folder structure via .gitkeep)
 data/raw/**
 !data/raw/.gitkeep

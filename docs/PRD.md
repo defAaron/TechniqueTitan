@@ -117,8 +117,8 @@ it to a normalized score, and assigns a severity band.
 
 > **Note on methodology:** Phase 1 uses **heuristic, landmark-geometry-based scoring** (joint
 > angles, relative positions). A future phase MAY replace or augment heuristics with a model
-> fine-tuned on piano-specific posture data (see Roadmap Phase 4). Heuristics MUST remain the
-> documented fallback.
+> trained on piano-specific posture labels (see Roadmap Phase 4 and
+> [ML_UPGRADE.md](./ML_UPGRADE.md)). Heuristics MUST remain the documented fallback.
 
 ### 3.4 Feedback Generation
 

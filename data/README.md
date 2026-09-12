@@ -1,7 +1,8 @@
 # Data intake
 
 Batch dataset layout for the Technique Titan CLI
-(`python -m technique_titan.batch.process_folder`). Requires the package
+(`python -m technique_titan.batch.process_folder`, then
+`python -m technique_titan.eval`). Requires the package
 installed (`pip install -e .`) and preferably Python 3.11.
 
 Drop your raw hand images anywhere under `raw/` (subfolders are fine and are
@@ -38,7 +39,7 @@ headers as `labels_template.csv`) before running the batch command below.
 Labels get merged into `processed/batch_summary.csv` so scores can be compared
 against expert judgments.
 
-Then run one command from the project root:
+Then from the project root:
 
 ```bash
 python -m technique_titan.batch.process_folder \
@@ -53,6 +54,32 @@ Both hands are detected and scored separately. Outputs land in `processed/`:
 - `outliers.csv` — auto-flagged rows worth a manual look
 - `failed/failures.csv` — images with no detectable hand, with reasons
 
-Note: `labels.csv` is merged by `filename`, so a label row currently applies to
-every hand from that image; per-hand labels are future work. `labels_template.csv`
+**Batch vs eval merge:** the batch CLI still joins `labels.csv` by **filename
+only**, so one label row is copied onto every detected hand from that image.
+The eval CLI is **hand-aware**: `hand` of `left` or `right` matches that
+detected hand; `both` applies to both hands in the image. `labels_template.csv`
 in this folder is a **schema reference** only — keep the live labels in Notion.
+
+## Evaluation report
+
+Pipeline: Notion export → `data/labels.csv` → batch (`processed/batch_summary.csv`)
+→ eval report. Requires local `data/raw/` (gitignored); CI does not run this
+MediaPipe batch.
+
+```bash
+python -m technique_titan.eval \
+  --summary data/processed/batch_summary.csv \
+  --labels data/labels.csv \
+  --split data/eval/holdout_split.json \
+  --output data/eval/reports
+```
+
+Writes per-criterion accuracy, Cohen’s κ, and confusion matrices under
+`data/eval/reports/` (gitignored). The train/hold-out ids live in
+`data/eval/holdout_split.json` (tracked — do not regenerate casually).
+
+Threshold search is `notebooks/scoring_tuning.ipynb`: candidates on TRAIN
+only; promote `config/scoring.yaml` only if HOLD-OUT agreement rises. The
+notebook does not overwrite YAML. There is no published hold-out ≥85% figure
+yet; the harness is how that number will be measured. See
+[`docs/ML_UPGRADE.md`](../docs/ML_UPGRADE.md).

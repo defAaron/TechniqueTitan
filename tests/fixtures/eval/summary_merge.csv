@@ -1,0 +1,12 @@
+source,hand,hand_index,severity_wrist_height,severity_finger_curvature,severity_thumb_position,severity_wrist_lateral,severity_hand_arch,label_wrist_height
+solo/left_only.png,left,0,good,good,good,good,good,should_ignore
+solo/left_only.png,right,1,warning,warning,warning,warning,warning,should_ignore
+both_hands.png,left,0,warning,good,good,good,critical,
+both_hands.png,right,1,warning,good,good,good,critical,
+nested.png,right,0,critical,warning,good,good,good,
+other/basename_only.png,right,0,good,good,good,good,good,
+excellent/1.png,right,0,good,good,good,good,good,
+good/1.png,left,0,warning,warning,warning,warning,warning,
+orphan_pred.png,right,0,good,good,good,good,good,
+blank_true.png,right,0,good,good,good,good,good,
+prefer_labels.png,right,0,warning,good,good,good,good,critical

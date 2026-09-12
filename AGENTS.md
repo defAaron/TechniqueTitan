@@ -33,5 +33,6 @@ See [`data/README.md`](data/README.md) for batch intake and CSV export notes.
 - [`docs/DEPLOY.md`](docs/DEPLOY.md) — Vercel / Render / Streamlit deploy
 - [`docs/PRD.md`](docs/PRD.md) — product requirements
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased delivery
+- [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md) — AI/ML upgrade path (eval before custom models)
 - [`README.md`](README.md) — setup and architecture
 - [`data/README.md`](data/README.md) — raw data layout + labeling

@@ -1,0 +1,10 @@
+filename,hand,wrist_height,finger_curvature,thumb_position,wrist_lateral,hand_arch,notes
+solo/left_only.png,left,good,good,good,good,good,left labeled
+both_hands.png,both,warning,good,good,good,critical,both hands
+folder/nested.png,right,critical,warning,good,good,good,nested path
+basename_only.png,right,good,good,good,good,good,basename
+excellent/1.png,right,good,good,good,good,good,exact path
+good/1.png,left,warning,warning,warning,warning,warning,same basename other folder
+unmatched_label.png,right,good,good,good,good,good,no prediction
+blank_true.png,right,,good,good,good,good,blank wrist_height
+prefer_labels.png,right,good,good,good,good,good,csv is source of truth

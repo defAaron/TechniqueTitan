@@ -1,7 +1,7 @@
 # Technique Titan — Roadmap
 
 **Status:** Draft v1.1
-**Last updated:** 2026-08-05
+**Last updated:** 2026-09-11
 **Companion document:** [`PRD.md`](./PRD.md)
 
 This roadmap turns the PRD into a phased, milestone-based delivery plan. Each phase lists
@@ -19,9 +19,10 @@ estimates, not commitments.
 | Product UI | `web/` (photo / video / live / about) | Done (analyze UX) |
 | Streamlit interim UI | `app.py` | Done |
 | Batch CLI | `technique_titan.batch` | Done |
-| CI | `.github/workflows/ci.yml` | Done (pytest + web build) |
+| Eval harness | `technique_titan.eval` | In progress (first slice landing) |
+| CI | `.github/workflows/ci.yml` | Done (pytest + web build; eval units via `tests/`) |
 | Session persistence / progress | — | Not started |
-| Accounts / teacher roles / ML model | — | Not started |
+| Accounts / teacher roles / learned scorer | — | Not started |
 
 ---
 
@@ -48,7 +49,7 @@ estimates, not commitments.
 
 ## Phase 1 — Core Detection
 
-**Status:** Done (heuristic engine shipped; expert ≥85% validation still ongoing as data accumulates)
+**Status:** Done (heuristic engine shipped; eval harness landing; ≥85% still pending measured hold-out)
 
 **Goals**
 - Extract reliable, normalized hand landmarks.
@@ -60,11 +61,11 @@ estimates, not commitments.
 - Composite score with documented weighting. ✅
 - Externally configurable thresholds (`config/scoring.yaml`). ✅
 - Unit tests against fixed landmark fixtures. ✅
-- Validation against expert-labeled set — **in progress** as labels are collected in the Notion classification table (export to `labels.csv` for batch merge).
+- Validation against expert-labeled set — eval harness (`technique_titan.eval` + frozen `data/eval/holdout_split.json`) exists; ≥85% still pending a measured hold-out report (export Notion → `labels.csv` → batch → eval).
 
 **Definition of Done**
 - All five criteria produce scores + severities. ✅
-- Severity agreement ≥ 85% with expert labels — **pending** larger labeled set.
+- Severity agreement ≥ 85% with expert labels — **pending** measured hold-out (harness exists; no in-repo number yet).
 - Landmark extraction ≥ 95% on in-spec inputs — target retained; measure on curated set.
 - Score repeatability within ±5/100 for a static pose — target retained.
 - Scoring methodology documented; tests green in CI. ✅
@@ -134,13 +135,17 @@ estimates, not commitments.
 
 ## Phase 4 — Intelligence Upgrade
 
-**Status:** Planned
+**Status:** Planned — eval loop underway (first ML slice landing); learned scorer and teacher/student roles not started
 
 **Goals**
 - Improve accuracy with a piano-specific model and add multi-user/teacher capabilities.
 
+**ML plan:** see [ML_UPGRADE.md](./ML_UPGRADE.md) for sequence (eval loop →
+learned scoring on existing features → temporal habits → piano-specific
+vision). Do not start with a custom detector or pixel-to-score CNN.
+
 **Key Deliverables**
-- Model fine-tuned on piano-specific hand-posture data (augmenting or replacing heuristics), with heuristics retained as documented fallback. *(PRD §3.3 note)*
+- Evaluation harness + calibrated / learned scorer on geometric features (augmenting heuristics), with heuristics retained as documented fallback. *(PRD §3.3 note; [ML_UPGRADE.md](./ML_UPGRADE.md))* Eval CLI / frozen split / tuning notebook are landing; learned scorer is not built.
 - Expanded, well-labeled training/validation datasets (built on the Phase 0 protocol).
 - User accounts with **teacher/student roles**: students submit sessions; teachers review, annotate, and assign corrections. *(PRD: FR-PT-4, UC-5)*
 - **Exportable reports** (PDF/CSV) of sessions and progress. *(PRD: FR-PT-5)*
@@ -193,10 +198,10 @@ estimates, not commitments.
 | 2 — Feedback Engine | Phase 1 | Done | Actionable coaching |
 | 3a — Analyze UX | Phases 1–2 | Done | Public web product |
 | 3b — Persistence | Phase 3a | Next | Progress tracking |
-| 4 — Intelligence Upgrade | Phase 3b + data | Planned | Better accuracy, teacher/student, reports |
+| 4 — Intelligence Upgrade | Phase 3b + data | Planned (eval loop underway) | Better accuracy, teacher/student, reports |
 | 5 — Scale & Polish | Phase 4 | Planned | Perf, a11y, monetization, community |
 
-\*Expert-label validation targets remain active work as the dataset grows.
+\*Expert-label validation remains active: eval harness landing; ≥85% still pending measured hold-out.
 
 ## Indicative Timeline
 Phases 0–3a are complete. Remaining Phase 3b through end of Phase 4 is roughly

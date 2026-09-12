@@ -79,6 +79,7 @@ Both hands are detected and scored independently when visible in frame.
 | REST analyze API | Available (`api/`) |
 | Templated coaching tips | Available (`config/coaching.yaml`) |
 | Bulk image processing (CLI) | Available |
+| Heuristic vs expert eval (CLI) | Available (`technique_titan.eval`; hold-out report is local) |
 | Two-hand detection + separate scores | Available |
 | Configurable scoring thresholds | Available (`config/scoring.yaml`) |
 | Progress tracking / accounts | Planned (Phase 3 remainder / Phase 4) |
@@ -222,6 +223,24 @@ Outputs:
 - `data/processed/metrics/` — full vectors, angles, and scores per image
 - `data/processed/outliers.csv` — auto-flagged suspicious rows
 
+### Evaluation loop
+
+After a labeled batch run, compare predicted severities to expert labels. The eval CLI merges summary + `data/labels.csv` (hand-aware: `left`/`right` vs `both`; the batch CSV still merges labels by filename only), then reports per-criterion accuracy, Cohen’s κ, and confusion matrices on the frozen split:
+
+```sh
+python -m technique_titan.eval \
+  --summary data/processed/batch_summary.csv \
+  --labels data/labels.csv \
+  --split data/eval/holdout_split.json \
+  --output data/eval/reports
+```
+
+`data/eval/holdout_split.json` is tracked. Generated files under `data/eval/reports/` are gitignored. Threshold search is `notebooks/scoring_tuning.ipynb`: fit candidate `ideal`/`limit` bands on TRAIN only; copy into `config/scoring.yaml` only if HOLD-OUT agreement rises. The notebook does not overwrite YAML.
+
+NFR-ACC-2 (severity agreement ≥85%) is the target this harness will measure. There is no in-repo hold-out number yet — do not treat that bar as met.
+
+Full agreement reports need local `data/raw/` → `data/processed/` (raw images are gitignored). CI runs eval **unit tests** via pytest, not a MediaPipe batch on `data/raw`.
+
 ### How it works
 
 ```mermaid
@@ -268,6 +287,7 @@ technique_titan/
 │   ├── geometry/
 │   ├── features/
 │   ├── batch/                # Bulk folder processor CLI
+│   ├── eval/                 # Heuristic vs expert agreement (CLI)
 │   ├── analysis.py
 │   ├── scoring.py
 │   └── coaching.py
@@ -278,18 +298,20 @@ technique_titan/
 ├── data/
 │   ├── raw/                  # Labeled set: excellent|good|warning|critical
 │   ├── fixtures/             # Local smoke images (not labeled)
-│   └── processed/            # Batch outputs (gitignored)
+│   ├── processed/            # Batch outputs (gitignored)
+│   └── eval/                 # holdout_split.json (tracked) + reports/ (gitignored)
 ├── docs/
 │   ├── archive/              # Research notes / historical artifacts
 │   ├── PRD.md
 │   ├── ROADMAP.md
+│   ├── ML_UPGRADE.md
 │   ├── SCORING_METHODS.md
 │   ├── DEPLOY.md
 │   └── errors.md
 ├── tests/
 │   ├── engine/               # Core library unit tests
 │   └── api/                  # FastAPI tests
-├── notebooks/
+├── notebooks/                # scoring_tuning.ipynb (TRAIN search; HOLD-OUT gate)
 ├── app.py                    # Streamlit UI (interim / Cloud demo) — keep at repo root
 ├── Dockerfile                # API image (Render) — keep at repo root
 ├── render.yaml               # Render Blueprint (optional)
@@ -308,6 +330,7 @@ technique_titan/
 | `coaching.py` | Templated tips from `config/coaching.yaml` |
 | `analysis.py` | `analyze_hands()`, overlay drawing, label disambiguation |
 | `batch/process_folder.py` | Walks `data/raw/`, writes CSV/JSON exports |
+| `eval/` | Merges batch summary + labels; accuracy, Cohen’s κ, confusion matrices vs frozen split |
 
 ### API surface
 
@@ -354,7 +377,7 @@ Project conventions:
 
 * Scoring thresholds live in `config/scoring.yaml` — tune without code changes.
 * Coaching copy lives in `config/coaching.yaml` — templates, not an LLM.
-* The batch CLI is for bulk data; the React UI is for interactive review.
+* The batch CLI is for bulk data; eval compares that output to expert labels; the React UI is for interactive review.
 * Prefer Python **3.11** in all environments (CI, Docker, Streamlit Cloud).
 
 ### Documentation
@@ -363,11 +386,12 @@ Project conventions:
 |---|---|
 | [docs/PRD.md](docs/PRD.md) | Product requirements and personas |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan |
+| [docs/ML_UPGRADE.md](docs/ML_UPGRADE.md) | AI/ML upgrade path (eval → learned scoring → temporal → vision) |
 | [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md) | Formulas and landmark inputs per criterion |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Render + Vercel + Streamlit Cloud deploy guide |
 | [docs/errors.md](docs/errors.md) | Chronological error history — agents must check before new work |
 | [web/README.md](web/README.md) | React UI develop / build notes |
-| [data/README.md](data/README.md) | Dataset intake for batch runs |
+| [data/README.md](data/README.md) | Dataset intake, labels export, batch + eval |
 
 _For more examples, please refer to the [Documentation](docs/PRD.md)._
 
@@ -382,7 +406,7 @@ _For more examples, please refer to the [Documentation](docs/PRD.md)._
 - [x] Phase 3a — Product surface: React UI + API (photo / video / live)
 - [ ] Phase 3b — Persistence: session history and progress charts
 - [ ] Phase 4 — Intelligence
-  - [ ] Piano-specific model
+  - [ ] Piano-specific model — see [docs/ML_UPGRADE.md](docs/ML_UPGRADE.md)
   - [ ] Teacher / student roles
 - [ ] Phase 5 — Scale & polish: performance, accessibility, monetization, observability
 
