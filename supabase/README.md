@@ -8,8 +8,11 @@ is the wrong target).
 
 1. [supabase.com](https://supabase.com) → **New project** (name e.g. `technique-titan`).
 2. Copy **Project URL** and the **anon / publishable** key into `web/.env.local`
-   (see [`web/.env.example`](../web/.env.example)). Never put the **service_role**
-   key in `web/` or Vercel frontend env.
+   (see [`web/.env.example`](../web/.env.example)). Production: the same two
+   values on Vercel, then **redeploy**. URL and key must be from this project
+   (the JWT payload `ref` must match the hostname). Paste the key as one line
+   with no quotes. Never put the **service_role** key in `web/` or Vercel
+   frontend env.
 3. Run [`migrations/20260917000000_profiles_and_signup_stats.sql`](migrations/20260917000000_profiles_and_signup_stats.sql)
    in the SQL editor (or `supabase db push` after `supabase link`).
 
@@ -22,6 +25,11 @@ Dashboard → **Authentication** → **URL configuration**:
 | Site URL | `https://technique-titan.vercel.app` |
 | Redirect URLs | `http://localhost:5173/auth/callback` |
 | | `https://technique-titan.vercel.app/auth/callback` |
+
+Do **not** leave Site URL as `http://localhost:3000` (Supabase’s Next.js default). If the confirm
+link is not in Redirect URLs, GoTrue sends the user there and the token shows
+`otp_expired` / “Email link is invalid or has expired”. After changing URLs,
+resend confirmation and use only the new email.
 
 ## Email
 

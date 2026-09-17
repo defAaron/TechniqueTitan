@@ -19,6 +19,7 @@ type AuthContextValue = {
   isAdminLoading: boolean
   signInWithPassword: (email: string, password: string) => Promise<void>
   signUpWithPassword: (email: string, password: string) => Promise<{ needsConfirmation: boolean }>
+  resendSignupEmail: (email: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -94,6 +95,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { needsConfirmation: !data.session }
   }, [])
 
+  const resendSignupEmail = useCallback(async (email: string) => {
+    if (!supabase) throw new Error('Auth is not configured.')
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: authCallbackUrl() },
+    })
+    if (error) throw error
+  }, [])
+
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) throw new Error('Auth is not configured.')
     const { error } = await supabase.auth.signInWithOAuth({
@@ -119,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdminLoading,
       signInWithPassword,
       signUpWithPassword,
+      resendSignupEmail,
       signInWithGoogle,
       signOut,
     }),
@@ -129,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdminLoading,
       signInWithPassword,
       signUpWithPassword,
+      resendSignupEmail,
       signInWithGoogle,
       signOut,
     ],
@@ -147,4 +160,20 @@ export function useAuth(): AuthContextValue {
 export function safeNextPath(raw: string | null): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/'
   return raw
+}
+
+/** Confirmation / OAuth often lands on Site URL (`/`) instead of `/auth/callback`. */
+export function isAuthReturnUrl(search: string, hash: string): boolean {
+  const params = new URLSearchParams(search)
+  const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
+  return Boolean(
+    params.get('code') ||
+      params.get('error_code') ||
+      params.get('error_description') ||
+      params.get('error') ||
+      hashParams.get('access_token') ||
+      hashParams.get('error_code') ||
+      hashParams.get('error_description') ||
+      hashParams.get('error'),
+  )
 }

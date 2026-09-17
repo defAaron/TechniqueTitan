@@ -26,7 +26,7 @@ new significant error, append an entry here in the same format.
 | npm | Always from **`web/`**, never repo root. |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
-| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** (no trailing slash) and **redeploy**. Never put **`service_role`** in `web/` or Vercel frontend env. Redirect allow-list must include localhost + production `/auth/callback`. |
+| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. |
 | Render CORS | Set **`CORS_ORIGINS`** to the Vercel origin (`https://technique-titan.vercel.app`). Never pair `*` with `allow_credentials=True`. |
 | Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
@@ -394,6 +394,30 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E30 — Production signup `Invalid API key`
+| | |
+|---|---|
+| **When** | 2026-09-17 |
+| **Stage** | Vercel UI + Supabase Auth |
+| **Symptom** | Create account / Google sign-in on production shows **Invalid API key** |
+| **Root cause** | Vite bakes `VITE_SUPABASE_*` at build time. Production had the URL for one Supabase project and a truncated JWT anon key from another (header + payload only, a space after the first `.`, missing signature). GoTrue rejects that `apikey` header. |
+| **Fix** | In Vercel, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from the **same** dedicated Technique Titan project. Paste the full anon/publishable key as a single line with no quotes. Redeploy. Client now strips whitespace/quotes and refuses a 2-part JWT so this fails closed with a setup message instead of a cryptic API error. |
+| **Prevention** | URL and key must share a project ref. Copy the key from the dashboard reveal (not a wrapped preview). Changing env vars requires a new Vercel build. |
+
+---
+
+### E31 — Email confirm opens `localhost:3000` / `otp_expired`
+| | |
+|---|---|
+| **When** | 2026-09-17 |
+| **Stage** | Supabase Auth email confirmation |
+| **Symptom** | Safari: can’t connect to `localhost:3000/?error=access_denied&error_code=otp_expired…` after clicking the confirm-email link |
+| **Root cause** | GoTrue **Site URL** defaulted to `http://localhost:3000` (Next.js). The confirmation `emailRedirectTo` (`/auth/callback` on Vite `:5173` or Vercel) was not in the redirect allow-list, so the email landed on Site URL. The token was already rejected (`otp_expired`) before the browser even tried to load that host. |
+| **Fix** | Dashboard → Authentication → URL configuration: Site URL `https://technique-titan.vercel.app`; Redirect URLs `http://localhost:5173/auth/callback` and `https://technique-titan.vercel.app/auth/callback`. Discard the old email; resend confirmation. App maps `otp_expired` to a resend form and forwards `/?error=…` / `?code=` to `/auth/callback`. |
+| **Prevention** | Never leave Site URL as `localhost:3000`. Allow-list must match `emailRedirectTo` exactly or GoTrue falls back to Site URL. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -408,7 +432,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E30 — Short title
+### E32 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

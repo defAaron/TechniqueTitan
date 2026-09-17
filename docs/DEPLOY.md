@@ -122,7 +122,9 @@ Optional accounts use Supabase (`web/.env.local` — see [`supabase/README.md`](
    See [`web/.env.example`](../web/.env.example).
 3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from a **dedicated**
    Technique Titan Supabase project (anon/publishable key only — never
-   `service_role`). Auth URL / Google OAuth steps:
+   `service_role`). Both values must be from the **same** project. Paste the
+   full key as **one line** (no quotes, spaces, or line breaks — a wrapped JWT
+   becomes `Invalid API key`). Auth URL / Google OAuth steps:
    [`supabase/README.md`](../supabase/README.md).
 4. Ensure Render `CORS_ORIGINS` includes the Vercel URL.
 5. **Redeploy** after changing env vars (Vite bakes them at build time).

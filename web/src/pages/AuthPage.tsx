@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../components/layout'
 import { safeNextPath, useAuth } from '../lib/auth'
+import { supabaseConfigHelp } from '../lib/supabase'
 
 function GoogleIcon() {
   return (
@@ -38,14 +39,24 @@ function authMessage(error: unknown): string {
     if (/email not confirmed/i.test(message)) {
       return 'Confirm your email before signing in. Check your inbox for the link.'
     }
+    if (/invalid api key/i.test(message)) {
+      return 'Supabase rejected the API key in this build. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY from the same project (full anon/publishable key, one line, no quotes) on Vercel, then redeploy.'
+    }
     return message
   }
   return 'Something went wrong. Try again.'
 }
 
 export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
-  const { configured, loading, user, signInWithPassword, signUpWithPassword, signInWithGoogle } =
-    useAuth()
+  const {
+    configured,
+    loading,
+    user,
+    signInWithPassword,
+    signUpWithPassword,
+    resendSignupEmail,
+    signInWithGoogle,
+  } = useAuth()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const next = safeNextPath(searchParams.get('next'))
@@ -56,6 +67,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checkEmail, setCheckEmail] = useState(false)
+  const [resendBusy, setResendBusy] = useState(false)
 
   const isSignup = mode === 'signup'
   const switchTo = isSignup
@@ -92,6 +104,19 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     }
   }
 
+  async function onResend() {
+    setError(null)
+    setResendBusy(true)
+    try {
+      await resendSignupEmail(email.trim())
+      setCheckEmail(true)
+    } catch (err) {
+      setError(authMessage(err))
+    } finally {
+      setResendBusy(false)
+    }
+  }
+
   async function onGoogle() {
     setError(null)
     setBusy(true)
@@ -107,9 +132,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     return (
       <div className="max-w-md">
         <PageHeader eyebrow="Account" title={isSignup ? 'Sign up' : 'Sign in'}>
-          Auth is not configured in this build. Copy web/.env.example to
-          web/.env.local, set the Supabase URL and anon key, then restart Vite (or
-          redeploy Vercel).
+          {supabaseConfigHelp()}
         </PageHeader>
       </div>
     )
@@ -120,8 +143,21 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
       <div className="max-w-md">
         <PageHeader eyebrow="Account" title="Check your email">
           We sent a confirmation link to {email}. Open it to finish creating your
-          account, then sign in.
+          account, then sign in. Use the latest email if you request another.
         </PageHeader>
+        {error && (
+          <p className="mb-6 border border-critical/40 bg-critical/10 px-4 py-3 text-base text-critical">
+            {error}
+          </p>
+        )}
+        <button
+          type="button"
+          disabled={resendBusy || !email.trim()}
+          onClick={() => void onResend()}
+          className="mb-8 block font-body text-sm uppercase tracking-widest text-white/60 transition-colors hover:text-white disabled:opacity-50"
+        >
+          {resendBusy ? 'Sending…' : 'Resend confirmation email'}
+        </button>
         <Link
           to="/login"
           className="font-body text-sm uppercase tracking-widest text-white/60 transition-colors hover:text-white"
@@ -194,6 +230,16 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
           <p className="border border-critical/40 bg-critical/10 px-4 py-3 text-base text-critical">
             {error}
           </p>
+        )}
+        {!isSignup && error && /confirm your email/i.test(error) && (
+          <button
+            type="button"
+            disabled={resendBusy || !email.trim()}
+            onClick={() => void onResend()}
+            className="font-body text-sm uppercase tracking-widest text-white/60 transition-colors hover:text-white disabled:opacity-50"
+          >
+            {resendBusy ? 'Sending…' : 'Resend confirmation email'}
+          </button>
         )}
 
         <button

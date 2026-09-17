@@ -1,10 +1,12 @@
 import { useEffect, type ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
+import { isAuthReturnUrl } from '../../lib/auth'
 import { ApiStatusBanner } from './ApiStatusBanner'
 import { CinematicFooter, CinematicNav } from './CinematicChrome'
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
   const isLanding = pathname === '/'
 
   useEffect(() => {
@@ -17,6 +19,10 @@ export function Layout({ children }: { children: ReactNode }) {
     document.documentElement.classList.add('landing')
     return () => document.documentElement.classList.remove('landing')
   }, [isLanding])
+
+  if (pathname !== '/auth/callback' && isAuthReturnUrl(location.search, location.hash)) {
+    return <Navigate to={`/auth/callback${location.search}${location.hash}`} replace />
+  }
 
   return (
     <div className="landing-grain min-h-screen bg-black text-white">
