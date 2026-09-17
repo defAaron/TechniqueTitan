@@ -26,7 +26,7 @@ new significant error, append an entry here in the same format.
 | npm | Always from **`web/`**, never repo root. |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
-| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. `/admin` lists `auth.users`; apply the profiles + `admin_list_signups` migrations or Google OAuth rows never appear in `profiles`. |
+| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. `/admin` lists `auth.users`; apply the profiles + `admin_list_signups` migrations or Google OAuth rows never appear in `profiles`. `is_admin()` must use `auth.users.email` (Google JWTs often omit email). Run admin inserts in their own SQL editor run — a later statement error rolls back the whole script. |
 | Render CORS | Set **`CORS_ORIGINS`** to the Vercel origin (`https://technique-titan.vercel.app`). Never pair `*` with `allow_credentials=True`. |
 | Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
@@ -430,6 +430,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E33 — Admin nav missing after Google sign-in / combined SQL
+| | |
+|---|---|
+| **When** | 2026-09-17 |
+| **Stage** | Supabase Auth admin gate |
+| **Symptom** | **Admin** link disappears even after `insert into app_admins` |
+| **Root cause** | (1) `is_admin()` compared `app_admins` to `auth.jwt() ->> 'email'`, which Google access tokens often omit. (2) Admin is per signed-in email, not global. (3) Supabase SQL editor runs the script as one transaction — a failing `profiles` backfill rolls back the `app_admins` insert. |
+| **Fix** | `is_admin()` looks up `auth.users.email` by `auth.uid()`. Insert every owner login email. Run admin inserts in a separate SQL run from the profiles backfill. Hard-refresh while signed in as an `app_admins` email. |
+| **Prevention** | Do not gate admin on the JWT email claim. Do not bundle unrelated SQL in one editor run. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -444,7 +456,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E33 — Short title
+### E34 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

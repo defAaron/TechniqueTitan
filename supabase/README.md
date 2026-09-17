@@ -60,10 +60,18 @@ After you create an account and confirm it, add that exact sign-in email
 row exists on the same project Vercel uses:
 
 ```sql
-insert into public.app_admins (email)
-values (lower('aaronsumit123@gmail.com'))
+insert into public.app_admins (email) values
+  (lower('aaron.dutta22@gmail.com')),
+  (lower('aaronsumit123@gmail.com'))
 on conflict (email) do nothing;
 ```
+
+You must be **signed in as one of those emails**. The Admin link is per session, not
+global. Google tokens often omit `email` in the JWT — run
+[`20260917000003_is_admin_from_auth_users.sql`](migrations/20260917000003_is_admin_from_auth_users.sql)
+so `is_admin()` uses `auth.users.email`. Do not combine that with a `profiles`
+backfill in the same SQL editor run: if the backfill errors, Postgres rolls back
+the admin insert too.
 
 Then refresh a signed-in tab (or sign out and back in). `/admin` is also
 gated by `is_admin()` — a hidden link is not security. If you signed up with

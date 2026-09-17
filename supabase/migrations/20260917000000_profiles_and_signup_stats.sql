@@ -46,12 +46,17 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, auth
 as $$
+  -- Google access tokens often omit the email claim; look up auth.users instead.
   select exists (
     select 1
-    from public.app_admins
-    where email = lower(coalesce(auth.jwt() ->> 'email', ''))
+    from public.app_admins a
+    where a.email = lower(coalesce(
+      (select u.email from auth.users u where u.id = auth.uid()),
+      auth.jwt() ->> 'email',
+      ''
+    ))
   );
 $$;
 
