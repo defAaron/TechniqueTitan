@@ -52,11 +52,20 @@ use the Inbucket/Mailpit inbox shown in the Auth settings.
 
 ## Admin stats (`/admin`)
 
-After you create an account and confirm it:
+After you create an account and confirm it, add that exact sign-in email
+(lowercased) to `app_admins`. The **Admin** nav link stays hidden until this
+row exists on the same project Vercel uses:
 
 ```sql
-insert into public.app_admins (email) values ('you@example.com');
+insert into public.app_admins (email)
+values (lower('aaronsumit123@gmail.com'))
+on conflict (email) do nothing;
 ```
+
+Then refresh a signed-in tab (or sign out and back in). `/admin` is also
+gated by `is_admin()` — a hidden link is not security. If you signed up with
+a different address, insert that email instead. The table and `is_admin()`
+function come from the previous migration; run that first if the insert fails.
 
 The in-app **Admin** link and signup counts are gated by `is_admin()` (JWT email
 vs `app_admins`). Do not treat a hidden nav link as security.
