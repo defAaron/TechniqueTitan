@@ -26,7 +26,7 @@ new significant error, append an entry here in the same format.
 | npm | Always from **`web/`**, never repo root. |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
-| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. |
+| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. `/admin` lists `auth.users`; apply the profiles + `admin_list_signups` migrations or Google OAuth rows never appear in `profiles`. |
 | Render CORS | Set **`CORS_ORIGINS`** to the Vercel origin (`https://technique-titan.vercel.app`). Never pair `*` with `allow_credentials=True`. |
 | Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
@@ -418,6 +418,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E32 — Google signup missing from `/admin`
+| | |
+|---|---|
+| **When** | 2026-09-17 |
+| **Stage** | Supabase Auth + admin stats |
+| **Symptom** | A second Google account can sign in, but `/admin` account signups does not list it |
+| **Root cause** | The page read `public.profiles`, which is filled only by `handle_new_user` on `auth.users` insert. If that trigger was missing, applied late, or the Google identity was linked onto an existing user, Auth has the account and `profiles` does not get a new row. |
+| **Fix** | Backfill `profiles` from `auth.users`, upsert in the trigger, and list signups via `admin_list_signups()` (reads `auth.users`). Run [`supabase/migrations/20260917000002_admin_list_signups.sql`](../supabase/migrations/20260917000002_admin_list_signups.sql) on the production project and refresh `/admin`. |
+| **Prevention** | Admin counts must follow `auth.users`, not assume the profiles trigger already ran. Same email + Google is one Auth user. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -432,7 +444,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E32 — Short title
+### E33 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

@@ -13,8 +13,11 @@ is the wrong target).
    (the JWT payload `ref` must match the hostname). Paste the key as one line
    with no quotes. Never put the **service_role** key in `web/` or Vercel
    frontend env.
-3. Run [`migrations/20260917000000_profiles_and_signup_stats.sql`](migrations/20260917000000_profiles_and_signup_stats.sql)
-   in the SQL editor (or `supabase db push` after `supabase link`).
+3. Run the SQL files in [`supabase/migrations/`](migrations/) in order in the
+   SQL editor (or `supabase db push` after `supabase link`). Google signups are
+   missing from `/admin` until
+   [`20260917000002_admin_list_signups.sql`](migrations/20260917000002_admin_list_signups.sql)
+   has been applied (backfills `profiles` from `auth.users`).
 
 ## Auth URLs
 
@@ -68,4 +71,9 @@ a different address, insert that email instead. The table and `is_admin()`
 function come from the previous migration; run that first if the insert fails.
 
 The in-app **Admin** link and signup counts are gated by `is_admin()` (JWT email
-vs `app_admins`). Do not treat a hidden nav link as security.
+vs `app_admins`). Do not treat a hidden nav link as security. `/admin` lists
+`auth.users` (via `admin_list_signups()` after the backfill migration). If a
+Google account is missing, run
+[`20260917000002_admin_list_signups.sql`](migrations/20260917000002_admin_list_signups.sql)
+on that project and refresh `/admin`. Two Google logins with the **same email**
+are one Auth user, not two rows.

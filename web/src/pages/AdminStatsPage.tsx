@@ -29,18 +29,31 @@ export function AdminStatsPage() {
     }
 
     let cancelled = false
-    void supabase
-      .from('profiles')
-      .select('id, email, auth_provider, created_at')
-      .order('created_at', { ascending: false })
-      .then(({ data, error: queryError }) => {
-        if (cancelled) return
-        if (queryError) {
-          setError(queryError.message)
-          return
-        }
-        setRows((data ?? []) as ProfileRow[])
-      })
+    void (async () => {
+      const rpc = await supabase.rpc('admin_list_signups')
+      if (cancelled) return
+      if (!rpc.error) {
+        setRows((rpc.data ?? []) as ProfileRow[])
+        return
+      }
+      const missingFn = /could not find the function|does not exist|42883/i.test(
+        rpc.error.message,
+      )
+      if (!missingFn) {
+        setError(rpc.error.message)
+        return
+      }
+      const { data, error: queryError } = await supabase
+        .from('profiles')
+        .select('id, email, auth_provider, created_at')
+        .order('created_at', { ascending: false })
+      if (cancelled) return
+      if (queryError) {
+        setError(queryError.message)
+        return
+      }
+      setRows((data ?? []) as ProfileRow[])
+    })()
 
     return () => {
       cancelled = true
@@ -62,8 +75,7 @@ export function AdminStatsPage() {
   return (
     <div>
       <PageHeader eyebrow="Admin" title="Account signups">
-        Counts come from `profiles`, filled on every Auth signup. Regular users cannot
-        read this list.
+        Counts come from Auth users. Regular users cannot read this list.
       </PageHeader>
 
       {error && (
