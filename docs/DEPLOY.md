@@ -9,6 +9,7 @@ How to get Technique Titan in front of users: the React + FastAPI product stack
 |---|---|---|---|
 | Product UI | React 19 + TypeScript + Vite + Tailwind 4 | [Vercel](https://technique-titan.vercel.app) | Primary |
 | Product API | FastAPI + MediaPipe + OpenCV | [Render](https://technique-titan-api.onrender.com) (Docker) | Primary |
+| Accounts | Supabase Auth (email + Google) | Dedicated Technique Titan project | Optional sign-in; analyze stays public |
 | Interim demo | Streamlit (`app.py`) | Streamlit Community Cloud | Optional / research |
 
 The React UI already has **photo + video + live** parity with Streamlit. Live
@@ -108,7 +109,8 @@ npm run dev          # proxies /v1 → localhost:8000
 
 Open http://localhost:5173
 
-Routes: `/` (home), `/photo`, `/video`, `/live`, `/about`.
+Routes: `/` (home), `/photo`, `/video`, `/live`, `/about`, `/login`, `/signup`.
+Optional accounts use Supabase (`web/.env.local` — see [`supabase/README.md`](../supabase/README.md)). Photo / video / live stay public.
 
 ### Production
 
@@ -118,9 +120,13 @@ Routes: `/` (home), `/photo`, `/video`, `/live`, `/about`.
    `https://technique-titan-api.onrender.com`
 
    See [`web/.env.example`](../web/.env.example).
-3. Ensure Render `CORS_ORIGINS` includes the Vercel URL.
-4. **Redeploy** after changing env vars (Vite bakes them at build time).
-5. [`web/vercel.json`](../web/vercel.json) rewrites SPA routes to `index.html`.
+3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from a **dedicated**
+   Technique Titan Supabase project (anon/publishable key only — never
+   `service_role`). Auth URL / Google OAuth steps:
+   [`supabase/README.md`](../supabase/README.md).
+4. Ensure Render `CORS_ORIGINS` includes the Vercel URL.
+5. **Redeploy** after changing env vars (Vite bakes them at build time).
+6. [`web/vercel.json`](../web/vercel.json) rewrites SPA routes to `index.html`.
 
 ### “Load failed” / API unreachable
 
@@ -162,6 +168,7 @@ Video there, or use the React Live page for hosted real-time feedback.
 
 - [x] API on Render (`technique-titan-api.onrender.com`)
 - [x] UI on Vercel (`technique-titan.vercel.app`) with `VITE_API_BASE_URL` set
+- [ ] Vercel `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (dedicated project; redeploy)
 - [ ] Custom domain on Vercel (+ optional API subdomain)
 - [ ] Confirm rate limits under real traffic
 - [ ] CI green on `main` (`.github/workflows/ci.yml` — pytest + web build)

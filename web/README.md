@@ -18,6 +18,10 @@ npm run dev
 Open http://localhost:5173. Requests to `/v1/*` proxy to the API (see `vite.config.ts`).
 
 For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.example`).
+Optional auth: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from a dedicated
+Technique Titan project ([`supabase/README.md`](../supabase/README.md)). Never
+commit the `service_role` key. CI builds succeed without these vars (auth pages
+show “not configured”).
 
 ## Routes
 
@@ -28,6 +32,10 @@ For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.exa
 | `/video` | Video analyze | Upload MP4/MOV → `POST /v1/analyze/video` + Recharts timeline |
 | `/live` | Live practice | Browser MediaPipe → `POST /v1/score/landmarks`, or JPEG → `/v1/analyze/frame` |
 | `/about` | About | Scoring overview |
+| `/login` | Sign in | Email/password or Google (optional; analyze stays public) |
+| `/signup` | Sign up | Email/password or Google |
+| `/auth/callback` | OAuth return | PKCE redirect target |
+| `/admin` | Signup stats | Owner-only account counts (`app_admins`) |
 
 ## Scripts
 
@@ -47,6 +55,7 @@ For production builds, set `VITE_API_BASE_URL` to your API origin (see `.env.exa
 | `@mediapipe/tasks-vision` | In-browser hand landmarks (live) |
 | Recharts | Video posture timeline |
 | OGL | Specular WebGL button effect |
+| `@supabase/supabase-js` | Optional email / Google auth |
 | Tailwind CSS 4 | Styling via `@tailwindcss/vite` |
 
 ## Layout
@@ -61,12 +70,13 @@ web/
 │   │   ├── layout/     # App chrome
 │   │   ├── marketing/  # Landing hero
 │   │   ├── analyze/    # Score / overlay / coaching panels
+│   │   ├── auth/       # ProtectedRoute
 │   │   └── ui/         # Shared primitives
 │   ├── pages/        # Route screens
-│   └── lib/          # API client + MediaPipe helper
+│   └── lib/          # API client, auth, MediaPipe helper
 ├── index.html
 ├── vite.config.ts
-├── .env.example      # VITE_API_BASE_URL
+├── .env.example      # VITE_API_BASE_URL, VITE_SUPABASE_*
 └── vercel.json       # SPA rewrite for Vercel
 ```
 
@@ -74,4 +84,5 @@ web/
 
 Root Directory = `web` on Vercel. Set `VITE_API_BASE_URL` to the Render API origin
 (`https://technique-titan-api.onrender.com`) and allow the Vercel origin in API
-`CORS_ORIGINS`. Full steps: [docs/DEPLOY.md](../docs/DEPLOY.md).
+`CORS_ORIGINS`. Set `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` and **redeploy**.
+Full steps: [docs/DEPLOY.md](../docs/DEPLOY.md).

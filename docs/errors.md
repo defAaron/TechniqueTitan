@@ -26,6 +26,7 @@ new significant error, append an entry here in the same format.
 | npm | Always from **`web/`**, never repo root. |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
+| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** (no trailing slash) and **redeploy**. Never put **`service_role`** in `web/` or Vercel frontend env. Redirect allow-list must include localhost + production `/auth/callback`. |
 | Render CORS | Set **`CORS_ORIGINS`** to the Vercel origin (`https://technique-titan.vercel.app`). Never pair `*` with `allow_credentials=True`. |
 | Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
@@ -39,6 +40,7 @@ new significant error, append an entry here in the same format.
 | GitHub mermaid | Quote node labels; avoid reserved IDs (`end`, `graph`, `input`); do not use subgraphs with edges that cross groups — GitHub/Safari crashes with `t.render`. |
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
 | Root clutter | Keep Streamlit/Render entry files at repo root (`app.py`, `Dockerfile`, `requirements*.txt`). Do not commit source `*.mp4` or a root `package-lock.json` — frontend lockfile is `web/package-lock.json`; masters live in `assets/source/` (gitignored). |
+| Local CLI | Run `python -m technique_titan.*` from the repo **`.venv`** after `pip install -e .`. Homebrew `python3.11` does not have the package. |
 
 ---
 
@@ -380,6 +382,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E29 — Homebrew python3.11 missing `technique_titan`
+| | |
+|---|---|
+| **When** | 2026-09-14 |
+| **Stage** | Evaluation loop / batch CLI |
+| **Symptom** | `ModuleNotFoundError: No module named 'technique_titan'` when running `python -m technique_titan.batch.process_folder` / `technique_titan.eval` |
+| **Root cause** | Commands used system Homebrew `python3.11` without `pip install -e .` (package lives in `src/`; that interpreter has no editable install) |
+| **Fix** | Create repo `.venv` with `python3.11 -m venv .venv`, then `.venv/bin/python -m pip install -e .` and `requirements-dev.txt`; document venv before CLI commands in the README |
+| **Prevention** | Always run batch/eval via the repo `.venv` after an editable install. Do not assume Homebrew `python3.11` can import `technique_titan`. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -394,7 +408,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E29 — Short title
+### E30 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

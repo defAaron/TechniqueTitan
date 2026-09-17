@@ -82,7 +82,8 @@ Both hands are detected and scored independently when visible in frame.
 | Heuristic vs expert eval (CLI) | Available (`technique_titan.eval`; hold-out report is local) |
 | Two-hand detection + separate scores | Available |
 | Configurable scoring thresholds | Available (`config/scoring.yaml`) |
-| Progress tracking / accounts | Planned (Phase 3 remainder / Phase 4) |
+| Optional accounts (email / Google) | Available (Supabase Auth; analyze stays public) |
+| Progress tracking / session history | Planned (Phase 3 remainder) |
 
 ### Five posture criteria
 
@@ -119,6 +120,7 @@ Formulas and landmark inputs are documented in [docs/SCORING_METHODS.md](docs/SC
 | Scoring / coaching config | PyYAML |
 | Product API | FastAPI + Uvicorn + Pydantic 2 |
 | Product UI | React 19 + TypeScript + Vite 8 + Tailwind 4 |
+| Accounts | Supabase Auth (email + Google OAuth) |
 | Charts / WebGL | Recharts, OGL |
 | Interim UI | Streamlit `1.30+` |
 | Deploy | Render (API Docker), Vercel (web), Streamlit Cloud (interim) |
@@ -168,6 +170,11 @@ The product stack (React UI + FastAPI) is the recommended local setup.
 
 Vite proxies `/v1/*` to the API. Missing API on `:8000` produces a Vite **502**.
 
+Optional sign-in (email or Google) needs a dedicated Supabase project. Copy
+`web/.env.example` to `web/.env.local` and set `VITE_SUPABASE_URL` /
+`VITE_SUPABASE_ANON_KEY`. Setup: [`supabase/README.md`](supabase/README.md).
+Photo, video, and live work without an account.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
@@ -181,6 +188,9 @@ Vite proxies `/v1/*` to the API. Missing API on `:8000` produces a Vite **502**.
 | `/video` | Upload MP4/MOV → frame scores + posture timeline |
 | `/live` | Browser camera → landmarks (fast) or frame upload |
 | `/about` | How the scoring engine works |
+| `/login` | Optional email or Google sign in |
+| `/signup` | Create an account |
+| `/admin` | Owner-only signup counts |
 
 Live mode on the React UI prefers **browser-side MediaPipe** (`@mediapipe/tasks-vision`) and posts compact landmarks to `POST /v1/score/landmarks` so video stays on-device. Frame-upload mode (`POST /v1/analyze/frame`) is available as a fallback.
 
@@ -201,9 +211,13 @@ On macOS, grant camera access under **System Settings → Privacy & Security →
 
 ### Batch processing (testers / datasets)
 
+Use the repo `.venv`, not Homebrew `python3.11` (that interpreter does not have the package):
+
 ```sh
+python3.11 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e .
-# For tests: pip install -r requirements-dev.txt
+# For tests / eval extras: pip install -r requirements-dev.txt
 ```
 
 Drop images into `data/raw/` (subfolders OK; e.g. `excellent/1.png`, `good/2.png`), then:
@@ -225,7 +239,7 @@ Outputs:
 
 ### Evaluation loop
 
-After a labeled batch run, compare predicted severities to expert labels. The eval CLI merges summary + `data/labels.csv` (hand-aware: `left`/`right` vs `both`; the batch CSV still merges labels by filename only), then reports per-criterion accuracy, Cohen’s κ, and confusion matrices on the frozen split:
+After a labeled batch run, compare predicted severities to expert labels. Same `.venv` as batch (`source .venv/bin/activate`). The eval CLI merges summary + `data/labels.csv` (hand-aware: `left`/`right` vs `both`; the batch CSV still merges labels by filename only), then reports per-criterion accuracy, Cohen’s κ, and confusion matrices on the frozen split:
 
 ```sh
 python -m technique_titan.eval \
@@ -360,7 +374,8 @@ Live camera does **not** work on Streamlit Cloud (no webcam on the server). Use 
 ### Development
 
 ```sh
-# Python tests
+# Python tests (from the repo .venv)
+source .venv/bin/activate
 pip install -e ".[api]"
 pip install -r requirements-dev.txt
 pytest
@@ -389,6 +404,7 @@ Project conventions:
 | [docs/ML_UPGRADE.md](docs/ML_UPGRADE.md) | AI/ML upgrade path (eval → learned scoring → temporal → vision) |
 | [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md) | Formulas and landmark inputs per criterion |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Render + Vercel + Streamlit Cloud deploy guide |
+| [supabase/README.md](supabase/README.md) | Dedicated Auth project, Google OAuth, admin stats |
 | [docs/errors.md](docs/errors.md) | Chronological error history — agents must check before new work |
 | [web/README.md](web/README.md) | React UI develop / build notes |
 | [data/README.md](data/README.md) | Dataset intake, labels export, batch + eval |
@@ -404,6 +420,7 @@ _For more examples, please refer to the [Documentation](docs/PRD.md)._
 - [x] Phase 1 — Core detection: geometry scoring engine
 - [x] Phase 2 — Feedback engine: templated coaching + overlays
 - [x] Phase 3a — Product surface: React UI + API (photo / video / live)
+- [x] Phase 3b (accounts) — Optional email / Google sign-in + owner signup stats
 - [ ] Phase 3b — Persistence: session history and progress charts
 - [ ] Phase 4 — Intelligence
   - [ ] Piano-specific model — see [docs/ML_UPGRADE.md](docs/ML_UPGRADE.md)

@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { AuthControls } from './AuthControls'
 
 export const APP_NAV = [
   { to: '/photo', label: 'Photo' },
@@ -48,7 +49,7 @@ export function CinematicNav({
         )}
         Technique Titan
       </Link>
-      <div className="flex flex-wrap justify-end gap-4 font-body text-sm uppercase tracking-widest text-white/60 sm:gap-8">
+      <div className="flex flex-wrap items-center justify-end gap-4 font-body text-sm uppercase tracking-widest text-white/60 sm:gap-8">
         {links.map((item) =>
           overlay ? (
             <Link
@@ -74,6 +75,7 @@ export function CinematicNav({
             </NavLink>
           ),
         )}
+        <AuthControls />
       </div>
     </nav>
   )

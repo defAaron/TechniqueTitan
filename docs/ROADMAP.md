@@ -22,7 +22,8 @@ estimates, not commitments.
 | Eval harness | `technique_titan.eval` | In progress (first slice landing) |
 | CI | `.github/workflows/ci.yml` | Done (pytest + web build; eval units via `tests/`) |
 | Session persistence / progress | — | Not started |
-| Accounts / teacher roles / learned scorer | — | Not started |
+| Optional accounts (email / Google) | `web/` + `supabase/` | Done (analyze stays public) |
+| Teacher roles / learned scorer | — | Not started |
 
 ---
 
@@ -115,6 +116,7 @@ estimates, not commitments.
 
 ### 3b — Persistence & polish (next)
 
+- Optional **email + Google accounts** (Supabase Auth). Analyze routes stay public; `ProtectedRoute` is ready to gate them later. Owner `/admin` signup counts. ✅
 - Persistence of session results and **session history + progress charts** per criterion over time. *(PRD: FR-PT-1…FR-PT-3, UC-4)*
 - Richer in-product capture guidance. *(PRD: FR-IN-5)*
 - Accessibility pass to WCAG 2.1 AA basics (contrast, keyboard nav, non-color severity cues, screen-reader text). *(PRD: NFR-A11Y-1…3)*
