@@ -13,11 +13,10 @@ is the wrong target).
    (the JWT payload `ref` must match the hostname). Paste the key as one line
    with no quotes. Never put the **service_role** key in `web/` or Vercel
    frontend env.
-3. Run the SQL files in [`supabase/migrations/`](migrations/) in order in the
-   SQL editor (or `supabase db push` after `supabase link`). Google signups are
-   missing from `/admin` until
-   [`20260917000002_admin_list_signups.sql`](migrations/20260917000002_admin_list_signups.sql)
-   has been applied (backfills `profiles` from `auth.users`).
+3. Run [`bootstrap.sql`](bootstrap.sql) once in the SQL editor (creates `profiles`,
+   `app_admins`, triggers, admin emails, and backfills Google signups). Or run
+   the files in [`migrations/`](migrations/) in order. If you only `insert into
+   app_admins` and the table does not exist, create the schema first.
 
 ## Auth URLs
 
