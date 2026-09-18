@@ -258,13 +258,16 @@ Full agreement reports need local `data/raw/` → `data/processed/` (raw images 
 Offline classical ML (logistic regression per criterion) trains from `data/labels.csv` plus `data/processed/batch_summary.csv` and/or `data/synthetic/feature_rows.csv`. Production scoring stays on YAML heuristics. See [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md).
 
 ```sh
+source .venv/bin/activate   # or prefix commands with .venv/bin/python -m
+pip install -e ".[ml]"
+
 python -m technique_titan.ml.train \
   --labels data/labels.csv \
   --synthetic data/synthetic/feature_rows.csv \
   --split data/eval/holdout_split.json \
   --output config/models
 
-python -m technique_titan.eval --scorer ml --models config/models
+python -m technique_titan.eval --scorer compare --models config/models
 ```
 
 ### How it works

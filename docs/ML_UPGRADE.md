@@ -120,9 +120,12 @@ Each criterion is an L2-regularized multinomial logistic regression
 distance-from-ideal transforms so two-sided YAML bands stay linearly
 representable. Production scoring is unchanged.
 
-Install the extra (`pip install -e ".[ml]"` or `requirements-dev.txt`), then:
+Use the repo `.venv` (Homebrew `python3.11` does not have the package). Install
+the extra (`pip install -e ".[ml]"` or `requirements-dev.txt`), then:
 
 ```sh
+source .venv/bin/activate   # or: .venv/bin/python -m technique_titan.ml.train …
+
 python -m technique_titan.ml.synthetic \
   --labels data/labels.csv \
   --output data/synthetic/feature_rows.csv
