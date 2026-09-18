@@ -1,7 +1,7 @@
 # Technique Titan — ML Upgrade Path
 
-**Status:** Evaluation loop in progress (first implementation slice landing). Learned scoring is not started.
-**Last updated:** 2026-09-11
+**Status:** Evaluation loop landed. Offline learned scoring (logistic regression) landed; production still uses YAML heuristics.
+**Last updated:** 2026-09-18
 **Companions:** [`PRD.md`](./PRD.md) (Phase 4, NFR-ACC-2, FR-SC-6), [`ROADMAP.md`](./ROADMAP.md) (Phase 4), [`SCORING_METHODS.md`](./SCORING_METHODS.md), [`data/README.md`](../data/README.md)
 
 This document is the source of truth for making the engine more AI/ML without
@@ -16,8 +16,8 @@ replace MediaPipe on a few dozen photos.
 
 | Fact | Value |
 |---|---|
-| Trained models in-repo | None (MediaPipe Hands is frozen, off-the-shelf) |
-| Expert-labeled images | 33 rows in `data/labels.csv` (Notion table `techniquetitan`) |
+| Trained models in-repo | Offline joblib artifacts in `config/models/` (regenerate with `python -m technique_titan.ml.train`). MediaPipe Hands remains frozen and off-the-shelf. Production scoring still uses YAML heuristics. |
+| Expert-labeled images | `data/labels.csv` (Notion table `techniquetitan` plus additional `fexcellent/` / `fgood/` / `fwarning/` / `fcritical/` rows). Companion geometry table: `data/synthetic/feature_rows.csv` |
 | Scoring | Piecewise-linear 1-D map per criterion in `config/scoring.yaml` |
 | Coaching | Templates in `config/coaching.yaml` (not an LLM) |
 | Hold-out metric in CI | Eval harness **unit tests** via pytest (`tests/`). Full agreement report is **local** — it needs `data/processed` from gitignored `data/raw` |
@@ -64,7 +64,7 @@ data volume and throws away explainability (PRD FR-SC-6).
 | # | Phase | When | Why | Work |
 |---|---|---|---|---|
 | 1 | Evaluation loop | In progress (this slice) | Cannot claim a piano-specific model until heuristics lose to a hold-out set | Agreement report vs `labels.csv`, confusion matrices, threshold search in `notebooks/scoring_tuning.ipynb` |
-| 2 | Learned scoring | After ~80–150 labeled hands | YAML `ideal`/`limit` ranges are a 1-D guess | Gradient-boosted or logistic model: features → severity. Heuristics stay as fallback |
+| 2 | Learned scoring | Offline slice landed | YAML `ideal`/`limit` ranges are a 1-D guess | Per-criterion L2 logistic regression on geometry features. Heuristics stay as the production fallback |
 | 3 | Temporal intelligence | Once live/video is the product | Every frame is independent today; habits live in time | Landmark smoothing, dwell detection, session-level habit classifier |
 | 4 | Piano-specific vision | After scoring is calibrated | MediaPipe is generic | Key-plane detection, Pose/Holistic forearm, viewpoint rejector |
 
@@ -79,7 +79,7 @@ persistence remain the product half of that phase (see [`ROADMAP.md`](./ROADMAP.
 |---|---|---|---|---|
 | Do now | Heuristic vs expert agreement report | Eval | Current 33 + more | Harness landing. Unblocks measuring NFR-ACC-2 (≥85%). Proves what is already wrong |
 | Do now | Calibrate `scoring.yaml` from labels | Classical | Current set | Tuning notebook exists; thresholds are still starting guesses |
-| First models | Tabular severity model on features | Supervised | ~80–150 hands | First piano-specific model. Keep YAML as fallback |
+| First models | Tabular severity model on features | Supervised | Current labels + companion feature table | Offline logistic regression landed. Keep YAML on the serving path |
 | First models | Viewpoint / quality rejector | Small classifier | ~100 frames tagged by angle | PRD open Q1. Stops scoring wrist height from a top-down shot |
 | First models | Temporal smoothing + habit dwell | Signal / HMM | A few labeled clips | Live mode currently forgets the last frame |
 | Perception | Key-plane + forearm (Pose) | CV features | None to start | Makes wrist height and lateral deviation physically correct |
@@ -109,11 +109,42 @@ persistence remain the product half of that phase (see [`ROADMAP.md`](./ROADMAP.
    `notebooks/scoring_tuning.ipynb` on **TRAIN** only.
 3. **Landing (gate):** promote those bands into `config/scoring.yaml` **only if**
    HOLD-OUT agreement rises. The notebook never auto-overwrites YAML.
-4. **Not started:** train a sklearn classifier on the exported feature vector with
-   a heuristic fallback flag in `scoring.yaml`.
+4. **Landing (offline):** train a sklearn logistic regression per criterion on the exported feature vector (`python -m technique_titan.ml.train`). Production still uses YAML; do not wire `ml_with_fallback` into the API yet.
 
-That is the start of an ML project. A new architecture is not. This slice is
-the evaluation loop, not a completed learned scorer.
+That is the start of an ML project. A new architecture is not. Serving still uses the evaluation loop plus YAML heuristics; the learned scorer is offline until a follow-up slice.
+
+### Offline learned scorer
+
+Each criterion is an L2-regularized multinomial logistic regression
+(`StandardScaler` + `LogisticRegression`) on the geometry feature vector, plus
+distance-from-ideal transforms so two-sided YAML bands stay linearly
+representable. Production scoring is unchanged.
+
+Install the extra (`pip install -e ".[ml]"` or `requirements-dev.txt`), then:
+
+```sh
+python -m technique_titan.ml.synthetic \
+  --labels data/labels.csv \
+  --output data/synthetic/feature_rows.csv
+
+python -m technique_titan.ml.train \
+  --labels data/labels.csv \
+  --summary data/processed/batch_summary.csv \
+  --synthetic data/synthetic/feature_rows.csv \
+  --split data/eval/holdout_split.json \
+  --output config/models
+
+python -m technique_titan.eval \
+  --scorer compare \
+  --summary data/processed/batch_summary.csv \
+  --synthetic data/synthetic/feature_rows.csv \
+  --labels data/labels.csv \
+  --split data/eval/holdout_split.json \
+  --models config/models \
+  --output data/eval/reports
+```
+
+`--summary` is optional when only the companion feature table is present. `--scorer ml` writes an ML-vs-expert report; `--scorer compare` prints heuristic vs ML side by side. Hold-out files stay the original real-image ids in `data/eval/holdout_split.json`; additional `f*` paths are train-only.
 
 ### Reproduce the agreement report
 
@@ -171,7 +202,8 @@ None of the following is complete. The eval harness is the first slice only.
 - Heuristic severity agreement measured against expert labels (target ≥85%,
   NFR-ACC-2) — not yet reported on hold-out.
 - Learned scorer meets or exceeds heuristics on that split, with YAML
-  fallback wired and tested — not started.
+  fallback wired and tested — **offline trainer landed; production fallback
+  not wired yet**.
 - Viewpoint-unsuitable frames are rejected or flagged rather than scored as
   confident technique errors.
 - Live/video can report a habit that lasts more than one frame.

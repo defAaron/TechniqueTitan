@@ -255,6 +255,18 @@ NFR-ACC-2 (severity agreement ≥85%) is the target this harness will measure. T
 
 Full agreement reports need local `data/raw/` → `data/processed/` (raw images are gitignored). CI runs eval **unit tests** via pytest, not a MediaPipe batch on `data/raw`.
 
+Offline classical ML (logistic regression per criterion) trains from `data/labels.csv` plus `data/processed/batch_summary.csv` and/or `data/synthetic/feature_rows.csv`. Production scoring stays on YAML heuristics. See [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md).
+
+```sh
+python -m technique_titan.ml.train \
+  --labels data/labels.csv \
+  --synthetic data/synthetic/feature_rows.csv \
+  --split data/eval/holdout_split.json \
+  --output config/models
+
+python -m technique_titan.eval --scorer ml --models config/models
+```
+
 ### How it works
 
 ```mermaid
@@ -302,17 +314,19 @@ technique_titan/
 │   ├── features/
 │   ├── batch/                # Bulk folder processor CLI
 │   ├── eval/                 # Heuristic vs expert agreement (CLI)
+│   ├── ml/                   # Offline logistic scoring (train / predict)
 │   ├── analysis.py
 │   ├── scoring.py
 │   └── coaching.py
 ├── assets/
 │   ├── brand/                # Master brand icon (favicons derived in web/public)
 │   └── source/               # Unoptimized masters (gitignored)
-├── config/                   # scoring.yaml + coaching.yaml
+├── config/                   # scoring.yaml + coaching.yaml (+ gitignored models/)
 ├── data/
 │   ├── raw/                  # Labeled set: excellent|good|warning|critical
 │   ├── fixtures/             # Local smoke images (not labeled)
 │   ├── processed/            # Batch outputs (gitignored)
+│   ├── synthetic/            # Companion feature table for f-prefixed labels
 │   └── eval/                 # holdout_split.json (tracked) + reports/ (gitignored)
 ├── docs/
 │   ├── archive/              # Research notes / historical artifacts
@@ -349,6 +363,7 @@ technique_titan/
 | `analysis.py` | `analyze_hands()`, overlay drawing, label disambiguation |
 | `batch/process_folder.py` | Walks `data/raw/`, writes CSV/JSON exports |
 | `eval/` | Merges batch summary + labels; accuracy, Cohen’s κ, confusion matrices vs frozen split |
+| `ml/` | Offline per-criterion logistic regression (train CLI, joblib artifacts) |
 
 ### API surface
 

@@ -9,3 +9,7 @@ jupyter>=1.0
 ipykernel>=6.29
 pandas>=2.2
 matplotlib>=3.8
+
+# Offline classical ML extras (also: pip install -e ".[ml]")
+scikit-learn>=1.3,<2
+joblib>=1.3

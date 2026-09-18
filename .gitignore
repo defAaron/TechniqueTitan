@@ -41,6 +41,10 @@ data/processed/
 # Generated eval reports (frozen split data/eval/holdout_split.json stays tracked)
 data/eval/reports/
 
+# Trained scikit-learn artifacts (regenerate with python -m technique_titan.ml.train)
+config/models/**
+!config/models/.gitkeep
+
 # Raw labeled images (keep folder structure via .gitkeep)
 data/raw/**
 !data/raw/.gitkeep

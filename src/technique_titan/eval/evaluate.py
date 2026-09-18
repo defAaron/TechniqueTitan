@@ -78,8 +78,9 @@ def _fmt_metric(value: float | None, digits: int = 3) -> str:
 def render_agreement_md(report: dict) -> str:
     """Human-readable agreement tables including hold-out confusion matrices."""
     split = report["split"]
+    title = report.get("title") or "Heuristic vs expert agreement"
     lines = [
-        "# Heuristic vs expert agreement",
+        f"# {title}",
         "",
         f"- Matched rows: {report['n_matched']}",
         f"- Unmatched predictions: {report['n_unmatched_predictions']}",
@@ -208,6 +209,87 @@ def render_stdout_table(report: dict) -> str:
     return "\n".join(header_lines + rows) + "\n"
 
 
+def render_compare_table(heuristic: dict, ml: dict) -> str:
+    """Side-by-side heuristic vs ML agreement on train and hold-out slices."""
+    headers = (
+        "criterion",
+        "n_train",
+        "h_acc_tr",
+        "ml_acc_tr",
+        "h_k_tr",
+        "ml_k_tr",
+        "n_holdout",
+        "h_acc_ho",
+        "ml_acc_ho",
+        "h_k_ho",
+        "ml_k_ho",
+    )
+    widths = {
+        "criterion": 18,
+        "n_train": 7,
+        "h_acc_tr": 8,
+        "ml_acc_tr": 9,
+        "h_k_tr": 7,
+        "ml_k_tr": 8,
+        "n_holdout": 9,
+        "h_acc_ho": 8,
+        "ml_acc_ho": 9,
+        "h_k_ho": 7,
+        "ml_k_ho": 8,
+    }
+
+    def cell(key: str, value: object, numeric: bool = True) -> str:
+        text = str(value) if not isinstance(value, float) else _fmt_metric(value)
+        if value is None:
+            text = "—"
+        width = widths[key]
+        return text.rjust(width) if numeric else text.ljust(width)
+
+    lines = [
+        f"heuristic_matched={heuristic['n_matched']}  ml_matched={ml['n_matched']}",
+        "",
+        " ".join(cell(h, h, numeric=(h != "criterion")) for h in headers),
+    ]
+    for name in CRITERIA:
+        h_tr = heuristic["criteria"][name]["train"]
+        m_tr = ml["criteria"][name]["train"]
+        h_ho = heuristic["criteria"][name]["holdout"]
+        m_ho = ml["criteria"][name]["holdout"]
+        values = {
+            "criterion": name,
+            "n_train": h_tr["n"],
+            "h_acc_tr": h_tr["accuracy"],
+            "ml_acc_tr": m_tr["accuracy"],
+            "h_k_tr": h_tr["kappa"],
+            "ml_k_tr": m_tr["kappa"],
+            "n_holdout": h_ho["n"],
+            "h_acc_ho": h_ho["accuracy"],
+            "ml_acc_ho": m_ho["accuracy"],
+            "h_k_ho": h_ho["kappa"],
+            "ml_k_ho": m_ho["kappa"],
+        }
+        lines.append(
+            " ".join(cell(h, values[h], numeric=(h != "criterion")) for h in headers)
+        )
+    h_macro = heuristic["macro"]
+    m_macro = ml["macro"]
+    values = {
+        "criterion": "macro",
+        "n_train": "—",
+        "h_acc_tr": h_macro["train"]["accuracy"],
+        "ml_acc_tr": m_macro["train"]["accuracy"],
+        "h_k_tr": h_macro["train"]["kappa"],
+        "ml_k_tr": m_macro["train"]["kappa"],
+        "n_holdout": "—",
+        "h_acc_ho": h_macro["holdout"]["accuracy"],
+        "ml_acc_ho": m_macro["holdout"]["accuracy"],
+        "h_k_ho": h_macro["holdout"]["kappa"],
+        "ml_k_ho": m_macro["holdout"]["kappa"],
+    }
+    lines.append(" ".join(cell(h, values[h], numeric=(h != "criterion")) for h in headers))
+    return "\n".join(lines) + "\n"
+
+
 def _write_report(output_dir: Path, report: dict) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "agreement.json").write_text(
@@ -223,13 +305,19 @@ def _write_report(output_dir: Path, report: dict) -> None:
 
 
 def evaluate(
-    summary_path: Path,
+    summary_path: Path | None,
     labels_path: Path,
     split_path: Path,
     output_dir: Path | None = None,
+    *,
+    summary_rows: list[dict] | None = None,
+    scorer: str = "heuristic",
 ) -> dict:
     """Full report dict. Always include train / holdout / all slices."""
-    summary_rows = load_csv_rows(summary_path)
+    if summary_rows is None:
+        if summary_path is None:
+            raise ValueError("evaluate requires summary_path or summary_rows")
+        summary_rows = load_csv_rows(summary_path)
     labels = load_labels(labels_path)
     matched = merge_predictions_and_labels(summary_rows, labels, match_hand=True)
     n_unmatched_predictions, n_unmatched_labels = unmatched_counts(
@@ -259,7 +347,13 @@ def evaluate(
             "holdout": _slice_stats(holdout_rows, name),
         }
 
+    titles = {
+        "heuristic": "Heuristic vs expert agreement",
+        "ml": "ML vs expert agreement",
+    }
     report = {
+        "scorer": scorer,
+        "title": titles.get(scorer, f"{scorer} vs expert agreement"),
         "n_matched": len(matched),
         "n_unmatched_predictions": n_unmatched_predictions,
         "n_unmatched_labels": n_unmatched_labels,

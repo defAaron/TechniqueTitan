@@ -1,0 +1,16 @@
+{
+  "seed": 42,
+  "holdout_fraction": 0.3,
+  "train": [
+    "fexcellent/1.png",
+    "fexcellent/2.png",
+    "fgood/1.png",
+    "fgood/2.png",
+    "fwarning/1.png",
+    "fcritical/1.png"
+  ],
+  "holdout": [
+    "fwarning/2.png",
+    "fcritical/2.png"
+  ]
+}
