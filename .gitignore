@@ -34,10 +34,7 @@ service-account*.json
 .DS_Store
 .idea/
 .vscode/
-.cursor/*
-!.cursor/rules/
-!.cursor/rules/**
-
+.cursor/
 # Generated batch outputs (reproducible from data/raw/)
 data/processed/
 

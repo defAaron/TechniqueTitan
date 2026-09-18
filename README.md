@@ -322,13 +322,17 @@ technique_titan/
 │   ├── SCORING_METHODS.md
 │   ├── DEPLOY.md
 │   └── errors.md
+├── supabase/                 # Auth schema, bootstrap SQL, migrations
 ├── tests/
 │   ├── engine/               # Core library unit tests
 │   └── api/                  # FastAPI tests
 ├── notebooks/                # scoring_tuning.ipynb (TRAIN search; HOLD-OUT gate)
+├── .github/workflows/        # pytest + web build
+├── AGENTS.md                 # Agent operating instructions
 ├── app.py                    # Streamlit UI (interim / Cloud demo) — keep at repo root
 ├── Dockerfile                # API image (Render) — keep at repo root
 ├── render.yaml               # Render Blueprint (optional)
+├── packages.txt              # Streamlit Cloud apt packages
 ├── pyproject.toml
 ├── requirements.txt          # Streamlit Cloud
 ├── requirements-api.txt      # Docker / API
