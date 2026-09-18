@@ -34,5 +34,6 @@ See [`data/README.md`](data/README.md) for batch intake and CSV export notes.
 - [`docs/PRD.md`](docs/PRD.md) — product requirements
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased delivery
 - [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md) — AI/ML upgrade path (eval before custom models)
+- [`docs/ML_LOGISTIC_REGRESSION.md`](docs/ML_LOGISTIC_REGRESSION.md) — offline learned scorer math and rationale
 - [`README.md`](README.md) — setup and architecture
 - [`data/README.md`](data/README.md) — raw data layout + labeling

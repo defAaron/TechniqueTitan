@@ -94,6 +94,7 @@ yet; the harness is how that number will be measured. See
 
 Geometry features plus expert labels train one multinomial logistic
 regression per criterion. Production scoring is unchanged (YAML heuristics).
+How the math works and why it helps: [`docs/ML_LOGISTIC_REGRESSION.md`](../docs/ML_LOGISTIC_REGRESSION.md).
 
 Use the repo `.venv` (`source .venv/bin/activate` or `.venv/bin/python -m …`).
 Requires `pip install -e ".[ml]"`.

@@ -2,7 +2,7 @@
 
 **Status:** Evaluation loop landed. Offline learned scoring (logistic regression) landed; production still uses YAML heuristics.
 **Last updated:** 2026-09-18
-**Companions:** [`PRD.md`](./PRD.md) (Phase 4, NFR-ACC-2, FR-SC-6), [`ROADMAP.md`](./ROADMAP.md) (Phase 4), [`SCORING_METHODS.md`](./SCORING_METHODS.md), [`data/README.md`](../data/README.md)
+**Companions:** [`PRD.md`](./PRD.md) (Phase 4, NFR-ACC-2, FR-SC-6), [`ROADMAP.md`](./ROADMAP.md) (Phase 4), [`SCORING_METHODS.md`](./SCORING_METHODS.md), [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md), [`data/README.md`](../data/README.md)
 
 This document is the source of truth for making the engine more AI/ML without
 throwing away explainable geometry. Detection is already neural (MediaPipe).
@@ -118,7 +118,8 @@ That is the start of an ML project. A new architecture is not. Serving still use
 Each criterion is an L2-regularized multinomial logistic regression
 (`StandardScaler` + `LogisticRegression`) on the geometry feature vector, plus
 distance-from-ideal transforms so two-sided YAML bands stay linearly
-representable. Production scoring is unchanged.
+representable. Production scoring is unchanged. Math, feature design, and
+rationale: [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md).
 
 Use the repo `.venv` (Homebrew `python3.11` does not have the package). Install
 the extra (`pip install -e ".[ml]"` or `requirements-dev.txt`), then:
