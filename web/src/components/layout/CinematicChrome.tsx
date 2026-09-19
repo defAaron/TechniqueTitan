@@ -49,7 +49,7 @@ function ModesDropdown() {
           current || open ? 'text-white' : '',
         ].join(' ')}
       >
-        {current?.label ?? 'Modes'}
+        {current?.label ?? 'Coach'}
         <svg
           viewBox="0 0 12 12"
           aria-hidden="true"
