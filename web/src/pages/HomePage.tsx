@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { CinematicFooter } from '../components/layout'
 import { CinematicHero } from '../components/marketing'
 import { CRITERION_LABELS } from '../lib/api'
+import { useAuth } from '../lib/auth'
 
 const WIDE_IMG = '/landing/keys-wide.jpg'
 const PIANIST_IMG = '/landing/pianist.jpg'
@@ -103,6 +104,8 @@ function ModeMedia({ mode }: { mode: Mode }) {
 }
 
 export function HomePage() {
+  const { user } = useAuth()
+
   return (
     <div className="bg-black">
       <CinematicHero />
@@ -207,8 +210,8 @@ export function HomePage() {
               the one correction that matters most right now.
             </p>
             <p className="mb-10 font-body text-base font-light leading-relaxed text-white/40">
-              No account, no wearables, no special hardware. Live mode keeps video on your
-              device and posts only compact landmarks to the API.
+              No wearables, no special hardware — just a camera and an account. Live mode
+              keeps video on your device and posts only compact landmarks to the API.
             </p>
             <Link
               to="/about"
@@ -231,7 +234,14 @@ export function HomePage() {
                 >
                   <ModeMedia mode={mode} />
                 </div>
-                <Link to={mode.to} className="block">
+                <Link
+                  to={
+                    user
+                      ? mode.to
+                      : `/signup?next=${encodeURIComponent(mode.to)}`
+                  }
+                  className="block"
+                >
                   <p className="mb-1 font-cinematic text-base text-white">{mode.title}</p>
                   <p className="font-body text-sm text-white/40">{mode.meta}</p>
                 </Link>

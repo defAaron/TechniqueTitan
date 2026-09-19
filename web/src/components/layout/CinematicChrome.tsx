@@ -1,13 +1,91 @@
-import type { CSSProperties, ReactNode } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../../lib/auth'
 import { AuthControls } from './AuthControls'
 
-export const APP_NAV = [
+const MODE_NAV = [
   { to: '/photo', label: 'Photo' },
   { to: '/video', label: 'Video' },
   { to: '/live', label: 'Live' },
-  { to: '/about', label: 'About' },
 ] as const
+
+const PUBLIC_NAV = [{ to: '/about', label: 'About' }] as const
+
+function ModesDropdown() {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const location = useLocation()
+  const current = MODE_NAV.find((item) => location.pathname === item.to)
+
+  useEffect(() => {
+    setOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!open) return
+    const onPointerDown = (event: PointerEvent) => {
+      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((value) => !value)}
+        className={[
+          'inline-flex items-center gap-2 transition-colors duration-300 hover:text-white',
+          current || open ? 'text-white' : '',
+        ].join(' ')}
+      >
+        {current?.label ?? 'Modes'}
+        <svg
+          viewBox="0 0 12 12"
+          aria-hidden="true"
+          className={[
+            'h-2.5 w-2.5 fill-current transition-transform duration-300',
+            open ? 'rotate-180' : '',
+          ].join(' ')}
+        >
+          <path d="M2.2 4.2 6 8l3.8-3.8" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-50 mt-3 min-w-36 border border-white/10 bg-black/95 py-1.5 backdrop-blur-sm"
+        >
+          {MODE_NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              role="menuitem"
+              className={({ isActive }) =>
+                [
+                  'block px-4 py-2.5 transition-colors duration-300 hover:bg-white/5 hover:text-white',
+                  isActive ? 'text-white' : 'text-white/60',
+                ].join(' ')
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const footerLinks = [
   { href: 'https://github.com/defAaron/TechniqueTitan', label: 'GitHub', external: true },
@@ -23,7 +101,11 @@ export function CinematicNav({
   overlay?: boolean
   style?: CSSProperties
 }) {
-  const links = overlay ? APP_NAV : [{ to: '/', label: 'Home' }, ...APP_NAV]
+  const { user } = useAuth()
+  const links = [
+    ...(overlay ? [] : [{ to: '/', label: 'Home' }]),
+    ...PUBLIC_NAV,
+  ]
 
   return (
     <nav
@@ -75,6 +157,7 @@ export function CinematicNav({
             </NavLink>
           ),
         )}
+        {user && <ModesDropdown />}
         <AuthControls />
       </div>
     </nav>

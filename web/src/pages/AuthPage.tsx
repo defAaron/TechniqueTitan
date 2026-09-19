@@ -172,8 +172,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     <div className="max-w-md">
       <PageHeader eyebrow="Account" title={isSignup ? 'Create an account' : 'Sign in'}>
         {isSignup
-          ? 'Email and password, or continue with Google. Photo, video, and live stay available without an account.'
-          : 'Welcome back. Analyze tools stay public — an account is optional for now.'}
+          ? 'Email and password, or continue with Google. An account is required for photo, video, and live.'
+          : 'Welcome back. Sign in to continue to photo, video, or live practice.'}
       </PageHeader>
 
       <form className="space-y-4" onSubmit={(e) => void onSubmit(e)}>

@@ -22,9 +22,30 @@ export default function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/photo" element={<PhotoAnalyze />} />
-              <Route path="/video" element={<VideoAnalyze />} />
-              <Route path="/live" element={<LivePractice />} />
+              <Route
+                path="/photo"
+                element={
+                  <ProtectedRoute>
+                    <PhotoAnalyze />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/video"
+                element={
+                  <ProtectedRoute>
+                    <VideoAnalyze />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/live"
+                element={
+                  <ProtectedRoute>
+                    <LivePractice />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/login" element={<AuthPage mode="login" />} />
               <Route path="/signup" element={<AuthPage mode="signup" />} />
