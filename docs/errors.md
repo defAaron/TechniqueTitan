@@ -41,6 +41,7 @@ new significant error, append an entry here in the same format.
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
 | Root clutter | Keep Streamlit/Render entry files at repo root (`app.py`, `Dockerfile`, `requirements*.txt`). Do not commit source `*.mp4` or a root `package-lock.json` — frontend lockfile is `web/package-lock.json`; masters live in `assets/source/` (gitignored). |
 | Local CLI | Run `python -m technique_titan.*` from the repo **`.venv`** after `pip install -e .`. Homebrew `python3.11` does not have the package. |
+| MediaPipe Hands laterality | Python `mp.solutions.hands` reports **selfie/mirror** Left/Right. Invert to anatomical labels for unmirrored photos (batch, API photo/video). Do **not** invert Streamlit live frames that are already `cv2.flip`'d. |
 
 ---
 
@@ -442,6 +443,18 @@ new significant error, append an entry here in the same format.
 
 ---
 
+### E34 — MediaPipe Hands laterality was selfie/mirror, not anatomical
+| | |
+|---|---|
+| **When** | 2026-09-19 |
+| **Stage** | Eval loop / batch laterality |
+| **Symptom** | Hold-out eval dropped 6/10 real photos (`n_holdout=4`) because summary `hand` was the opposite of Notion (`left` vs `right`). Almost every mismatch was a clean swap. |
+| **Root cause** | `mp.solutions.hands` is trained on mirrored selfie images. Unmirrored pianist photos of an anatomical right hand were stored as `Left`. Expert labels in Notion are anatomical. |
+| **Fix** | `HandDetector` inverts Left/Right by default (`anatomical_handedness`). Streamlit live keeps `invert_handedness=False` because those frames are already `cv2.flip`'d. Re-run `process_folder` so `batch_summary.csv` matches labels. |
+| **Prevention** | Treat Python Hands laterality as mirror-view unless inverted. Do not flip browser live landmarks (tasks-vision + mirrored canvas is a different convention). Do not “fix” Notion `hand` when the detector is mirrored. |
+
+---
+
 ## Appendix — minor / environment notes
 
 | ID | Note |
@@ -456,7 +469,7 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E34 — Short title
+### E35 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

@@ -12,6 +12,16 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
+# mp.solutions.hands is trained on mirrored (selfie) images, so an unmirrored
+# photo of a player's right hand is reported as "Left". Expert labels are
+# anatomical. Invert unless the caller already mirrored the frame.
+_MIRROR_HANDEDNESS = {"Left": "Right", "Right": "Left"}
+
+
+def anatomical_handedness(label: str) -> str:
+    """Map MediaPipe selfie/mirror Left/Right to anatomical Left/Right."""
+    return _MIRROR_HANDEDNESS.get(label, label)
+
 
 @dataclass
 class HandDetection:
@@ -22,7 +32,7 @@ class HandDetection:
     # (21, 3) world coordinates in meters, origin at hand center.
     # More stable for 3D angle math; may be None for older mediapipe versions.
     world_landmarks: Optional[np.ndarray]
-    handedness: str  # "Left" or "Right" (as seen from the camera's mirror view)
+    handedness: str  # anatomical "Left" or "Right" after mirror correction
     confidence: float  # handedness classification score, used as quality signal
 
     def to_dict(self) -> dict:
@@ -59,7 +69,9 @@ class HandDetector:
         static_image_mode: bool = True,
         max_hands: int = 2,
         min_detection_confidence: float = 0.5,
+        invert_handedness: bool = True,
     ):
+        self._invert_handedness = invert_handedness
         self._hands = mp.solutions.hands.Hands(
             static_image_mode=static_image_mode,
             max_num_hands=max_hands,
@@ -85,6 +97,8 @@ class HandDetector:
                 label, score = cls.label, cls.score
             else:
                 label, score = "Unknown", 0.0
+            if self._invert_handedness:
+                label = anatomical_handedness(label)
 
             detection.hands.append(
                 HandDetection(

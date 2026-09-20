@@ -719,7 +719,8 @@ def live_mode(config: dict, coaching_config: dict) -> None:
     scores_placeholder = feed_col.empty()
 
     try:
-        with HandDetector(static_image_mode=False) as detector:
+        # Frame is mirrored below, so MediaPipe selfie labels already match anatomy.
+        with HandDetector(static_image_mode=False, invert_handedness=False) as detector:
             while st.session_state.live_running:
                 ok, frame = cap.read()
                 if not ok:
