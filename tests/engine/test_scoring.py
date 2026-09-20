@@ -38,7 +38,7 @@ def test_score_all_with_default_config():
         "mean_finger_curvature": 140.0,
         "thumb_index_angle": 35.0,
         "wrist_lateral_deviation_deg": 2.0,
-        "hand_arch_ratio": 0.25,
+        "hand_arch_ratio": 0.10,
     }
     result = score_all(metrics, config)
     assert set(result["scores"]) == set(config["criteria"])

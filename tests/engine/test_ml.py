@@ -41,7 +41,7 @@ def test_matrix_shape_matches_feature_names():
 def test_derived_outside_ideal_is_zero_inside_band():
     row = {"wrist_height_delta": 0.1, "mean_finger_curvature": 140.0,
            "thumb_index_angle": 35.0, "wrist_lateral_deviation_deg": 2.0,
-           "hand_arch_ratio": 0.25}
+           "hand_arch_ratio": 0.10}
     derived = derived_from_row(row)
     assert derived["wrist_height_delta_outside_ideal"] == 0.0
     assert derived["mean_finger_curvature_outside_ideal"] == 0.0

@@ -57,9 +57,9 @@ def test_critical_before_warning_then_by_weight(scoring_config, coaching_config)
     # hand_arch weight 0.20 warning should follow all criticals.
     # wrist_height weight 0.25 critical should beat thumb critical by weight.
     metrics = _ideal_metrics(scoring_config)
-    metrics["wrist_height_delta"] = 0.50  # above ideal -> too_high
+    metrics["wrist_height_delta"] = 1.50  # above ideal -> too_high
     metrics["thumb_index_angle"] = 5.0  # below ideal -> too_low
-    metrics["hand_arch_ratio"] = 0.05  # below ideal -> too_low
+    metrics["hand_arch_ratio"] = 0.01  # below ideal -> too_low
 
     scores = {k: 100.0 for k in scoring_config["criteria"]}
     severities = {k: "good" for k in scoring_config["criteria"]}
@@ -85,7 +85,7 @@ def test_critical_before_warning_then_by_weight(scoring_config, coaching_config)
 
 def test_wrist_height_too_high_selects_template(scoring_config, coaching_config):
     metrics = _ideal_metrics(scoring_config)
-    metrics["wrist_height_delta"] = 0.50  # above ideal_hi
+    metrics["wrist_height_delta"] = 1.50  # above ideal_hi
 
     scores = {k: 100.0 for k in scoring_config["criteria"]}
     severities = {k: "good" for k in scoring_config["criteria"]}

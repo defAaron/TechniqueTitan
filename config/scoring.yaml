@@ -8,8 +8,9 @@
 #            (score falls linearly between ideal edge and limit edge)
 #   weight : contribution to the composite score (weights sum to 1.0)
 #
-# NOTE: these defaults are starting points. Calibrate them against your
-# labeled data (data/labels.csv) after running your first real batches.
+# Calibrated 2026-09-19 from notebooks/scoring_tuning.ipynb on TRAIN files only.
+# Promoted because hold-out macro accuracy rose 0.622 → 0.689 (κ 0.064 → 0.103).
+# NFR-ACC-2 (≥85% hold-out) is still not met.
 
 severity_bands:
   good_min: 80      # score >= 80  -> "good"
@@ -24,26 +25,26 @@ outliers:
 criteria:
   wrist_height:
     metric: wrist_height_delta
-    ideal: [-0.05, 0.20]
-    limit: [-0.40, 0.60]
+    ideal: [-0.0711, 0.966]
+    limit: [-1.434, 1.634]
     weight: 0.25
   finger_curvature:
     metric: mean_finger_curvature
-    ideal: [115.0, 160.0]
-    limit: [70.0, 180.0]
+    ideal: [117.5, 161.9]
+    limit: [95.4, 171.2]
     weight: 0.25
   thumb_position:
     metric: thumb_index_angle
-    ideal: [20.0, 55.0]
-    limit: [0.0, 90.0]
+    ideal: [18.15, 47.41]
+    limit: [1.188, 130.2]
     weight: 0.15
   wrist_lateral:
     metric: wrist_lateral_deviation_deg
     ideal: [-10.0, 10.0]
-    limit: [-35.0, 35.0]
+    limit: [-37.92, 40.13]
     weight: 0.15
   hand_arch:
     metric: hand_arch_ratio
-    ideal: [0.12, 0.45]
-    limit: [0.0, 0.80]
+    ideal: [0.0324, 0.1616]
+    limit: [0.026, 0.1905]
     weight: 0.20
