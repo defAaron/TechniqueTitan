@@ -46,8 +46,10 @@ As of 2026-08-05 the repository contains:
 | Streamlit (`app.py`) | Shipped as interim / research UI (local live OpenCV) |
 | Batch CLI | Shipped — `technique_titan.batch.process_folder` |
 | Tests + CI | Shipped — pytest fixtures; GitHub Actions (Python 3.11 + Node 22 web build) |
-| Accounts / session persistence / progress charts | **Not shipped** (Phase 3 remainder) |
-| Piano-specific ML model / teacher roles | **Not shipped** (Phase 4) |
+| Optional auth (email / Google) | **Shipped** — analyze stays public; `/admin` owner view |
+| Session persistence / progress charts | **Not shipped** (Phase 3b) |
+| Eval + offline learned scorer | **Shipped offline** — production API uses YAML only; hold-out macro **0.689** vs ≥85% target ([`ML_UPGRADE.md`](./ML_UPGRADE.md)) |
+| Teacher roles / piano-specific perception | **Not shipped** (Phase 4 remainder) |
 
 Primary user-facing surface: **React + FastAPI**. Streamlit remains useful for local
 research and an optional Community Cloud demo.

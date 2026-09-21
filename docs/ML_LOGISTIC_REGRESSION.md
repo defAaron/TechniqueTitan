@@ -1,7 +1,7 @@
 # Offline learned scorer — multinomial logistic regression
 
-**Status:** Offline trainer landed; production still uses YAML heuristics.  
-**Last updated:** 2026-09-18  
+**Status:** Offline trainer landed; production still uses YAML heuristics. Hold-out macro **0.622** (Sep 2026 local compare) — **below** heuristic **0.689** on the same split; do not serve until that gate clears.  
+**Last updated:** 2026-09-21  
 **Companions:** [`ML_UPGRADE.md`](./ML_UPGRADE.md), [`SCORING_METHODS.md`](./SCORING_METHODS.md), [`data/README.md`](../data/README.md)
 
 This document explains **what** the offline classical ML scorer does, **how**

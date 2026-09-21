@@ -1,7 +1,7 @@
 # Technique Titan — Roadmap
 
-**Status:** Draft v1.1
-**Last updated:** 2026-09-11
+**Status:** Draft v1.2
+**Last updated:** 2026-09-21
 **Companion document:** [`PRD.md`](./PRD.md)
 
 This roadmap turns the PRD into a phased, milestone-based delivery plan. Each phase lists
@@ -14,16 +14,21 @@ estimates, not commitments.
 | Area | Location | Status |
 |---|---|---|
 | Core engine | `src/technique_titan/` | Done |
-| Scoring + coaching config | `config/*.yaml` | Done |
-| Product API | `api/` | Done |
+| Scoring + coaching config | `config/scoring.yaml`, `config/coaching.yaml` | Done (YAML recalibrated 2026-09-19 from train-only notebook) |
+| Product API | `api/` | Done (YAML scoring only) |
 | Product UI | `web/` (photo / video / live / about) | Done (analyze UX) |
 | Streamlit interim UI | `app.py` | Done |
 | Batch CLI | `technique_titan.batch` | Done |
-| Eval harness | `technique_titan.eval` | In progress (first slice landing) |
-| CI | `.github/workflows/ci.yml` | Done (pytest + web build; eval units via `tests/`) |
+| Eval harness | `technique_titan.eval` + `data/eval/holdout_split.json` | Done (local agreement reports; pytest in CI) |
+| Offline ML scorer | `technique_titan.ml` + `notebooks/scoring_tuning.ipynb` | Done offline (not in API; does not beat YAML on hold-out yet) |
+| CI | `.github/workflows/ci.yml` | Done (pytest + web build; eval/ML units via `tests/`) |
 | Session persistence / progress | — | Not started |
 | Optional accounts (email / Google) | `web/` + `supabase/` | Done (analyze stays public) |
-| Teacher roles / learned scorer | — | Not started |
+| Teacher roles / exportable reports | — | Not started |
+
+**Measured accuracy (local, Sep 2026):** heuristic hold-out **macro accuracy 0.689**
+(Cohen's κ 0.103) on 10 frozen real-image ids — see [`ML_UPGRADE.md`](./ML_UPGRADE.md).
+NFR-ACC-2 target (≥ 85%) is **not met**.
 
 ---
 
@@ -50,7 +55,7 @@ estimates, not commitments.
 
 ## Phase 1 — Core Detection
 
-**Status:** Done (heuristic engine shipped; eval harness landing; ≥85% still pending measured hold-out)
+**Status:** Done (engine + eval loop); **validation active** — hold-out **0.689** vs ≥85% target
 
 **Goals**
 - Extract reliable, normalized hand landmarks.
@@ -62,11 +67,12 @@ estimates, not commitments.
 - Composite score with documented weighting. ✅
 - Externally configurable thresholds (`config/scoring.yaml`). ✅
 - Unit tests against fixed landmark fixtures. ✅
-- Validation against expert-labeled set — eval harness (`technique_titan.eval` + frozen `data/eval/holdout_split.json`) exists; ≥85% still pending a measured hold-out report (export Notion → `labels.csv` → batch → eval).
+- Validation against expert-labeled set — eval harness + frozen split + tuning notebook. ✅
+- Measured hold-out agreement — **0.689 macro** after 2026-09-19 YAML promotion (local repro); target ≥85% **pending**.
 
 **Definition of Done**
 - All five criteria produce scores + severities. ✅
-- Severity agreement ≥ 85% with expert labels — **pending** measured hold-out (harness exists; no in-repo number yet).
+- Severity agreement ≥ 85% with expert labels on hold-out — **pending** (currently **0.689** macro).
 - Landmark extraction ≥ 95% on in-spec inputs — target retained; measure on curated set.
 - Score repeatability within ±5/100 for a static pose — target retained.
 - Scoring methodology documented; tests green in CI. ✅
@@ -137,29 +143,35 @@ estimates, not commitments.
 
 ## Phase 4 — Intelligence Upgrade
 
-**Status:** Planned — eval loop underway (first ML slice landing); learned scorer and teacher/student roles not started
+**Status:** In progress — **offline ML + eval shipped**; teacher roles, serving ML, and perception upgrades not started
 
 **Goals**
-- Improve accuracy with a piano-specific model and add multi-user/teacher capabilities.
+- Improve accuracy with calibrated scoring and piano-specific perception; add multi-user/teacher capabilities.
 
 **ML plan:** see [ML_UPGRADE.md](./ML_UPGRADE.md) for sequence (eval loop →
-learned scoring on existing features → temporal habits → piano-specific
-vision). Do not start with a custom detector or pixel-to-score CNN.
+learned scoring on features → temporal habits → piano-specific vision). Do not start
+with a custom detector or pixel-to-score CNN.
 
 **Key Deliverables**
-- Evaluation harness + calibrated / learned scorer on geometric features (augmenting heuristics), with heuristics retained as documented fallback. *(PRD §3.3 note; [ML_UPGRADE.md](./ML_UPGRADE.md))* Eval CLI / frozen split / tuning notebook are landing; learned scorer is not built.
-- Expanded, well-labeled training/validation datasets (built on the Phase 0 protocol).
-- User accounts with **teacher/student roles**: students submit sessions; teachers review, annotate, and assign corrections. *(PRD: FR-PT-4, UC-5)*
-- **Exportable reports** (PDF/CSV) of sessions and progress. *(PRD: FR-PT-5)*
-- Access control and privacy handling for stored user data. *(PRD: NFR-SEC-3)*
+- Evaluation harness + YAML calibration loop on frozen hold-out. ✅ (hold-out macro **0.689**; ≥85% still open)
+- Offline learned scorer on geometric features (logistic regression). ✅ (`technique_titan.ml`; joblib under `config/models/`, gitignored)
+- **Production** learned scorer with YAML fallback. ❌ (gate: ML must meet or beat heuristic hold-out; then API + tests)
+- Expanded **real-image** expert labels (33 today + companion `f*` rows in CSV). 🔄
+- Viewpoint / quality rejector. ❌
+- Temporal habit layer (live/video). ❌
+- User accounts with **teacher/student roles**: students submit sessions; teachers review, annotate, and assign corrections. *(PRD: FR-PT-4, UC-5)* ❌
+- **Exportable reports** (PDF/CSV) of sessions and progress. *(PRD: FR-PT-5)* ❌
+- Access control and privacy handling for stored user data. *(PRD: NFR-SEC-3)* ❌ (depends on 3b)
 
 **Dependencies**
-- Phase 3b (product surface + persistence) and accumulated/labeled data.
+- Phase 3b persistence unlocks teacher workflows and the teacher-correction label flywheel.
+- Label growth unlocks meaningful hold-out κ and any production ML promotion.
 
-**Estimated Duration:** 6–8 weeks
+**Estimated Duration:** 6–10 weeks from today (overlaps with finishing 3b; perception/temporal tail may extend)
 
 **Definition of Done**
-- Fine-tuned model meets or exceeds heuristic accuracy on the held-out validation set (and improves agreement beyond the ≥85% baseline).
+- Learned or calibrated scorer meets or exceeds heuristic hold-out accuracy and moves toward ≥85% expert agreement.
+- YAML fallback wired and tested on the serving path if ML is enabled.
 - Teacher and student roles work end-to-end (submit → review → annotate).
 - Reports export correctly; stored data is access-controlled.
 
@@ -196,16 +208,27 @@ vision). Do not start with a custom detector or pixel-to-score CNN.
 | Phase | Depends on | Status | Unlocks |
 |---|---|---|---|
 | 0 — Foundation | Early prototypes | Done | Reproducible builds, data strategy |
-| 1 — Core Detection | Phase 0 | Done* | Scored criteria |
+| 1 — Core Detection | Phase 0 | Done* | Scored criteria + eval baseline |
 | 2 — Feedback Engine | Phase 1 | Done | Actionable coaching |
 | 3a — Analyze UX | Phases 1–2 | Done | Public web product |
-| 3b — Persistence | Phase 3a | Next | Progress tracking |
-| 4 — Intelligence Upgrade | Phase 3b + data | Planned (eval loop underway) | Better accuracy, teacher/student, reports |
+| 3b — Persistence | Phase 3a | **Next (product)** | Progress tracking, teacher flywheel |
+| 4 — Intelligence Upgrade | 3b + labels (partial now) | **In progress (ML offline)** | Better accuracy, teacher/student, reports |
 | 5 — Scale & Polish | Phase 4 | Planned | Perf, a11y, monetization, community |
 
-\*Expert-label validation remains active: eval harness landing; ≥85% still pending measured hold-out.
+\*Hold-out expert agreement **0.689** / target **0.85** — active calibration and labeling.
 
-## Indicative Timeline
-Phases 0–3a are complete. Remaining Phase 3b through end of Phase 4 is roughly
-**10–14 weeks** of sequential work for a small team, with Phase 5 as ongoing
-hardening thereafter. Documentation, testing, and data collection run continuously.
+## Indicative timeline
+
+Phases **0–3a** and the **eval/offline-ML slice** are complete. What remains:
+
+| Track | Rough duration | Notes |
+|---|---|---|
+| **3b** — persistence, a11y, capture guidance | 4–6 weeks | Product-critical; parallel with labeling |
+| **4 (ML)** — heuristic ≥85% hold-out, optional production ML gate | 2–6+ weeks | Dominated by **real** label count, not code |
+| **4 (ML)** — viewpoint + temporal + piano perception | 6–10 weeks | After scoring gate or in parallel where safe |
+| **4 (product)** — teacher/student + exports | 4–6 weeks | After 3b schema |
+| **5** — scale / monetization | Ongoing | After Phase 4 core |
+
+**Sequential small-team estimate:** finishing **3b** plus reaching a credible **Phase 4 DoD**
+(accuracy + teacher loop) is roughly **10–16 weeks**, with labeling and eval re-runs
+continuous throughout. Detail on ML ordering: [`ML_UPGRADE.md`](./ML_UPGRADE.md).

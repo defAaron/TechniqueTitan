@@ -86,8 +86,9 @@ Writes per-criterion accuracy, Cohen’s κ, and confusion matrices under
 
 Threshold search is `notebooks/scoring_tuning.ipynb`: candidates on TRAIN
 only; promote `config/scoring.yaml` only if HOLD-OUT agreement rises. The
-notebook does not overwrite YAML. There is no published hold-out ≥85% figure
-yet; the harness is how that number will be measured. See
+notebook does not overwrite YAML. After the 2026-09-19 train-only promotion,
+local heuristic hold-out **macro accuracy is 0.689** (target ≥85% / NFR-ACC-2
+still open). Re-run eval after each export. See
 [`docs/ML_UPGRADE.md`](../docs/ML_UPGRADE.md).
 
 ## Offline classical ML
