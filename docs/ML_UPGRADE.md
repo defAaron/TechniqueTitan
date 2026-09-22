@@ -98,7 +98,7 @@ persistence remain the product half of that phase (see [`ROADMAP.md`](./ROADMAP.
 | Fine-tune a hand detector on `data/raw` | 33 images cannot beat MediaPipe. You will overfit lighting and camera angle |
 | End-to-end CNN from pixels to score | Kills explainability (FR-SC-6) and needs thousands of labels we do not have |
 | LLM as the scorer | Non-deterministic, untestable, expensive on live 2–4 Hz. Templates stay; an LLM may rewrite copy later from structured metrics |
-| Accounts before an eval harness | Persistence helps the product, not the model. Labels and agreement come first |
+| Accounts before labels / eval discipline | Auth is shipped; model quality still depends on Notion labels and hold-out eval, not login |
 
 ---
 

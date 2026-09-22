@@ -1,5 +1,11 @@
 # Data intake
 
+**Inventory (Sep 2026):** `labels.csv` has **115** rows — **33** paths under
+`data/raw/` (Notion expert labels) and **82** companion `f*` rows (geometry in
+`synthetic/feature_rows.csv`). Frozen hold-out: **10** real image ids in
+`data/eval/holdout_split.json`. Production scoring is YAML-only; eval/ML are
+local — see [`docs/ML_UPGRADE.md`](../docs/ML_UPGRADE.md).
+
 Batch dataset layout for the Technique Titan CLI
 (`python -m technique_titan.batch.process_folder`, then
 `python -m technique_titan.eval`). Requires the package

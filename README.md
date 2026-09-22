@@ -79,11 +79,12 @@ Both hands are detected and scored independently when visible in frame.
 | REST analyze API | Available (`api/`) |
 | Templated coaching tips | Available (`config/coaching.yaml`) |
 | Bulk image processing (CLI) | Available |
-| Heuristic vs expert eval (CLI) | Available (`technique_titan.eval`; hold-out report is local) |
+| Heuristic vs expert eval (CLI) | Available (`technique_titan.eval`; frozen split; local reports) |
+| Offline ML scorer (logistic regression) | Available offline (`technique_titan.ml`); **not** on API — production uses YAML |
 | Two-hand detection + separate scores | Available |
-| Configurable scoring thresholds | Available (`config/scoring.yaml`) |
+| Configurable scoring thresholds | Available (`config/scoring.yaml`; recalibrated 2026-09-19 from train-only notebook) |
 | Optional accounts (email / Google) | Available (Supabase Auth; analyze stays public) |
-| Progress tracking / session history | Planned (Phase 3 remainder) |
+| Progress tracking / session history | Planned (Phase 3b) |
 
 ### Five posture criteria
 
@@ -251,23 +252,34 @@ python -m technique_titan.eval \
 
 `data/eval/holdout_split.json` is tracked. Generated files under `data/eval/reports/` are gitignored. Threshold search is `notebooks/scoring_tuning.ipynb`: fit candidate `ideal`/`limit` bands on TRAIN only; copy into `config/scoring.yaml` only if HOLD-OUT agreement rises. The notebook does not overwrite YAML.
 
-NFR-ACC-2 (severity agreement ≥85%) is the target this harness will measure. There is no in-repo hold-out number yet — do not treat that bar as met.
+**NFR-ACC-2** target is ≥85% expert severity agreement. Measured **heuristic hold-out macro accuracy is 0.689** (Cohen's κ 0.103) after the 2026-09-19 YAML promotion — **below target**. Re-run after every Notion export and batch. Details: [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md), [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-Full agreement reports need local `data/raw/` → `data/processed/` (raw images are gitignored). CI runs eval **unit tests** via pytest, not a MediaPipe batch on `data/raw`.
+Full agreement reports need local `data/raw/` → `data/processed/` (raw images are gitignored). CI runs eval/ML **unit tests** via pytest, not a MediaPipe batch on `data/raw`.
 
-Offline classical ML (logistic regression per criterion) trains from `data/labels.csv` plus `data/processed/batch_summary.csv` and/or `data/synthetic/feature_rows.csv`. Production scoring stays on YAML heuristics. See [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md).
+Offline classical ML (one multinomial logistic regression per criterion) uses `data/labels.csv` plus `data/processed/batch_summary.csv` and/or `data/synthetic/feature_rows.csv`. **Production API scoring stays YAML-only** until ML meets or beats heuristic hold-out on real images. Math: [`docs/ML_LOGISTIC_REGRESSION.md`](docs/ML_LOGISTIC_REGRESSION.md).
 
 ```sh
 source .venv/bin/activate   # or prefix commands with .venv/bin/python -m
 pip install -e ".[ml]"
 
+python -m technique_titan.ml.synthetic \
+  --labels data/labels.csv \
+  --output data/synthetic/feature_rows.csv
+
 python -m technique_titan.ml.train \
   --labels data/labels.csv \
+  --summary data/processed/batch_summary.csv \
   --synthetic data/synthetic/feature_rows.csv \
   --split data/eval/holdout_split.json \
   --output config/models
 
-python -m technique_titan.eval --scorer compare --models config/models
+python -m technique_titan.eval --scorer compare \
+  --summary data/processed/batch_summary.csv \
+  --synthetic data/synthetic/feature_rows.csv \
+  --labels data/labels.csv \
+  --split data/eval/holdout_split.json \
+  --models config/models \
+  --output data/eval/reports
 ```
 
 ### How it works
@@ -336,6 +348,7 @@ technique_titan/
 │   ├── PRD.md
 │   ├── ROADMAP.md
 │   ├── ML_UPGRADE.md
+│   ├── ML_LOGISTIC_REGRESSION.md
 │   ├── SCORING_METHODS.md
 │   ├── DEPLOY.md
 │   └── errors.md
@@ -424,6 +437,7 @@ Project conventions:
 | [docs/PRD.md](docs/PRD.md) | Product requirements and personas |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phased delivery plan |
 | [docs/ML_UPGRADE.md](docs/ML_UPGRADE.md) | AI/ML upgrade path (eval → learned scoring → temporal → vision) |
+| [docs/ML_LOGISTIC_REGRESSION.md](docs/ML_LOGISTIC_REGRESSION.md) | Offline logistic scorer — features, math, train/compare CLI |
 | [docs/SCORING_METHODS.md](docs/SCORING_METHODS.md) | Formulas and landmark inputs per criterion |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Render + Vercel + Streamlit Cloud deploy guide |
 | [supabase/README.md](supabase/README.md) | Dedicated Auth project, Google OAuth, admin stats |
@@ -439,15 +453,17 @@ _For more examples, please refer to the [Documentation](docs/PRD.md)._
 ## Roadmap
 
 - [x] Phase 0 — Foundation: project structure, tests, data strategy
-- [x] Phase 1 — Core detection: geometry scoring engine
+- [x] Phase 1 — Core engine + eval harness (hold-out macro **0.689** vs ≥85% target — validation ongoing)
 - [x] Phase 2 — Feedback engine: templated coaching + overlays
 - [x] Phase 3a — Product surface: React UI + API (photo / video / live)
 - [x] Phase 3b (accounts) — Optional email / Google sign-in + owner signup stats
-- [ ] Phase 3b — Persistence: session history and progress charts
-- [ ] Phase 4 — Intelligence
-  - [ ] Piano-specific model — see [docs/ML_UPGRADE.md](docs/ML_UPGRADE.md)
-  - [ ] Teacher / student roles
-- [ ] Phase 5 — Scale & polish: performance, accessibility, monetization, observability
+- [ ] Phase 3b — Persistence, capture guidance, accessibility (WCAG basics)
+- [ ] Phase 4 — Intelligence (in progress offline)
+  - [x] Eval loop + YAML calibration gate + offline logistic regression ([docs/ML_UPGRADE.md](docs/ML_UPGRADE.md))
+  - [ ] Production ML + ≥85% hold-out agreement
+  - [ ] Viewpoint gate, temporal habits, piano-specific perception
+  - [ ] Teacher / student roles + exportable reports
+- [ ] Phase 5 — Scale & polish: performance, full a11y audit, monetization, observability
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for full detail, and the [open issues](https://github.com/defAaron/TechniqueTitan/issues) for proposed features and known issues.
 

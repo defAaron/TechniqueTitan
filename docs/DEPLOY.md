@@ -10,6 +10,7 @@ How to get Technique Titan in front of users: the React + FastAPI product stack
 | Product UI | React 19 + TypeScript + Vite + Tailwind 4 | [Vercel](https://technique-titan.vercel.app) | Primary |
 | Product API | FastAPI + MediaPipe + OpenCV | [Render](https://technique-titan-api.onrender.com) (Docker) | Primary |
 | Accounts | Supabase Auth (email + Google) | Dedicated Technique Titan project | Optional sign-in; analyze stays public |
+| Scoring (API) | YAML heuristics (`config/scoring.yaml`) | Render API container | Offline ML in repo only — not on serving path ([`ML_UPGRADE.md`](./ML_UPGRADE.md)) |
 | Interim demo | Streamlit (`app.py`) | Streamlit Community Cloud | Optional / research |
 
 The React UI already has **photo + video + live** parity with Streamlit. Live
@@ -190,3 +191,13 @@ cd web && npm run dev
 ```
 
 Open http://localhost:5173
+
+---
+
+## Related docs
+
+| Doc | Use when |
+|---|---|
+| [`ML_UPGRADE.md`](./ML_UPGRADE.md) | Eval / offline ML — not part of deploy, but defines what production scoring is |
+| [`ROADMAP.md`](./ROADMAP.md) | Phase 3b persistence (future Supabase tables for sessions) |
+| [`errors.md`](./errors.md) | CORS, `VITE_*` bake-time, Render cold start, Supabase redirect URLs |

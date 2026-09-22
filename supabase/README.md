@@ -4,6 +4,10 @@ Dedicated **Technique Titan** project only. Do not apply these migrations to
 another app’s database (the connected calendar project with `public.accounts`
 is the wrong target).
 
+This project stores **identity only** (profiles, admin list). Analysis results
+are **not** persisted yet — Phase 3b will add session tables when progress
+tracking ships ([`docs/ROADMAP.md`](../docs/ROADMAP.md)).
+
 ## Create the project
 
 1. [supabase.com](https://supabase.com) → **New project** (name e.g. `technique-titan`).

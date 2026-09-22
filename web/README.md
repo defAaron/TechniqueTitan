@@ -3,6 +3,9 @@
 React 19 + TypeScript + Vite 8 + Tailwind 4 product frontend for Technique Titan.
 
 Primary user-facing surface. Talks to the FastAPI backend under `/v1/*`.
+Scoring on the API is **YAML heuristics only** (offline ML is not wired).
+Optional Supabase auth is live; **session history / progress charts are not**
+(Phase 3b — see [`docs/ROADMAP.md`](../docs/ROADMAP.md)).
 
 ## Develop
 

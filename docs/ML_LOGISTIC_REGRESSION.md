@@ -301,7 +301,9 @@ python -m technique_titan.eval --scorer compare \
   --summary data/processed/batch_summary.csv \
   --synthetic data/synthetic/feature_rows.csv \
   --labels data/labels.csv \
-  --models config/models
+  --split data/eval/holdout_split.json \
+  --models config/models \
+  --output data/eval/reports
 ```
 
 Eval joins predictions to labels (`eval/labels.py`), tags train vs hold-out

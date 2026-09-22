@@ -1,6 +1,6 @@
 # Scoring Methods
 
-**Last updated:** 2026-08-05
+**Last updated:** 2026-09-21
 
 Documents each criterion's landmark inputs and formula (PRD FR-SC-6). All
 measurements are computed on **normalized landmarks**: translated so the wrist
@@ -101,3 +101,19 @@ Several metrics are camera-angle sensitive (PRD Open Question 1):
   reliable from world landmarks than image-normalized coordinates.
 - Batch runs flag statistically extreme values in `outliers.csv` so
   angle-related artifacts can be reviewed instead of silently skewing data.
+
+## Calibration and evaluation
+
+Piecewise `ideal` / `limit` bands in `config/scoring.yaml` are tuned against
+expert labels in Notion (export → `data/labels.csv`). Workflow:
+
+1. `python -m technique_titan.batch.process_folder` on `data/raw/`
+2. `python -m technique_titan.eval` against `data/eval/holdout_split.json`
+3. Candidate bands from `notebooks/scoring_tuning.ipynb` (**train files only**)
+4. Promote YAML **only** if hold-out macro accuracy / κ rises
+
+After the 2026-09-19 promotion, local heuristic hold-out **macro accuracy is
+0.689** (target ≥85% / NFR-ACC-2 still open). Offline logistic regression
+reuses the same geometry features but does **not** replace production scoring
+until it beats heuristics on hold-out — see [`ML_UPGRADE.md`](./ML_UPGRADE.md)
+and [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md).

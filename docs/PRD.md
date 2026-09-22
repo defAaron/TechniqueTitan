@@ -1,8 +1,8 @@
 # Technique Titan — Product Requirements Document (PRD)
 
-**Status:** Draft v1.1
+**Status:** Draft v1.2
 **Owner:** Product / Engineering Lead
-**Last updated:** 2026-08-05
+**Last updated:** 2026-09-21
 
 ---
 
@@ -35,7 +35,7 @@ Technique Titan closes this gap by providing **objective, repeatable, on-demand 
 evaluation** that works from a standard camera, without specialized hardware.
 
 ### 1.3 Current State of the Repository (factual baseline)
-As of 2026-08-05 the repository contains:
+As of 2026-09-21 the repository contains:
 
 | Area | Status |
 |---|---|
@@ -117,9 +117,10 @@ it to a normalized score, and assigns a severity band.
 - **FR-SC-5 (SHOULD):** The system SHOULD return the underlying geometric measurement alongside the score for transparency and debugging. ✅ (batch metrics JSON; API returns scores/severities + coaching)
 - **FR-SC-6 (MUST):** Each criterion's scoring method MUST be documented with its landmark inputs and formula so results are explainable and auditable. ✅ ([SCORING_METHODS.md](./SCORING_METHODS.md))
 
-> **Note on methodology:** Phase 1 uses **heuristic, landmark-geometry-based scoring** (joint
-> angles, relative positions). A future phase MAY replace or augment heuristics with a model
-> trained on piano-specific posture labels (see Roadmap Phase 4 and
+> **Note on methodology:** Production uses **heuristic, landmark-geometry-based scoring**
+> (`config/scoring.yaml`). An **offline** multinomial logistic regression per criterion is
+> trained in-repo (`technique_titan.ml`) but is **not** on the API serving path until it
+> meets or beats heuristic hold-out agreement (see Roadmap Phase 4 and
 > [ML_UPGRADE.md](./ML_UPGRADE.md)). Heuristics MUST remain the documented fallback.
 
 ### 3.4 Feedback Generation
@@ -136,7 +137,7 @@ it to a normalized score, and assigns a severity band.
 - **FR-PT-1 (SHOULD):** The system SHOULD persist analysis results (per-criterion scores, composite score, timestamp) per user/session. Not shipped.
 - **FR-PT-2 (SHOULD):** The system SHOULD display score trends over time per criterion (charts). Not shipped (video timeline is per-session only).
 - **FR-PT-3 (SHOULD):** The system SHOULD summarize a session (best/worst criterion, average composite score, most frequent issue). Partial — live/video surfaces rolling scores; no saved session summary.
-- **FR-PT-4 (MAY):** The system MAY support user accounts and, later, teacher/student roles (see Roadmap Phase 4). Not shipped.
+- **FR-PT-4 (MAY):** The system MAY support user accounts and, later, teacher/student roles (see Roadmap Phase 4). **Accounts shipped** (Supabase email + Google); **teacher/student roles not shipped**.
 - **FR-PT-5 (MAY):** The system MAY export a session/progress report (PDF/CSV). Partial — batch CLI exports CSV/JSON; no user-facing session PDF.
 
 ---
@@ -180,7 +181,7 @@ it to a normalized score, and assigns a severity band.
 | Metric | Target |
 |---|---|
 | Landmark extraction success rate on in-spec inputs | ≥ 95% (NFR-ACC-1) |
-| Severity classification agreement with expert labels | ≥ 85% (NFR-ACC-2) |
+| Severity classification agreement with expert labels | ≥ 85% (NFR-ACC-2); **measured heuristic hold-out macro 0.689** (Sep 2026 local eval) |
 | Static image analysis latency | ≤ 2 s (NFR-PERF-1) |
 | Live score update rate | ≥ ~2–4 Hz interactive feedback (NFR-PERF-2) |
 | Score repeatability (static pose) | within ±5 / 100 (NFR-ACC-3) |
@@ -188,8 +189,9 @@ it to a normalized score, and assigns a severity band.
 | Week-1 retention (returning to track progress) | ≥ 30% of new users return within 7 days |
 | Measurable posture improvement | ≥ 50% of weekly-active users improve composite score ≥ 10 points over 4 weeks |
 
-> Engagement/retention metrics become measurable only once persistence (Phase 3
-> remainder) exists; accuracy and latency metrics are measurable from Phase 1 tooling.
+> Engagement/retention metrics become measurable only once persistence (Phase 3b)
+> exists. Accuracy is measurable via `technique_titan.eval` on a frozen hold-out split;
+> the ≥85% bar is not met yet (see [ML_UPGRADE.md](./ML_UPGRADE.md)).
 
 ---
 
@@ -209,7 +211,7 @@ it to a normalized score, and assigns a severity band.
 | # | Question | Current decision / status |
 |---|---|---|
 | 1 | **Camera angle dependence.** Mandate angle, multi-angle, or infer? | Still open. Docs note side-view preference for wrist height; batch `outliers.csv` helps flag artifacts. |
-| 2 | **Ground-truth labeling.** Who labels, how many samples? | Classification table in Notion (`techniquetitan`); agents label via Notion MCP; export to `data/labels.csv` for batch merge. Expert set in progress (~33 images in `data/raw/`). |
+| 2 | **Ground-truth labeling.** Who labels, how many samples? | Notion table `techniquetitan` → `data/labels.csv` (**115** rows: **33** real paths under `data/raw/`, **82** companion `f*` rows). Hold-out frozen at **10** real image ids. Grow real photos to improve κ and NFR-ACC-2. |
 | 3 | **Per-criterion thresholds.** Vary by skill/age/hand size? | Defaults in `scoring.yaml`; skill-level profiles deferred. |
 | 4 | **Local vs. cloud processing.** | Live prefers on-device landmarks; photo/video upload to API. No media retention yet. |
 | 5 | **Two-hand handling.** | **Resolved for v1:** simultaneous two-hand detection + per-hand scores. |

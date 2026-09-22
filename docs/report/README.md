@@ -16,3 +16,6 @@ Create a blank Overleaf project, replace `main.tex` with this file, and compile 
 No extra packages, fonts, or figure files are required. Diagrams are TikZ; references are a built-in `thebibliography`.
 
 The report is written to exceed ten pages at 11pt, one-half spacing, A4.
+
+Factual baseline for scores, roadmap, and ML status: [`../ROADMAP.md`](../ROADMAP.md),
+[`../ML_UPGRADE.md`](../ML_UPGRADE.md) (heuristic hold-out macro **0.689**, Sep 2026).
