@@ -310,6 +310,93 @@ For each detected hand the pipeline:
 
 ### Architecture
 
+Product serving, shared engine, and offline research as one graph. Every arrow is a real call or data dependency.
+
+```mermaid
+graph TD
+    Cam["Laptop camera"] --> LivePage["React Live"]
+    PhotoFile["Photo file"] --> PhotoPage["React Photo"]
+    VideoFile["Video file"] --> VideoPage["React Video"]
+    LivePage --> ReactUI["React UI on Vercel"]
+    PhotoPage --> ReactUI
+    VideoPage --> ReactUI
+    AuthPage["Login and signup"] --> ReactUI
+    AdminPage["Admin stats"] --> ReactUI
+    ReactUI --> Supabase["Supabase Auth"]
+    AdminPage --> Supabase
+    AuthPage --> Supabase
+    LivePage --> BrowserMP["Browser MediaPipe"]
+    PhotoPage -->|"POST /v1/analyze/image"| FastAPI["FastAPI on Render"]
+    VideoPage -->|"POST /v1/analyze/video"| FastAPI
+    LivePage -->|"POST /v1/analyze/frame"| FastAPI
+    BrowserMP -->|"POST /v1/score/landmarks"| FastAPI
+    FastAPI --> Health["GET /v1/health"]
+    FastAPI --> PubCfg["GET /v1/config/public"]
+    FastAPI --> ServerMP["HandDetector MediaPipe 0.10.21"]
+    FastAPI --> Analysis["analysis.py"]
+    BrowserMP --> Analysis
+    Streamlit["Streamlit app.py"] --> ServerMP
+    Streamlit --> Analysis
+    RawDir["data/raw photos"] --> BatchCLI["batch process_folder"]
+    BatchCLI --> ServerMP
+    ServerMP --> Analysis
+    Analysis --> Geometry["geometry normalize"]
+    Geometry --> Features["features extract"]
+    Features --> WristH["Wrist height"]
+    Features --> FingerC["Finger curvature"]
+    Features --> ThumbP["Thumb position"]
+    Features --> WristL["Wrist lateral"]
+    Features --> HandA["Hand arch"]
+    WristH --> Scoring["scoring.py"]
+    FingerC --> Scoring
+    ThumbP --> Scoring
+    WristL --> Scoring
+    HandA --> Scoring
+    ScoringYaml["config/scoring.yaml"] --> Scoring
+    Scoring --> Coaching["coaching.py"]
+    CoachingYaml["config/coaching.yaml"] --> Coaching
+    Coaching --> Overlay["Skeleton overlay"]
+    Coaching --> Panel["Score panel and tips"]
+    Overlay --> ReactUI
+    Panel --> ReactUI
+    Overlay --> Streamlit
+    Panel --> Streamlit
+    Scoring --> CsvOut["batch_summary.csv"]
+    Scoring --> JsonOut["per-image metrics JSON"]
+    BatchCLI --> CsvOut
+    BatchCLI --> JsonOut
+    Notion["Notion labels"] --> LabelsCsv["data/labels.csv"]
+    LabelsCsv --> BatchCLI
+    CsvOut --> EvalCLI["eval CLI"]
+    LabelsCsv --> EvalCLI
+    Holdout["holdout_split.json"] --> EvalCLI
+    EvalCLI --> Reports["eval reports"]
+    EvalCLI --> Notebook["scoring_tuning.ipynb"]
+    Notebook --> ScoringYaml
+    CsvOut --> MlTrain["ml train"]
+    LabelsCsv --> MlTrain
+    Synthetic["synthetic feature_rows.csv"] --> MlTrain
+    MlTrain --> Models["config/models offline"]
+    Models --> EvalCLI
+    GHA["GitHub Actions"] --> TestEngine["pytest engine"]
+    GHA --> TestApi["pytest API"]
+    GHA --> WebBuild["npm run build"]
+    TestEngine --> Analysis
+    TestEngine --> Scoring
+    TestApi --> FastAPI
+    WebBuild --> ReactUI
+    classDef product fill:#e8f1ff,stroke:#1d4ed8,color:#111111
+    classDef research fill:#f3e8ff,stroke:#6d28d9,color:#111111
+    classDef core fill:#f4f4f5,stroke:#18181b,color:#111111
+    class Cam,PhotoFile,VideoFile,LivePage,PhotoPage,VideoPage,AuthPage,AdminPage,ReactUI,Streamlit,BrowserMP,FastAPI,Health,PubCfg,ServerMP product
+    class RawDir,BatchCLI,Notion,LabelsCsv,CsvOut,JsonOut,Holdout,EvalCLI,Reports,Notebook,MlTrain,Synthetic,Models research
+    class Analysis,Geometry,Features,WristH,FingerC,ThumbP,WristL,HandA,Scoring,Coaching,Overlay,Panel,ScoringYaml,CoachingYaml,GHA,TestEngine,TestApi,WebBuild,Supabase core
+```
+
+Blue is product serving, purple is offline research, gray is the shared engine, config, and CI.
+
+Repo layout:
+
 ```
 technique_titan/
 ├── api/                      # FastAPI product backend (uvicorn api.main:app)
