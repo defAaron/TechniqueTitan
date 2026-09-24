@@ -84,7 +84,7 @@ Both hands are detected and scored independently when visible in frame.
 | Two-hand detection + separate scores | Available |
 | Configurable scoring thresholds | Available (`config/scoring.yaml`; recalibrated 2026-09-19 from train-only notebook) |
 | Optional accounts (email / Google) | Available (Supabase Auth; analyze stays public) |
-| Progress tracking / session history | Planned (Phase 3b) |
+| Progress tracking / session history | Shipped — opt-in save + `/progress` dashboard (scores only; apply Supabase migration) |
 
 ### Five posture criteria
 
@@ -544,7 +544,8 @@ _For more examples, please refer to the [Documentation](docs/PRD.md)._
 - [x] Phase 2 — Feedback engine: templated coaching + overlays
 - [x] Phase 3a — Product surface: React UI + API (photo / video / live)
 - [x] Phase 3b (accounts) — Optional email / Google sign-in + owner signup stats
-- [ ] Phase 3b — Persistence, capture guidance, accessibility (WCAG basics)
+- [x] Phase 3b — Session persistence + progress dashboard (Supabase free-tier caps; no media)
+- [ ] Phase 3b — Capture guidance, accessibility (WCAG basics)
 - [ ] Phase 4 — Intelligence (in progress offline)
   - [x] Eval loop + YAML calibration gate + offline logistic regression ([docs/ML_UPGRADE.md](docs/ML_UPGRADE.md))
   - [ ] Production ML + ≥85% hold-out agreement

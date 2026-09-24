@@ -71,6 +71,8 @@ def limiter_bucket(path: str) -> str:
         return "landmarks"
     if path.rstrip("/").endswith("/analyze/frame"):
         return "frame"
+    if path.rstrip("/").endswith("/progress/reduce"):
+        return "heavy"
     return "heavy"
 
 

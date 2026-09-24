@@ -22,7 +22,7 @@ estimates, not commitments.
 | Eval harness | `technique_titan.eval` + `data/eval/holdout_split.json` | Done (local agreement reports; pytest in CI) |
 | Offline ML scorer | `technique_titan.ml` + `notebooks/scoring_tuning.ipynb` | Done offline (not in API; does not beat YAML on hold-out yet) |
 | CI | `.github/workflows/ci.yml` | Done (pytest + web build; eval/ML units via `tests/`) |
-| Session persistence / progress | — | Not started |
+| Session persistence / progress | `web/` + `supabase/` + `technique_titan.progress` | In progress (save + dashboard shipped; a11y remaining) |
 | Optional accounts (email / Google) | `web/` + `supabase/` | Done (analyze stays public) |
 | Teacher roles / exportable reports | — | Not started |
 
@@ -123,7 +123,7 @@ NFR-ACC-2 target (≥ 85%) is **not met**.
 ### 3b — Persistence & polish (next)
 
 - Optional **email + Google accounts** (Supabase Auth). Analyze routes stay public; `ProtectedRoute` is ready to gate them later. Owner `/admin` signup counts. ✅
-- Persistence of session results and **session history + progress charts** per criterion over time. *(PRD: FR-PT-1…FR-PT-3, UC-4)*
+- Persistence of session results and **session history + progress charts** per criterion over time. *(PRD: FR-PT-1…FR-PT-3, UC-4)* ✅ (opt-in save; `/progress` dashboard; Supabase free-tier caps — see [`supabase/README.md`](../supabase/README.md))
 - Richer in-product capture guidance. *(PRD: FR-IN-5)*
 - Accessibility pass to WCAG 2.1 AA basics (contrast, keyboard nav, non-color severity cues, screen-reader text). *(PRD: NFR-A11Y-1…3)*
 - Optional: retire Streamlit Community Cloud once Vercel is the sole public URL.
@@ -136,7 +136,7 @@ NFR-ACC-2 target (≥ 85%) is **not met**.
 **Definition of Done**
 - A user can analyze a static image **and** run real-time mode in the browser and receive scored, prioritized feedback. ✅
 - Interactive live score updates (throttled API path). ✅
-- Sessions are saved and progress charts render historical trends. ❌ (remaining)
+- Sessions are saved and progress charts render historical trends. ✅ (apply `20260923000004_practice_sessions.sql` on Supabase)
 - Accessibility checklist passes for the core flows. ❌ (remaining)
 
 ---

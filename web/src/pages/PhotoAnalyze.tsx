@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CoachingTips, OverlayImage, ScorePanel } from '../components/analyze'
 import { PageHeader } from '../components/layout'
+import { AddToProgressButton } from '../components/progress'
 import {
   analyzeImage,
   formatApiError,
@@ -67,6 +68,14 @@ export function PhotoAnalyze() {
           {error}
         </p>
       )}
+
+      {result && (
+        <AddToProgressButton draft={result.progress_draft} className="mb-2" />
+      )}
+
+      {result && result.progress_draft?.hands?.length ? (
+        <AddToProgressButton draft={result.progress_draft} />
+      ) : null}
 
       {result && (
         <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">

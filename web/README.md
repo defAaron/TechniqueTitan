@@ -4,8 +4,11 @@ React 19 + TypeScript + Vite 8 + Tailwind 4 product frontend for Technique Titan
 
 Primary user-facing surface. Talks to the FastAPI backend under `/v1/*`.
 Scoring on the API is **YAML heuristics only** (offline ML is not wired).
-Optional Supabase auth is live; **session history / progress charts are not**
-(Phase 3b — see [`docs/ROADMAP.md`](../docs/ROADMAP.md)).
+Optional Supabase auth is live. Signed-in users can **Add to progress** after
+photo, video, or live analyze and view **`/progress`** (dashboard + session list).
+Scores only — no media in Supabase. Apply
+[`supabase/migrations/20260923000004_practice_sessions.sql`](../supabase/migrations/20260923000004_practice_sessions.sql)
+on your project. Remaining Phase 3b: a11y pass, richer capture guidance.
 
 ## Develop
 

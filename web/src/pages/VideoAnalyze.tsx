@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { VideoLandmarkReplay } from '../components/analyze'
 import { PageHeader } from '../components/layout'
+import { AddToProgressButton } from '../components/progress'
 import { analyzeVideo, formatApiError, type VideoAnalyzeResponse } from '../lib/api'
 
 export function VideoAnalyze() {
@@ -113,6 +114,9 @@ export function VideoAnalyze() {
 
       {result && (
         <div className="space-y-10">
+          {result.progress_draft?.hands?.length ? (
+            <AddToProgressButton draft={result.progress_draft} />
+          ) : null}
           {chartData.length > 0 && (
             <section className="animate-fade-up border border-white/10 bg-zinc-950 p-5">
               <h2 className="mb-4 font-cinematic text-2xl font-normal text-white">

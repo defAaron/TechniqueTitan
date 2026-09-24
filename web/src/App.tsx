@@ -10,6 +10,7 @@ import { AuthPage } from './pages/AuthPage'
 import { HomePage } from './pages/HomePage'
 import { LivePractice } from './pages/LivePractice'
 import { PhotoAnalyze } from './pages/PhotoAnalyze'
+import { ProgressPage } from './pages/ProgressPage'
 import { VideoAnalyze } from './pages/VideoAnalyze'
 
 const queryClient = new QueryClient()
@@ -43,6 +44,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <LivePractice />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/progress"
+                element={
+                  <ProtectedRoute>
+                    <ProgressPage />
                   </ProtectedRoute>
                 }
               />

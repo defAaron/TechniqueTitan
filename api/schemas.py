@@ -44,10 +44,43 @@ class HandResultOut(BaseModel):
     landmarks: List[List[float]]
 
 
+class HandSummaryOut(BaseModel):
+    hand: str
+    frames_kept: int
+    mean_composite: Optional[float] = None
+    p10_composite: Optional[float] = None
+    mean_scores: Dict[str, Optional[float]] = Field(default_factory=dict)
+    frac_warning: Dict[str, float] = Field(default_factory=dict)
+    frac_critical: Dict[str, float] = Field(default_factory=dict)
+    primary_issue: Optional[str] = None
+    tip_problem: Optional[str] = None
+    tip_fix: Optional[str] = None
+
+
+class SessionSampleOut(BaseModel):
+    t_ms: int
+    hand: str
+    confidence: float
+    composite: Optional[float] = None
+    scores: Dict[str, Optional[float]] = Field(default_factory=dict)
+    severities: Dict[str, str] = Field(default_factory=dict)
+
+
+class SessionDraftOut(BaseModel):
+    source: str
+    duration_s: float
+    frames_seen: int
+    frames_kept: int
+    scoring_version: str
+    hands: List[HandSummaryOut] = Field(default_factory=list)
+    samples: List[SessionSampleOut] = Field(default_factory=list)
+
+
 class AnalyzeResponse(BaseModel):
     hands: List[HandResultOut]
     overlay_png_base64: Optional[str] = None
     message: Optional[str] = None
+    progress_draft: Optional[SessionDraftOut] = None
 
 
 class LandmarkHandIn(BaseModel):
@@ -79,6 +112,24 @@ class VideoAnalyzeResponse(BaseModel):
     timeline: Dict[str, List[Optional[float]]]
     fps: float = 0.0
     message: Optional[str] = None
+    progress_draft: Optional[SessionDraftOut] = None
+
+
+class ProgressTickIn(BaseModel):
+    t_ms: int = Field(..., ge=0)
+    hand: str
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    composite_score: Optional[float] = None
+    scores: Dict[str, Optional[float]] = Field(default_factory=dict)
+    severities: Dict[str, str] = Field(default_factory=dict)
+    coaching: Optional[CoachingOut] = None
+
+
+class ReduceProgressRequest(BaseModel):
+    source: str = Field(..., pattern="^(live|photo|video)$")
+    duration_s: float = Field(default=0.0, ge=0.0)
+    frames_seen: int = Field(default=0, ge=0)
+    ticks: List[ProgressTickIn] = Field(default_factory=list)
 
 
 class PublicConfigResponse(BaseModel):

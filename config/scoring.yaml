@@ -12,6 +12,8 @@
 # Promoted because hold-out macro accuracy rose 0.622 → 0.689 (κ 0.064 → 0.103).
 # NFR-ACC-2 (≥85% hold-out) is still not met.
 
+version: "2026-09-19-calibrated"
+
 severity_bands:
   good_min: 80      # score >= 80  -> "good"
   warning_min: 50   # score >= 50  -> "warning", below -> "critical"

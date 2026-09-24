@@ -19,12 +19,16 @@ from technique_titan.analysis import (
 from technique_titan.coaching import annotate_with_coaching, generate_coaching
 from technique_titan.detection import HandDetection, HandDetector
 
+from technique_titan.progress.reducer import draft_from_analyze_hands, draft_from_video_frames
+
+from .progress_helpers import draft_to_out, min_confidence
 from .schemas import (
     AnalyzeResponse,
     CoachingOut,
     CoachingTipOut,
     HandResultOut,
     LandmarkHandIn,
+    SessionDraftOut,
     VideoAnalyzeResponse,
     VideoFrameScore,
 )
@@ -94,6 +98,26 @@ def serialize_hand(
     )
 
 
+def _photo_progress_draft(
+    hands: List[HandResultOut], scoring_config: dict
+) -> SessionDraftOut | None:
+    if not hands:
+        return None
+    try:
+        draft = draft_from_analyze_hands(
+            [h.model_dump() for h in hands],
+            source="photo",
+            min_confidence=min_confidence(scoring_config),
+            duration_s=0.0,
+            frames_seen=1,
+        )
+    except ValueError:
+        return None
+    if not draft.hands:
+        return None
+    return draft_to_out(draft, scoring_config)
+
+
 def analyze_image_bgr(
     image_bgr: np.ndarray,
     detector: HandDetector,
@@ -119,9 +143,11 @@ def analyze_image_bgr(
         )
         overlay_b64 = encode_png_base64(annotated)
 
+    hands_out = [serialize_hand(r, scoring_config, coaching_config) for r in results]
     return AnalyzeResponse(
-        hands=[serialize_hand(r, scoring_config, coaching_config) for r in results],
+        hands=hands_out,
         overlay_png_base64=overlay_b64,
+        progress_draft=_photo_progress_draft(hands_out, scoring_config),
     )
 
 
@@ -226,4 +252,21 @@ def analyze_video_bytes(
             message="No frames could be analyzed from that video.",
         )
 
-    return VideoAnalyzeResponse(frames=frames_out, timeline=timeline, fps=fps)
+    progress_draft: SessionDraftOut | None = None
+    try:
+        draft = draft_from_video_frames(
+            [f.model_dump() for f in frames_out],
+            fps=fps,
+            min_confidence=min_confidence(scoring_config),
+        )
+        if draft.hands:
+            progress_draft = draft_to_out(draft, scoring_config)
+    except ValueError:
+        progress_draft = None
+
+    return VideoAnalyzeResponse(
+        frames=frames_out,
+        timeline=timeline,
+        fps=fps,
+        progress_draft=progress_draft,
+    )

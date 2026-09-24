@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ScorePanel } from '../components/analyze'
+import { AddToProgressButton } from '../components/progress'
 import {
   analyzeFrame,
   formatApiError,
+  reduceProgressSession,
   scoreLandmarks,
   type AnalyzeResponse,
   type HandResult,
+  type ProgressTick,
+  type SessionDraftOut,
 } from '../lib/api'
 import {
   detectHandsVideo,
@@ -31,6 +35,32 @@ export function LivePractice() {
   const [hands, setHands] = useState<HandResult[]>([])
 
   const lastResultsRef = useRef<AnalyzeResponse | null>(null)
+  const sessionStartRef = useRef(0)
+  const ticksRef = useRef<ProgressTick[]>([])
+  const framesSeenRef = useRef(0)
+  const [progressDraft, setProgressDraft] = useState<SessionDraftOut | null>(null)
+  const [finalizing, setFinalizing] = useState(false)
+
+  const finalizeSession = useCallback(async () => {
+    if (!ticksRef.current.length) {
+      setProgressDraft(null)
+      return
+    }
+    setFinalizing(true)
+    try {
+      const draft = await reduceProgressSession({
+        source: 'live',
+        duration_s: Math.max(0, (Date.now() - sessionStartRef.current) / 1000),
+        frames_seen: framesSeenRef.current,
+        ticks: ticksRef.current,
+      })
+      setProgressDraft(draft)
+    } catch {
+      setProgressDraft(null)
+    } finally {
+      setFinalizing(false)
+    }
+  }, [])
 
   const stopCamera = useCallback(() => {
     cancelAnimationFrame(rafRef.current)
@@ -40,7 +70,8 @@ export function LivePractice() {
     lastResultsRef.current = null
     setRunning(false)
     setStatus('Camera idle')
-  }, [])
+    void finalizeSession()
+  }, [finalizeSession])
 
   useEffect(() => () => stopCamera(), [stopCamera])
 
@@ -76,6 +107,21 @@ export function LivePractice() {
       paintFrame(res)
       if (res.message && !res.hands.length) setStatus(res.message)
       else setStatus(res.hands.length ? `${res.hands.length} hand(s)` : 'No hand')
+      if (res.hands.length && sessionStartRef.current) {
+        framesSeenRef.current += 1
+        const t_ms = Math.max(0, Date.now() - sessionStartRef.current)
+        for (const hand of res.hands) {
+          ticksRef.current.push({
+            t_ms,
+            hand: hand.label,
+            confidence: hand.confidence,
+            composite_score: hand.composite_score,
+            scores: hand.scores,
+            severities: hand.severities,
+            coaching: hand.coaching,
+          })
+        }
+      }
     },
     [paintFrame],
   )
@@ -157,6 +203,10 @@ export function LivePractice() {
   async function startCamera() {
     setError(null)
     setHands([])
+    setProgressDraft(null)
+    ticksRef.current = []
+    framesSeenRef.current = 0
+    sessionStartRef.current = Date.now()
     backoffUntilRef.current = 0
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -248,6 +298,15 @@ export function LivePractice() {
         )}
         <span className="font-body text-sm text-white/40">{status}</span>
       </div>
+
+      {!running && (progressDraft || finalizing) && (
+        <div className="space-y-2">
+          {finalizing && (
+            <p className="font-body text-sm text-white/50">Building session summary…</p>
+          )}
+          <AddToProgressButton draft={progressDraft} />
+        </div>
+      )}
 
       {error && (
         <p className="border border-critical/40 bg-critical/10 px-4 py-3 text-base text-critical">

@@ -4,9 +4,25 @@ Dedicated **Technique Titan** project only. Do not apply these migrations to
 another app’s database (the connected calendar project with `public.accounts`
 is the wrong target).
 
-This project stores **identity only** (profiles, admin list). Analysis results
-are **not** persisted yet — Phase 3b will add session tables when progress
-tracking ships ([`docs/ROADMAP.md`](../docs/ROADMAP.md)).
+Stores **identity** (`profiles`, `app_admins`) and **opt-in practice progress**
+(`practice_sessions`, `session_hands`). No photos, video, or Supabase Storage —
+scores and compact jsonb timelines only.
+
+Apply [`migrations/20260923000004_practice_sessions.sql`](migrations/20260923000004_practice_sessions.sql)
+on the production project (or re-run the practice section of [`bootstrap.sql`](bootstrap.sql))
+after the auth migrations.
+
+### Free-tier storage rules (500 MB database quota)
+
+| Cap | Value |
+|---|---|
+| `samples` jsonb per session | ≤ **32 KB** (API rejects larger drafts) |
+| Sessions with timeline samples kept | **20** most recent per user (older `samples` cleared on save) |
+| Saved sessions per user | **400** max (DB trigger; delete old rows to save more) |
+| File storage | **Unused** — do not create buckets for analyze media |
+
+Free projects also **pause after ~7 days of inactivity** and have **no automatic backups**.
+Plan ops accordingly ([Supabase pricing](https://supabase.com/pricing)).
 
 ## Create the project
 

@@ -80,10 +80,43 @@ export interface HandResult {
   landmarks: number[][]
 }
 
+export interface HandSummary {
+  hand: string
+  frames_kept: number
+  mean_composite: number | null
+  p10_composite: number | null
+  mean_scores: Record<string, number | null>
+  frac_warning: Record<string, number>
+  frac_critical: Record<string, number>
+  primary_issue: string | null
+  tip_problem: string | null
+  tip_fix: string | null
+}
+
+export interface SessionSample {
+  t_ms: number
+  hand: string
+  confidence: number
+  composite: number | null
+  scores: Record<string, number | null>
+  severities: Record<string, string>
+}
+
+export interface SessionDraftOut {
+  source: string
+  duration_s: number
+  frames_seen: number
+  frames_kept: number
+  scoring_version: string
+  hands: HandSummary[]
+  samples: SessionSample[]
+}
+
 export interface AnalyzeResponse {
   hands: HandResult[]
   overlay_png_base64: string | null
   message: string | null
+  progress_draft?: SessionDraftOut | null
 }
 
 export interface VideoFrameScore {
@@ -96,6 +129,32 @@ export interface VideoAnalyzeResponse {
   timeline: Record<string, Array<number | null>>
   fps?: number
   message: string | null
+  progress_draft?: SessionDraftOut | null
+}
+
+export interface ProgressTick {
+  t_ms: number
+  hand: string
+  confidence: number
+  composite_score: number | null
+  scores: Record<string, number | null>
+  severities: Record<string, Severity | string>
+  coaching?: Coaching
+}
+
+export async function reduceProgressSession(payload: {
+  source: 'live' | 'photo' | 'video'
+  duration_s: number
+  frames_seen: number
+  ticks: ProgressTick[]
+}): Promise<SessionDraftOut> {
+  const res = await apiFetch(`${API_BASE}/v1/progress/reduce`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) throw new Error(await parseError(res))
+  return res.json()
 }
 
 export interface LandmarkHand {
