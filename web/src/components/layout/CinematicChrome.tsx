@@ -9,10 +9,7 @@ const MODE_NAV = [
   { to: '/live', label: 'Live' },
 ] as const
 
-const PUBLIC_NAV = [
-  { to: '/progress', label: 'Progress' },
-  { to: '/about', label: 'About' },
-] as const
+const PUBLIC_NAV = [{ to: '/about', label: 'About' }] as const
 
 function ModesDropdown() {
   const [open, setOpen] = useState(false)
