@@ -158,7 +158,7 @@ export function useAuth(): AuthContextValue {
 
 /** Internal path only — rejects protocol-relative and external URLs. */
 export function safeNextPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/'
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/progress'
   return raw
 }
 

@@ -106,17 +106,7 @@ export function CinematicNav({
   style?: CSSProperties
 }) {
   const { user } = useAuth()
-  const location = useLocation()
-  const onHome = location.pathname === '/'
-  const links = landing
-    ? [
-        ...(user && !onHome ? [{ to: '/', label: 'Home' }] : []),
-        ...(user ? [{ to: '/progress', label: 'Progress' }] : []),
-      ]
-    : [
-        ...(overlay ? [] : [{ to: '/', label: 'Home' }]),
-        ...(user ? [{ to: '/progress', label: 'Progress' }] : []),
-      ]
+  const links = user ? [{ to: '/progress', label: 'Progress' }] : []
 
   const navClass = fixed
     ? 'flex items-center justify-between border-b border-white/10 bg-black px-6 py-5 backdrop-blur-md sm:px-10'
@@ -155,7 +145,6 @@ export function CinematicNav({
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
               className={({ isActive }) =>
                 [
                   'transition-colors duration-300 hover:text-white',

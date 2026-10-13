@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { CinematicFooter } from '../components/layout'
 import { CinematicHero } from '../components/marketing'
 import { CRITERION_LABELS } from '../lib/api'
@@ -103,7 +103,11 @@ function ModeMedia({ mode }: { mode: Mode }) {
 }
 
 export function HomePage() {
-  const { user } = useAuth()
+  const { loading, user } = useAuth()
+
+  if (!loading && user) {
+    return <Navigate to="/progress" replace />
+  }
 
   return (
     <div className="bg-zinc-950">
