@@ -4,7 +4,6 @@ import { CinematicHero } from '../components/marketing'
 import { CRITERION_LABELS } from '../lib/api'
 import { useAuth } from '../lib/auth'
 
-const WIDE_IMG = '/landing/keys-wide.jpg'
 const PIANIST_IMG = '/landing/pianist.jpg'
 const PHOTO_MODE_VIDEO = '/landing/photo-mode.mp4'
 const VIDEO_MODE_VIDEO = '/landing/video-mode.mp4'
@@ -87,7 +86,7 @@ function ModeMedia({ mode }: { mode: Mode }) {
         muted
         loop
         playsInline
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover object-center"
       />
     )
   }
@@ -98,7 +97,7 @@ function ModeMedia({ mode }: { mode: Mode }) {
       alt={mode.alt}
       width={mode.width}
       height={mode.height}
-      className="h-full w-full object-cover grayscale transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0"
+      className="h-full w-full object-cover object-center grayscale transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0"
     />
   )
 }
@@ -107,12 +106,12 @@ export function HomePage() {
   const { user } = useAuth()
 
   return (
-    <div className="bg-black">
+    <div className="bg-zinc-950">
       <CinematicHero />
 
       <section
         id="criteria"
-        className="mx-auto max-w-6xl bg-black px-6 pb-24 pt-32 text-white sm:px-10"
+        className="mx-auto max-w-6xl bg-zinc-950 px-6 pb-24 pt-32 text-white sm:px-10"
       >
         <div className="mb-24 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-6">
           <div className="hidden pt-2 lg:col-span-1 lg:block">
@@ -142,19 +141,21 @@ export function HomePage() {
               {criteria.map((item) => (
                 <Link
                   key={item.key}
-                  to="/about"
-                  className="group flex cursor-pointer items-center gap-6 border-b border-white/10 py-5 transition-colors duration-300 hover:border-white/30"
+                  to="/signup"
+                  className="group flex cursor-pointer items-center gap-6 border-b border-transparent px-0 py-5 transition-colors duration-300 hover:border-white/25"
                 >
-                  <span className="w-12 flex-shrink-0 font-body text-sm text-white/30">
+                  <span className="w-12 flex-shrink-0 font-body text-sm text-white/30 transition-colors group-hover:text-white/50">
                     {item.n}
                   </span>
                   <div className="flex-1">
-                    <p className="font-cinematic text-base text-white transition-colors group-hover:text-white/80">
+                    <p className="font-cinematic text-lg text-white transition-colors group-hover:text-white">
                       {CRITERION_LABELS[item.key]}
                     </p>
-                    <p className="mt-0.5 font-body text-sm text-white/40">{item.body}</p>
+                    <p className="mt-0.5 font-body text-sm text-white/40 transition-colors group-hover:text-white/55">
+                      {item.body}
+                    </p>
                   </div>
-                  <span className="text-sm text-white/20 transition-colors group-hover:text-white/60">
+                  <span className="text-sm text-white/20 transition-colors group-hover:text-white/70">
                     →
                   </span>
                 </Link>
@@ -173,85 +174,46 @@ export function HomePage() {
           </blockquote>
           <div className="h-px flex-1 bg-white/10" />
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-6">
-          <div className="lg:col-span-5">
-            <div className="relative overflow-hidden bg-zinc-900" style={{ aspectRatio: '4/5' }}>
-              <img
-                src={WIDE_IMG}
-                alt="Piano keyboard detail in moody light"
-                width={2400}
-                height={1600}
-                className="h-full w-full object-cover"
-                style={{ filter: 'grayscale(20%) contrast(1.1)' }}
-              />
+      <section id="start" className="border-t border-white/10 bg-zinc-950 px-6 py-24 sm:px-10">
+        <div className="mx-auto max-w-4xl">
+          <h2
+            className="mb-16 font-cinematic font-normal leading-tight text-white sm:mb-20"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+          >
+            See how it works
+          </h2>
+          <div className="flex flex-col gap-20 sm:gap-24">
+          {modes.map((mode) => (
+            <article key={mode.to} className="group flex flex-col gap-5">
               <div
-                className="absolute inset-0"
+                className="w-full overflow-hidden rounded-lg bg-zinc-900"
                 style={{
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
+                  aspectRatio: '16 / 10',
+                  minHeight: 'clamp(14rem, 52vw, 22rem)',
                 }}
-              />
-            </div>
-          </div>
-          <div className="hidden lg:col-span-1 lg:block" />
-          <div className="lg:col-span-6">
-            <p className="mb-6 font-body text-sm uppercase tracking-[0.4em] text-white/30">
-              About
-            </p>
-            <h3
-              className="mb-6 font-cinematic font-normal text-white"
-              style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}
-            >
-              Technique Titan
-            </h3>
-            <p className="mb-4 font-body text-base font-light leading-relaxed text-white/50">
-              A second pair of eyes on every practice session. It measures wrist height,
-              finger curvature, thumb position, wrist line, and hand arch — then returns
-              the one correction that matters most right now.
-            </p>
-            <p className="mb-10 font-body text-base font-light leading-relaxed text-white/40">
-              No wearables, no special hardware — just a camera and an account. Live mode
-              keeps video on your device and posts only compact landmarks to the API.
-            </p>
-            <Link
-              to="/about"
-              className="border-b border-white/20 pb-1 font-body text-sm uppercase tracking-[0.4em] text-white/60 transition-all duration-300 hover:border-white hover:text-white"
-            >
-              How scoring works
-            </Link>
+              >
+                <ModeMedia mode={mode} />
+              </div>
+              <Link
+                to={
+                  user
+                    ? mode.to
+                    : `/signup?next=${encodeURIComponent(mode.to)}`
+                }
+                className="block"
+              >
+                <p className="mb-1 font-cinematic text-lg text-white">{mode.title}</p>
+                <p className="font-body text-sm text-white/40">{mode.meta}</p>
+              </Link>
+            </article>
+          ))}
           </div>
         </div>
       </section>
 
-      <section id="start" className="border-t border-white/10 bg-black px-6 py-24 sm:px-10">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-3">
-            {modes.map((mode) => (
-              <article key={mode.to} className="group">
-                <div
-                  className="mb-4 overflow-hidden bg-zinc-900"
-                  style={{ aspectRatio: `${mode.width} / ${mode.height}` }}
-                >
-                  <ModeMedia mode={mode} />
-                </div>
-                <Link
-                  to={
-                    user
-                      ? mode.to
-                      : `/signup?next=${encodeURIComponent(mode.to)}`
-                  }
-                  className="block"
-                >
-                  <p className="mb-1 font-cinematic text-base text-white">{mode.title}</p>
-                  <p className="font-body text-sm text-white/40">{mode.meta}</p>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <CinematicFooter />
+      <CinematicFooter onLanding />
     </div>
   )
 }

@@ -9,8 +9,6 @@ const MODE_NAV = [
   { to: '/live', label: 'Live' },
 ] as const
 
-const PUBLIC_NAV = [{ to: '/about', label: 'About' }] as const
-
 function ModesDropdown() {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -96,27 +94,38 @@ const footerLinks = [
 
 export function CinematicNav({
   overlay = false,
+  landing = false,
+  fixed = false,
   style,
 }: {
   overlay?: boolean
+  /** Home route: minimal chrome (logo + auth / signed-in tools). */
+  landing?: boolean
+  /** Pin to viewport top (used on the marketing home). */
+  fixed?: boolean
   style?: CSSProperties
 }) {
   const { user } = useAuth()
-  const links = [
-    ...(overlay ? [] : [{ to: '/', label: 'Home' }]),
-    ...(user ? [{ to: '/progress', label: 'Progress' }] : []),
-    ...PUBLIC_NAV,
-  ]
+  const location = useLocation()
+  const onHome = location.pathname === '/'
+  const links = landing
+    ? [
+        ...(user && !onHome ? [{ to: '/', label: 'Home' }] : []),
+        ...(user ? [{ to: '/progress', label: 'Progress' }] : []),
+      ]
+    : [
+        ...(overlay ? [] : [{ to: '/', label: 'Home' }]),
+        ...(user ? [{ to: '/progress', label: 'Progress' }] : []),
+      ]
+
+  const navClass = fixed
+    ? 'flex items-center justify-between border-b border-white/10 bg-black px-6 py-5 backdrop-blur-md sm:px-10'
+    : overlay
+      ? 'absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 pt-6 sm:px-10 sm:pt-8'
+      : 'sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-black/80 px-6 py-6 backdrop-blur-sm sm:px-10'
 
   return (
-    <nav
-      className={
-        overlay
-          ? 'absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 pt-6 sm:px-10 sm:pt-8'
-          : 'sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-black/80 px-6 py-6 backdrop-blur-sm sm:px-10'
-      }
-      style={style}
-    >
+    <nav className={navClass} style={style}>
       <Link
         to="/"
         className="flex items-center gap-3 font-body text-sm font-light uppercase tracking-[0.3em] text-white"
@@ -165,9 +174,14 @@ export function CinematicNav({
   )
 }
 
-export function CinematicFooter() {
+export function CinematicFooter({ onLanding = false }: { onLanding?: boolean }) {
   return (
-    <footer className="border-t border-white/10 bg-black px-6 py-12 sm:px-10">
+    <footer
+      className={[
+        'border-t border-white/10 px-6 py-12 sm:px-10',
+        onLanding ? 'bg-zinc-950' : 'bg-black',
+      ].join(' ')}
+    >
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <p className="font-body text-sm uppercase tracking-[0.4em] text-white/30">
           © {new Date().getFullYear()} Technique Titan

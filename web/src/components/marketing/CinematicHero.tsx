@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CinematicNav } from '../layout'
-
+import { Link } from 'react-router-dom'
 const CLOSE_UP_IMG = '/landing/keys-close.jpg'
 const PIANIST_IMG = '/landing/pianist.jpg'
 
@@ -154,8 +153,6 @@ export function CinematicHero() {
           }}
         />
 
-        <CinematicNav overlay style={{ opacity: lerp(1, 0.4, easedP2) }} />
-
         <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
           style={{ opacity: 1 - easedP2 }}
@@ -204,13 +201,13 @@ export function CinematicHero() {
             </p>
             <div className="h-px w-16 bg-white/30" />
           </div>
-          <a
-            href="#criteria"
+          <Link
+            to="/signup"
             className="mt-10 border border-white/30 px-8 py-3 font-body text-sm uppercase tracking-[0.3em] text-white/80 transition-all duration-500 hover:border-white hover:text-white"
             style={{ pointerEvents: heroOpacity > 0.4 ? 'auto' : 'none' }}
           >
             Discover
-          </a>
+          </Link>
         </div>
 
         <div

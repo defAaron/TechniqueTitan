@@ -25,11 +25,18 @@ export function Layout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="landing-grain min-h-screen bg-black text-white">
+    <div
+      className={
+        isLanding
+          ? 'landing-grain min-h-screen bg-zinc-950 text-white'
+          : 'landing-grain min-h-screen bg-black text-white'
+      }
+    >
       {isLanding ? (
         <>
           <div className="fixed inset-x-0 top-0 z-50">
             <ApiStatusBanner />
+            <CinematicNav landing fixed />
           </div>
           {children}
         </>
