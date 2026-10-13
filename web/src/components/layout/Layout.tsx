@@ -9,6 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation()
   const { pathname } = location
   const isLanding = pathname === '/'
+  const isProgress = pathname === '/progress'
 
   useEffect(() => {
     document.documentElement.classList.add('cinema')
@@ -30,7 +31,9 @@ export function Layout({ children }: { children: ReactNode }) {
       className={
         isLanding
           ? 'landing-grain min-h-screen bg-zinc-950 text-white'
-          : 'landing-grain min-h-screen bg-black text-white'
+          : isProgress
+            ? 'min-h-screen bg-[#050505] text-white'
+            : 'landing-grain min-h-screen bg-black text-white'
       }
     >
       <FloatingAppNav />
@@ -46,10 +49,25 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="flex min-h-screen flex-col">
           <ApiStatusBanner />
           <CinematicNav />
-          <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16 pt-11 sm:px-10">
+          <main
+            className={
+              isProgress
+                ? 'mx-auto w-full max-w-[1180px] flex-1 px-6 pb-12 pt-8 sm:px-8'
+                : 'mx-auto w-full max-w-6xl flex-1 px-6 pb-16 pt-11 sm:px-10'
+            }
+          >
             {children}
           </main>
-          <CinematicFooter />
+          {isProgress ? (
+            <footer className="border-t border-[#181818] bg-[#050505]/96 px-6 py-3 sm:px-8">
+              <p className="mx-auto flex max-w-[1180px] items-center justify-between font-body text-[9px] uppercase tracking-[0.42em] text-[#555]">
+                <span>© {new Date().getFullYear()} Technique Titan</span>
+                <span className="hidden text-[#343434] sm:inline">Form. Focus. Progress.</span>
+              </p>
+            </footer>
+          ) : (
+            <CinematicFooter />
+          )}
         </div>
       )}
     </div>

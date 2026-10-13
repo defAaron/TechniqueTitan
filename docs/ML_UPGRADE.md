@@ -2,7 +2,7 @@
 
 **Status:** Evaluation loop shipped and baselined. Offline logistic regression shipped; production still uses YAML heuristics only.
 **Last updated:** 2026-09-21
-**Companions:** [`PRD.md`](./PRD.md) (Phase 4, NFR-ACC-2, FR-SC-6), [`ROADMAP.md`](./ROADMAP.md) (Phase 4), [`SCORING_METHODS.md`](./SCORING_METHODS.md), [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md), [`data/README.md`](../data/README.md)
+**Companions:** [`PRD.md`](./PRD.md) (Phase 4, NFR-ACC-2, FR-SC-6), [`ROADMAP.md`](./ROADMAP.md) (Phase 4), [`SCORING_METHODS.md`](./SCORING_METHODS.md), [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md), [`PERSONALIZED_COACH.md`](./PERSONALIZED_COACH.md) (weekly focus + local LoRA copy), [`data/README.md`](../data/README.md)
 
 This document is the source of truth for making the engine more AI/ML without
 throwing away explainable geometry. Detection is already neural (MediaPipe).
