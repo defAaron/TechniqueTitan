@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { isAuthReturnUrl } from '../../lib/auth'
 import { ApiStatusBanner } from './ApiStatusBanner'
 import { CinematicFooter, CinematicNav } from './CinematicChrome'
+import { FloatingAppNav } from './FloatingAppNav'
 
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation()
@@ -32,6 +33,7 @@ export function Layout({ children }: { children: ReactNode }) {
           : 'landing-grain min-h-screen bg-black text-white'
       }
     >
+      <FloatingAppNav />
       {isLanding ? (
         <>
           <div className="fixed inset-x-0 top-0 z-50">

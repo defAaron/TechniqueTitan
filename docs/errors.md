@@ -26,7 +26,7 @@ new significant error, append an entry here in the same format.
 | npm | Always from **`web/`**, never repo root. |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
-| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. `/admin` lists `auth.users`; apply the profiles + `admin_list_signups` migrations or Google OAuth rows never appear in `profiles`. `is_admin()` must use `auth.users.email` (Google JWTs often omit email). Run admin inserts in their own SQL editor run — a later statement error rolls back the whole script. |
+| Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. **Local `web/.env.local` must use the same project ref as Vercel** — a wrong/deleted ref yields NXDOMAIN before OAuth loads. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. `/admin` lists `auth.users`; apply the profiles + `admin_list_signups` migrations or Google OAuth rows never appear in `profiles`. `is_admin()` must use `auth.users.email` (Google JWTs often omit email). Run admin inserts in their own SQL editor run — a later statement error rolls back the whole script. |
 | Render CORS | Set **`CORS_ORIGINS`** to the Vercel origin (`https://technique-titan.vercel.app`). Never pair `*` with `allow_credentials=True`. |
 | Trust proxy | Set **`TRUST_PROXY=1`** behind Render/reverse proxy so rate limits use `X-Forwarded-For`. |
 | Venvs | Ignore all `venv*` / `.venv*`. Recreate after Python upgrades; don’t trust stale `venv/`. |
@@ -469,7 +469,34 @@ new significant error, append an entry here in the same format.
 When a significant bug is found and fixed, add the next `E##` entry:
 
 ```markdown
-### E35 — Short title
+### E36 — Local OAuth callback: “Sign in did not complete” after Google
+| | |
+|---|---|
+| **When** | 2026-10-13 |
+| **Stage** | Local Vite + PKCE Google OAuth |
+| **Symptom** | `/auth/callback` shows “Sign in did not complete” ~8s after Google; prod works |
+| **Root cause** | `AuthProvider` called `getSession()` and cleared `loading` before `INITIAL_SESSION` / PKCE code exchange finished; callback page timed out with no user |
+| **Fix** | Wait for `onAuthStateChange` `INITIAL_SESSION` before `loading=false`; explicit `exchangeCodeForSession` fallback on `/auth/callback`; `strictPort: 5173` in Vite |
+| **Prevention** | Do not gate OAuth callback on a bare `getSession()` race |
+
+---
+
+### E35 — Local Google OAuth: Safari “can’t find server” for `*.supabase.co`
+| | |
+|---|---|
+| **When** | 2026-10-13 |
+| **Stage** | Local Vite dev + Supabase Google OAuth |
+| **Symptom** | Google sign-in works on Vercel but locally Safari fails on `https://<ref>.supabase.co/auth/v1/authorize?...`; DNS NXDOMAIN for `<ref>` |
+| **Root cause** | `web/.env.local` pointed at a different or deleted Supabase project ref than production (`VITE_SUPABASE_URL` / JWT `ref` mismatch) |
+| **Fix** | Copy **Project URL** and anon key from the same dedicated project Vercel uses into `web/.env.local`; restart `npm run dev` |
+| **Prevention** | Quick checklist: local env must match Vercel project ref; see `web/.env.example` |
+
+---
+
+## How to append
+
+```markdown
+### E36 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |

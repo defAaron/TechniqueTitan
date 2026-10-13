@@ -39,17 +39,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     let cancelled = false
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled) {
-        setSession(data.session)
-        setLoading(false)
-      }
-    })
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, next) => {
+    } = supabase.auth.onAuthStateChange((event, next) => {
+      if (cancelled) return
       setSession(next)
+      // Wait for PKCE / URL session recovery before routing (see AuthCallbackPage).
+      if (event === 'INITIAL_SESSION') {
+        setLoading(false)
+      }
     })
 
     return () => {

@@ -1,8 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { PageHeader } from '../components/layout'
 import { safeNextPath, useAuth } from '../lib/auth'
-import { supabaseConfigHelp } from '../lib/supabase'
+import { supabase, supabaseConfigHelp } from '../lib/supabase'
 
 function oauthErrorFromUrl(search: string, hash: string): string | null {
   const query = new URLSearchParams(search)
@@ -43,18 +43,42 @@ export function AuthCallbackPage() {
     oauthError && /expired|invalid or has expired/i.test(oauthError),
   )
 
+  const authCode = useMemo(
+    () => new URLSearchParams(location.search).get('code'),
+    [location.search],
+  )
+
   useEffect(() => {
     const raw = oauthErrorFromUrl(location.search, location.hash)
     setOauthError(raw ? friendlyAuthCallbackError(raw) : null)
   }, [location.search, location.hash])
 
   useEffect(() => {
+    if (loading || !supabase || !authCode || user || oauthError) return
+
+    let cancelled = false
+    void supabase.auth.exchangeCodeForSession(authCode).then(({ error }) => {
+      if (cancelled || !error) return
+      setOauthError(friendlyAuthCallbackError(error.message))
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [loading, authCode, user, oauthError])
+
+  useEffect(() => {
     if (loading || user || oauthError) return
+    const waitMs = authCode ? 20_000 : 8_000
     const timer = window.setTimeout(() => {
-      setOauthError('Sign in did not complete. Try again.')
-    }, 8000)
+      setOauthError(
+        authCode
+          ? 'Sign in did not complete. Clear localhost site data, then try Google again from /login.'
+          : 'Sign in did not complete. Use /login and finish Google sign-in in this browser tab.',
+      )
+    }, waitMs)
     return () => window.clearTimeout(timer)
-  }, [loading, user, oauthError])
+  }, [loading, user, oauthError, authCode])
 
   async function onResend(event: FormEvent) {
     event.preventDefault()

@@ -1,4 +1,5 @@
 export { ApiStatusBanner } from './ApiStatusBanner'
 export { AuthControls } from './AuthControls'
 export { CinematicFooter, CinematicNav, PageHeader } from './CinematicChrome'
+export { FloatingAppNav } from './FloatingAppNav'
 export { Layout } from './Layout'

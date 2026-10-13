@@ -8,7 +8,7 @@ function displayName(email: string | undefined): string {
 }
 
 export function AuthControls() {
-  const { loading, user, isAdmin, signOut } = useAuth()
+  const { loading, user, signOut } = useAuth()
 
   if (loading) {
     return (
@@ -33,11 +33,6 @@ export function AuthControls() {
 
   return (
     <span className="flex flex-wrap items-center justify-end gap-4 sm:gap-6">
-      {isAdmin && (
-        <Link to="/admin" className="transition-colors duration-300 hover:text-white">
-          Admin
-        </Link>
-      )}
       <span className="max-w-[10rem] truncate normal-case tracking-normal text-white/50" title={user.email}>
         {displayName(user.email)}
       </span>
