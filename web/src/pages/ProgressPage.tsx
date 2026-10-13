@@ -113,10 +113,7 @@ export function ProgressPage() {
 
   return (
     <div className="space-y-10">
-      <PageHeader eyebrow="Account" title="Progress">
-        Saved practice sessions store scores only — never photos or video. Use Photo, Video, or
-        Live, then choose Add to progress.
-      </PageHeader>
+      <PageHeader title="Progress" />
 
       {loading && (
         <p className="font-body text-sm text-white/50">Loading your saved sessions…</p>

@@ -36,7 +36,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <>
           <div className="fixed inset-x-0 top-0 z-50">
             <ApiStatusBanner />
-            <CinematicNav landing fixed />
+            <CinematicNav fixed />
           </div>
           {children}
         </>

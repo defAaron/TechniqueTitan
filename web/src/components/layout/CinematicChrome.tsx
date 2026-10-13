@@ -94,13 +94,10 @@ const footerLinks = [
 
 export function CinematicNav({
   overlay = false,
-  landing = false,
   fixed = false,
   style,
 }: {
   overlay?: boolean
-  /** Home route: minimal chrome (logo + auth / signed-in tools). */
-  landing?: boolean
   /** Pin to viewport top (used on the marketing home). */
   fixed?: boolean
   style?: CSSProperties
@@ -208,15 +205,17 @@ export function PageHeader({
   title,
   children,
 }: {
-  eyebrow: string
+  eyebrow?: string
   title: string
   children?: ReactNode
 }) {
   return (
     <header className="mb-10">
-      <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
-        {eyebrow}
-      </p>
+      {eyebrow ? (
+        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+          {eyebrow}
+        </p>
+      ) : null}
       <h1
         className="font-cinematic font-normal leading-tight text-white"
         style={{ fontSize: 'clamp(2.25rem, 4vw, 3.5rem)' }}
