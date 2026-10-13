@@ -1,23 +1,12 @@
 import { PageHeader } from '../components/layout'
 
-const criteria = [
-  'Wrist height',
-  'Finger curvature',
-  'Thumb position',
-  'Wrist lateral deviation',
-  'Overall hand arch',
-]
+const REPO_URL = 'https://github.com/defAaron/TechniqueTitan'
 
-const links = [
+const socialLinks = [
   {
     href: 'https://aarondutta.com',
     label: 'Website',
     detail: 'aarondutta.com',
-  },
-  {
-    href: 'https://github.com/defAaron',
-    label: 'GitHub',
-    detail: 'github.com/defAaron',
   },
   {
     href: 'https://linkedin.com/in/aaron-dutta',
@@ -36,80 +25,95 @@ const links = [
   },
 ]
 
+const linkClass =
+  'text-white underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white'
+
 export function AboutPage() {
   return (
     <article className="animate-fade-up max-w-3xl">
-      <PageHeader eyebrow="Origin" title="About">
-        Technique Titan started from a gap every serious pianist knows: you spend most of
-        your hours practicing alone, but posture only gets corrected once a week — if you
-        have a teacher at all.
+      <PageHeader title="About">
+        TechniqueTitan already has several users, one of them being the creator himself:{' '}
+        <a href="https://aarondutta.com" target="_blank" rel="noreferrer" className={linkClass}>
+          Aaron Dutta
+        </a>
+        . He started this project from a gap that every serious pianist knows: practicing alone
+        with no one to correct your posture.
       </PageHeader>
 
       <section aria-labelledby="inspiration-heading" className="mt-14">
-        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
-          01
-        </p>
+        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">01</p>
         <h2 id="inspiration-heading" className="font-cinematic text-3xl font-normal text-white">
-          The inspiration
+          The inspiration:
         </h2>
         <div className="mt-5 space-y-4 font-body text-base font-light leading-relaxed text-white/50">
           <p>
-            Good piano technique lives in small details — a wrist that stays level with the
-            keys, fingers that hold a natural curve, a thumb that rests on its side instead of
-            tucking under. Those habits decide speed, tone, and comfort. They also drift
-            quietly. A collapsed wrist feels normal after a few days. By the time it hurts or
-            a teacher catches it, the motion is already muscle memory.
+            Good piano technique lives in small details. A wrist that stays level with keys and
+            acts as a bridge for force. Fingers that hold a natural curve and can be implanted
+            into the keys with sufficient force to play music with depth. A thumb that doesn’t
+            bend too much or tuck under the hand, and rather rests on the side waiting to spring
+            into action. These habits decide tone, speed, and comfort. Simultaneously, with
+            practice, they also quietly drift. A collapsed wrist feels normal after a few days,
+            but by the time it hurts or a teacher catches it, the motion is already muscle
+            memory.
           </p>
           <p>
-            Lessons help, but they are infrequent. Between them, students reinforce whatever
-            their hands already do. Self-taught players and remote learners often get no
-            posture feedback at all. Mirrors and phone recordings only work if you know
-            exactly what to look for, frame by frame — and you cannot watch your hands while
-            you play.
+            Lessons always help, but the main issue is that they are infrequent. Between them,
+            students reinforce whatever their hands already do. This takes on a snowball effect,
+            where the more they practice with bad posture, the easier it is to get used to it,
+            worsen it, and continue to weaken technique. Self-taught players and remote learners
+            often get no posture feedback at all. Mirrors and phone recordings only work if you
+            know exactly what to look for, and even if you do, examining it frame by frame is
+            extremely tedious to say the least.
           </p>
           <p>
-            Technique Titan exists to close that loop. It turns an ordinary camera into a
-            second pair of eyes: detect the hand, measure five posture criteria with
-            geometry, score them consistently, and return the one coaching tip that matters
-            most right now — no wearables, no special hardware, and (in live mode) landmarks
-            that stay on your device.
+            Technique Titan ensures that these problems are non-existent for all pianists. It
+            turns an ordinary camera into a second pair of eyes. Detect hands, measure five
+            posture criteria with geometry, score them consistently, and return coaching tips that
+            matter the most at that very moment. No wearables or special hardware are needed, and
+            landmarks stay on your device for easy visualization of where the user goes wrong.
           </p>
         </div>
       </section>
 
       <section aria-labelledby="creator-heading" className="mt-16">
-        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
-          02
-        </p>
+        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">02</p>
         <h2 id="creator-heading" className="font-cinematic text-3xl font-normal text-white">
-          The creator
+          The creator:
         </h2>
         <div className="mt-5 space-y-4 font-body text-base font-light leading-relaxed text-white/50">
           <p>
-            Technique Titan was built by{' '}
-            <a
-              href="https://aarondutta.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-white underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white"
-            >
-              Aaron Dutta
-            </a>
-            , an award-winning pianist with fourteen years at the keys — including Royal
-            Conservatory of Music Level 10 Piano with Honours — and a first-year Honours
-            Mathematics student at the University of Waterloo.
-          </p>
-          <p>
-            The project sits at the intersection of those two lives: the musician who knows
-            how fragile healthy technique can be, and the builder exploring computer vision
-            and agentic systems who wanted objective, on-demand coaching between lessons.
-            What began as finger-and-wrist technique analysis research grew into the full
-            detect → score → coach product you see here.
+            TechniqueTitan was built by Aaron Dutta, an award-winning pianist with fourteen years
+            of experience who is studying mathematics and computer science at the University of
+            Waterloo. He is currently preparing for his ARCT Diploma certificate from the Royal
+            Conservatory of Music. Aaron made this project out of his love and interest for the
+            piano, and his eagerness to fix simple things that often go unnoticed with software.
+            At the start of this project’s creation, Aaron had zero experience and knowledge in
+            developing computer vision software, and diligently took the time to learn the nitty
+            gritty of how CV works. Take a look at the{' '}
+            <a href={REPO_URL} target="_blank" rel="noreferrer" className={linkClass}>
+              GitHub repo
+            </a>{' '}
+            (yes, this is an open-source project) to see how TechniqueTitan was made. Check out
+            Aaron’s socials as well to see what he’s building currently, and don’t be afraid to
+            shoot him a follow or connection request.
           </p>
         </div>
 
         <ul className="mt-8 divide-y divide-white/10 border-y border-white/10">
-          {links.map((link) => (
+          <li>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center justify-between gap-3 py-4 transition-colors duration-300 hover:text-white"
+            >
+              <span className="font-cinematic text-base text-white">GitHub</span>
+              <span className="truncate font-body text-sm text-white/40 transition-colors group-hover:text-white/70">
+                github.com/defAaron/TechniqueTitan
+              </span>
+            </a>
+          </li>
+          {socialLinks.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
@@ -125,39 +129,6 @@ export function AboutPage() {
             </li>
           ))}
         </ul>
-      </section>
-
-      <section aria-labelledby="scoring-heading" className="mt-16">
-        <p className="mb-4 font-body text-sm uppercase tracking-[0.4em] text-white/40">
-          03
-        </p>
-        <h2 id="scoring-heading" className="font-cinematic text-3xl font-normal text-white">
-          Under the hood
-        </h2>
-        <p className="mt-5 font-body text-base font-light leading-relaxed text-white/50">
-          Technique Titan detects hand landmarks, scores five piano posture criteria, and
-          returns prioritized coaching. The scoring engine is Python (MediaPipe + geometry);
-          this site is the React product UI.
-        </p>
-
-        <ul className="mt-8 divide-y divide-white/10 border-y border-white/10">
-          {criteria.map((label, i) => (
-            <li
-              key={label}
-              className="flex items-center gap-6 py-4 font-body text-base text-white"
-            >
-              <span className="w-8 font-body text-sm text-white/30">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span className="font-cinematic">{label}</span>
-            </li>
-          ))}
-        </ul>
-
-        <p className="mt-8 font-body text-base font-light leading-relaxed text-white/40">
-          Live mode prefers browser-side MediaPipe Hands and posts compact landmarks to the
-          API so video stays on your device. Frame-upload mode is available as a fallback.
-        </p>
       </section>
     </article>
   )

@@ -4,12 +4,13 @@ Dedicated **Technique Titan** project only. Do not apply these migrations to
 another app’s database (the connected calendar project with `public.accounts`
 is the wrong target).
 
-Stores **identity** (`profiles`, `app_admins`) and **opt-in practice progress**
-(`practice_sessions`, `session_hands`). No photos, video, or Supabase Storage —
-scores and compact jsonb timelines only.
+Stores **identity** (`profiles`, `app_admins`), a public **`avatars`** bucket for
+profile photos, and **opt-in practice progress** (`practice_sessions`,
+`session_hands`). Do not store analyze photos, video, or frames in Supabase.
 
 Apply [`migrations/20260923000004_practice_sessions.sql`](migrations/20260923000004_practice_sessions.sql)
-on the production project (or re-run the practice section of [`bootstrap.sql`](bootstrap.sql))
+and [`migrations/20261013000005_profile_avatar.sql`](migrations/20261013000005_profile_avatar.sql)
+on the production project (or re-run [`bootstrap.sql`](bootstrap.sql))
 after the auth migrations.
 
 ### Free-tier storage rules (500 MB database quota)
@@ -19,7 +20,7 @@ after the auth migrations.
 | `samples` jsonb per session | ≤ **32 KB** (API rejects larger drafts) |
 | Sessions with timeline samples kept | **20** most recent per user (older `samples` cleared on save) |
 | Saved sessions per user | **400** max (DB trigger; delete old rows to save more) |
-| File storage | **Unused** — do not create buckets for analyze media |
+| File storage | **`avatars` bucket only** (one square JPEG per user). Do not create buckets for analyze media |
 
 Free projects also **pause after ~7 days of inactivity** and have **no automatic backups**.
 Plan ops accordingly ([Supabase pricing](https://supabase.com/pricing)).

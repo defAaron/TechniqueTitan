@@ -1,4 +1,5 @@
-import { Link, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { CinematicFooter } from '../components/layout'
 import { CinematicHero } from '../components/marketing'
 import { CRITERION_LABELS } from '../lib/api'
@@ -103,11 +104,18 @@ function ModeMedia({ mode }: { mode: Mode }) {
 }
 
 export function HomePage() {
-  const { loading, user } = useAuth()
+  const { user } = useAuth()
+  const { hash } = useLocation()
 
-  if (!loading && user) {
-    return <Navigate to="/progress" replace />
-  }
+  useEffect(() => {
+    if (hash === '#about') {
+      const frame = requestAnimationFrame(() => {
+        document.getElementById('about')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+      return () => cancelAnimationFrame(frame)
+    }
+    window.scrollTo(0, 0)
+  }, [hash])
 
   return (
     <div className="bg-zinc-950">
@@ -213,6 +221,48 @@ export function HomePage() {
               </Link>
             </article>
           ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="about"
+        className="scroll-mt-28 border-t border-white/10 bg-zinc-950 px-6 py-24 sm:px-10"
+      >
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <p className="mb-6 font-body text-sm uppercase tracking-[0.4em] text-white/40">
+              About
+            </p>
+            <h2
+              className="font-cinematic font-normal leading-tight text-white"
+              style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+            >
+              Between
+              <br />
+              <em className="italic text-white/60">lessons</em>
+            </h2>
+          </div>
+          <div className="max-w-xl lg:col-span-7">
+            <div className="space-y-4 font-body text-base font-light leading-relaxed text-white/50">
+              <p>
+                Technique Titan started from a gap every serious pianist knows: most practice
+                hours are alone, and posture only gets corrected once a week — if there is a
+                teacher at all.
+              </p>
+              <p>
+                A wrist that stays level, fingers that hold a natural curve, a thumb that rests
+                on its side. Those habits decide speed, tone, and comfort, and they drift
+                quietly. This is a second pair of eyes: an ordinary camera, five posture
+                checks, and the one coaching note that matters right now.
+              </p>
+            </div>
+            <Link
+              to="/about"
+              className="mt-8 inline-block font-body text-sm uppercase tracking-widest text-white/60 transition-colors hover:text-white"
+            >
+              Read the full story
+            </Link>
           </div>
         </div>
       </section>

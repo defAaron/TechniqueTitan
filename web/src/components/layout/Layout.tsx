@@ -46,7 +46,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="flex min-h-screen flex-col">
           <ApiStatusBanner />
           <CinematicNav />
-          <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-24 pt-14 sm:px-10">
+          <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16 pt-11 sm:px-10">
             {children}
           </main>
           <CinematicFooter />

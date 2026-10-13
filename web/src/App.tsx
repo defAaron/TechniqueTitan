@@ -3,14 +3,17 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth'
 import { Layout } from './components/layout'
 import { AuthProvider } from './lib/auth'
+import { ProfileProvider } from './lib/profile'
 import { AboutPage } from './pages/AboutPage'
 import { AdminStatsPage } from './pages/AdminStatsPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { AuthPage } from './pages/AuthPage'
+import { EditProfilePage } from './pages/EditProfilePage'
 import { HomePage } from './pages/HomePage'
 import { LivePractice } from './pages/LivePractice'
 import { PhotoAnalyze } from './pages/PhotoAnalyze'
 import { ProgressPage } from './pages/ProgressPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { VideoAnalyze } from './pages/VideoAnalyze'
 
 const queryClient = new QueryClient()
@@ -19,8 +22,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Layout>
+        <ProfileProvider>
+          <BrowserRouter>
+            <Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route
@@ -56,6 +60,22 @@ export default function App() {
                 }
               />
               <Route path="/about" element={<AboutPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <EditProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/login" element={<AuthPage mode="login" />} />
               <Route path="/signup" element={<AuthPage mode="signup" />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
@@ -69,8 +89,9 @@ export default function App() {
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Layout>
-        </BrowserRouter>
+            </Layout>
+          </BrowserRouter>
+        </ProfileProvider>
       </AuthProvider>
     </QueryClientProvider>
   )
