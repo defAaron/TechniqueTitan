@@ -6,11 +6,70 @@ import {
   analyzeImage,
   formatApiError,
   overlayDataUrl,
+  type AnalyzeCoachPlan,
   type AnalyzeResponse,
+  type HandResult,
 } from '../lib/api'
 
 const CAPTURE =
   'Side or ¾ view, good lighting, hand fully in frame, roughly forearm height.'
+
+function pickLowerCompositeHand(hands: HandResult[]): HandResult | null {
+  if (!hands.length) return null
+  return [...hands].sort((a, b) => {
+    const scoreA = a.composite_score ?? -1
+    const scoreB = b.composite_score ?? -1
+    return scoreA - scoreB
+  })[0]
+}
+
+function handForCoachPlan(
+  hands: HandResult[],
+  coachPlan: AnalyzeCoachPlan | null | undefined,
+): string | null {
+  if (!coachPlan) return null
+  if (coachPlan.plan?.hand) return coachPlan.plan.hand
+  const target = pickLowerCompositeHand(hands)
+  return target ? target.label.toLowerCase() : null
+}
+
+function applyCoachPlanToHand(
+  hand: HandResult,
+  coachPlan: AnalyzeCoachPlan | null | undefined,
+  coachHand: string | null,
+): HandResult {
+  if (!coachPlan || !coachHand || hand.label.toLowerCase() !== coachHand) {
+    return hand
+  }
+  if (coachPlan.plan && coachPlan.problem && coachPlan.fix) {
+    return {
+      ...hand,
+      coaching: {
+        encouragement: null,
+        tips: [],
+        primary: {
+          criterion: coachPlan.plan.criterion,
+          severity: coachPlan.plan.severity,
+          direction: coachPlan.plan.direction,
+          problem: coachPlan.problem,
+          fix: coachPlan.fix,
+          priority: 0,
+        },
+      },
+    }
+  }
+  if (!coachPlan.plan && coachPlan.encouragement) {
+    return {
+      ...hand,
+      coaching: {
+        encouragement: coachPlan.encouragement,
+        tips: [],
+        primary: null,
+      },
+    }
+  }
+  return hand
+}
 
 export function PhotoAnalyze() {
   const [busy, setBusy] = useState(false)
@@ -93,12 +152,20 @@ export function PhotoAnalyze() {
           <div className="space-y-6">
             {[...result.hands]
               .sort((a, b) => a.label.localeCompare(b.label))
-              .map((hand) => (
-                <div key={hand.label} className="space-y-4">
-                  <ScorePanel hand={hand} compact />
-                  <CoachingTips hand={hand} />
-                </div>
-              ))}
+              .map((hand) => {
+                const coachHand = handForCoachPlan(result.hands, result.coach_plan)
+                const displayHand = applyCoachPlanToHand(
+                  hand,
+                  result.coach_plan,
+                  coachHand,
+                )
+                return (
+                  <div key={hand.label} className="space-y-4">
+                    <ScorePanel hand={displayHand} compact />
+                    <CoachingTips hand={displayHand} />
+                  </div>
+                )
+              })}
           </div>
         </div>
       )}

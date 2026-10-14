@@ -117,6 +117,17 @@ export function VideoAnalyze() {
           {result.progress_draft?.hands?.length ? (
             <AddToProgressButton draft={result.progress_draft} />
           ) : null}
+          {result.coach_plan?.plan && result.coach_plan.problem && result.coach_plan.fix ? (
+            <div className="animate-fade-up space-y-3 border border-white/10 bg-zinc-950 px-5 py-4 text-base text-white">
+              <p className="font-light text-white/60">{result.coach_plan.problem}</p>
+              <p>{result.coach_plan.fix}</p>
+            </div>
+          ) : null}
+          {!result.coach_plan?.plan && result.coach_plan?.encouragement ? (
+            <p className="animate-fade-up border border-good/40 bg-good/10 px-4 py-4 text-base text-good">
+              {result.coach_plan.encouragement}
+            </p>
+          ) : null}
           {chartData.length > 0 && (
             <section className="animate-fade-up border border-white/10 bg-zinc-950 p-5">
               <h2 className="mb-4 font-cinematic text-2xl font-normal text-white">

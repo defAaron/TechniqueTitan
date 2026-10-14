@@ -112,11 +112,27 @@ export interface SessionDraftOut {
   samples: SessionSample[]
 }
 
+export interface AnalyzeCoachPlan {
+  plan: {
+    hand: string
+    criterion: string
+    severity: string
+    direction: string
+    renderer: string
+  } | null
+  problem: string | null
+  fix: string | null
+  encouragement: string | null
+  plan_key: string | null
+  lock: unknown | null
+}
+
 export interface AnalyzeResponse {
   hands: HandResult[]
   overlay_png_base64: string | null
   message: string | null
   progress_draft?: SessionDraftOut | null
+  coach_plan?: AnalyzeCoachPlan | null
 }
 
 export interface VideoFrameScore {
@@ -130,6 +146,7 @@ export interface VideoAnalyzeResponse {
   fps?: number
   message: string | null
   progress_draft?: SessionDraftOut | null
+  coach_plan?: AnalyzeCoachPlan | null
 }
 
 export interface ProgressTick {
