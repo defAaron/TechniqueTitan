@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 8. Do not start it until the user asks.
+**Next problem:** none. All eight problems are committed.
 
 ---
 
@@ -625,9 +625,9 @@ grep -n "mlx\|transformers" ../Dockerfile ../requirements-api.txt || true
 
 **Subproblems:**
 
-- [ ] **8.1** Request body cannot select the model directory. Resolve paths with `Path(models_dir).resolve()` and require it equal `Path("config/models").resolve()`.
-- [ ] **8.2** Test: `SCORER=yaml` ignores joblib. `SCORER=ml_with_fallback` uses the fake pipeline. A throwing pipeline falls back per criterion.
-- [ ] **8.3** Dockerfile unchanged unless the gate passed. Render env is not modified from here; tell the user the dashboard variable stays unset.
+- [x] **8.1** Request body cannot select the model directory. Resolve paths with `Path(models_dir).resolve()` and require it equal `Path("config/models").resolve()`.
+- [x] **8.2** Test: `SCORER=yaml` ignores joblib. `SCORER=ml_with_fallback` uses the fake pipeline. A throwing pipeline falls back per criterion.
+- [x] **8.3** Dockerfile unchanged unless the gate passed. Render env is not modified from here; tell the user the dashboard variable stays unset.
 
 **Commands:**
 
@@ -643,7 +643,7 @@ cd web && npm run build
 
 **Commit subject:** `Gate learned severity scores behind SCORER`
 
-- [ ] Problem 8 committed
+- [x] Problem 8 committed
 
 ---
 

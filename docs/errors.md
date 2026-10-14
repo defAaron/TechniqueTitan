@@ -23,7 +23,7 @@ new significant error, append an entry here in the same format.
 | Local Streamlit webcam | Needs **full** `opencv-python` + AVFoundation on macOS — not headless. |
 | Hosted live camera | Server `cv2.VideoCapture(0)` cannot see the user’s webcam. Live on product UI = **browser MediaPipe**. |
 | Local React stack | Run **API on `:8000`** and `cd web && npm run dev`. Missing API → Vite **502**. |
-| npm | Always from **`web/`**, never repo root. |
+| npm | Always from **`web/`**, never repo root. Run **`npm run build`** before committing web changes — Vite dev skips `tsc` (`noUnusedLocals`). |
 | Rate limits | Landmarks ≫ frames ≫ uploads (defaults: **360 / 120 / 60** per window). |
 | Vercel | Set **`VITE_API_BASE_URL`** (no trailing slash) and **redeploy** (Vite bake-time). Root Directory = `web`. |
 | Auth / Supabase | Dedicated Technique Titan project only. Set **`VITE_SUPABASE_URL`** + **`VITE_SUPABASE_ANON_KEY`** from the **same** project (no trailing slash) and **redeploy**. Paste the **full** anon/publishable key as one line — no quotes, spaces, or line wraps. Never put **`service_role`** in `web/` or Vercel frontend env. **Local `web/.env.local` must use the same project ref as Vercel** — a wrong/deleted ref yields NXDOMAIN before OAuth loads. Auth **Site URL** must be `https://technique-titan.vercel.app` (not `localhost:3000`). Redirect allow-list must include localhost **:5173** + production `/auth/callback`. `/admin` lists `auth.users`; apply the profiles + `admin_list_signups` migrations or Google OAuth rows never appear in `profiles`. `is_admin()` must use `auth.users.email` (Google JWTs often omit email). Run admin inserts in their own SQL editor run — a later statement error rolls back the whole script. |
@@ -503,6 +503,18 @@ When a significant bug is found and fixed, add the next `E##` entry:
 | **Root cause** | Pytest's default prepend importer keys modules by basename, so the engine and API files collided |
 | **Fix** | Set `addopts = "--import-mode=importlib"` in `pyproject.toml` |
 | **Prevention** | Leave that setting in place; do not switch collection back to prepend |
+
+---
+
+### E38 — `npm run build` broken on `main` by an unused state binding
+| | |
+|---|---|
+| **When** | 2026-10-14 |
+| **Stage** | Floating nav toolbar work (`34b5d2b`) |
+| **Symptom** | `tsc -b` failed with `TS6133: 'skippedExpandEntersRemaining' is declared but its value is never read`, so `npm run build` (and a Vercel deploy) would fail |
+| **Root cause** | `useState` value was destructured but only its setter was used; `tsconfig.app.json` has `noUnusedLocals: true` and Vite dev does not type-check |
+| **Fix** | `33ac2e1`: destructure only the setter (`const [, setSkippedExpandEntersRemaining]`) |
+| **Prevention** | Run `cd web && npm run build` (not just `npm run dev`) before committing web changes |
 
 ---
 
