@@ -15,6 +15,16 @@ from technique_titan.progress.reducer import (
 )
 
 
+def _severity_score(sev: str) -> float:
+    if sev == "good":
+        return 90.0
+    if sev == "warning":
+        return 60.0
+    if sev == "critical":
+        return 30.0
+    return 85.0
+
+
 def _tick(
     t_ms: int,
     hand: str = "Right",
@@ -29,7 +39,7 @@ def _tick(
         "wrist_lateral": "good",
         "hand_arch": "good",
     }
-    scores = {k: 85.0 for k in severities}
+    scores = {k: _severity_score(severities[k]) for k in severities}
     return ScoredTick(
         t_ms=t_ms,
         hand=hand,
@@ -89,7 +99,23 @@ def test_dwell_primary_issue_picks_most_warning():
         frames_seen=4,
     )
     assert draft.hands[0].primary_issue == "wrist_height"
-    assert draft.hands[0].frac_warning["wrist_height"] == 0.5
+    assert draft.hands[0].frac_warning["wrist_height"] == 1.0
+
+
+def test_smoothing_ignores_brief_critical_for_primary_issue():
+    ticks = [
+        _tick(0, wrist_sev="warning"),
+        _tick(100, wrist_sev="critical"),
+        _tick(200, wrist_sev="warning"),
+    ]
+    draft = build_session_draft(
+        source="live",
+        ticks=ticks,
+        duration_s=0.5,
+        frames_seen=3,
+    )
+    assert draft.hands[0].primary_issue == "wrist_height"
+    assert draft.hands[0].frac_critical["wrist_height"] == 0.0
 
 
 def test_flicker_collapse_ignores_brief_change():

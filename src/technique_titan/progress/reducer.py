@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from statistics import mean
 from typing import Any, Iterable, Mapping, Sequence
 
+from technique_titan.coach.temporal import ScoreSmoother
+
 from .constants import (
     CRITERIA,
     FLICKER_MS,
@@ -215,6 +217,20 @@ def summarize_hand(
     hand_samples = [s for s in samples if s.hand == hand]
     if not hand_samples:
         return None
+
+    hand_samples = sorted(hand_samples, key=lambda s: s.t_ms)
+    smoother = ScoreSmoother()
+    for sample in hand_samples:
+        smoothed = smoother.update(
+            hand,
+            sample.t_ms,
+            {k: sample.scores.get(k) for k in CRITERIA},
+            {},
+            {},
+        )
+        for crit, row in smoothed.criteria.items():
+            sample.scores[crit] = row.score
+            sample.severities[crit] = row.severity
 
     composites = [s.composite for s in hand_samples if s.composite is not None]
     mean_composite = round(mean(composites), 1) if composites else None
