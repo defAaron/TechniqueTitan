@@ -51,14 +51,7 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/progress"
-                element={
-                  <ProtectedRoute>
-                    <ProgressPage />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/progress" element={<ProgressPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route
                 path="/profile"

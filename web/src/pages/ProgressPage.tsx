@@ -8,7 +8,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { useAuth } from '../lib/auth'
 import { CRITERION_LABELS } from '../lib/api'
+import {
+  formatCoachFocusMessage,
+  loadCoachFocusRow,
+  syncWeeklyCoachFocus,
+  type CoachFocusLock,
+} from '../lib/coachFocus'
 import {
   deletePracticeSession,
   getPracticeSession,
@@ -17,6 +24,7 @@ import {
   type PracticeSessionDetail,
   type PracticeSessionListRow,
 } from '../lib/progress'
+import { supabase } from '../lib/supabase'
 import './ProgressDashboard.css'
 
 const CRITERIA = [
@@ -104,7 +112,9 @@ function formatShortDate(iso: string): string {
 }
 
 export function ProgressPage() {
+  const { user, loading: authLoading } = useAuth()
   const [sessions, setSessions] = useState<PracticeSessionListRow[]>([])
+  const [focusLock, setFocusLock] = useState<CoachFocusLock | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -112,22 +122,46 @@ export function ProgressPage() {
   const [detailBusy, setDetailBusy] = useState(false)
   const [quoteIndex, setQuoteIndex] = useState(0)
 
+  const weeklyFocusText = useMemo(() => formatCoachFocusMessage(focusLock), [focusLock])
+
   const reload = useCallback(async () => {
     setLoading(true)
     setError(null)
+    if (!user || !supabase) {
+      setSessions([])
+      setFocusLock(null)
+      setLoading(false)
+      return
+    }
+
+    let storedLock: CoachFocusLock | null = null
+    try {
+      storedLock = await loadCoachFocusRow(user.id)
+      setFocusLock(storedLock)
+    } catch {
+      setFocusLock(null)
+    }
+
     try {
       const rows = await listPracticeSessions()
       setSessions(rows)
+      try {
+        const refreshed = await syncWeeklyCoachFocus(user.id, rows, storedLock)
+        setFocusLock(refreshed)
+      } catch {
+        // Keep stored row or empty sentence; session list stays loaded.
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load progress')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
+    if (authLoading) return
     void reload()
-  }, [reload])
+  }, [authLoading, reload])
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -254,35 +288,45 @@ export function ProgressPage() {
     }
   }
 
+  const pageReady = !loading && !authLoading
+
   return (
     <div className="progress-dashboard">
-      {loading && (
+      {(loading || authLoading) && (
         <p className="intro" role="status">Loading your saved sessions…</p>
       )}
       {error && <p className="status-banner" role="alert">{error}</p>}
 
-      {!loading && sessions.length === 0 && !error && (
+      {pageReady && (
+        <div className="page-heading">
+          <div>
+            <p className="eyebrow">Your practice</p>
+            <h1>Progress</h1>
+            <p className="intro">
+              A clear view of the work you have put in—and how far you have come.
+            </p>
+            <p className="intro" style={{ marginTop: '0.75rem' }}>
+              {weeklyFocusText}
+            </p>
+          </div>
+          {sessions.length > 0 ? (
+            <div className="date-control" aria-label="Reporting period">
+              <CalendarIcon />
+              Last 30 days
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {pageReady && sessions.length === 0 && !error && (
         <p className="empty-state">
           No saved sessions yet. After you analyze your posture, tap Add to progress on Photo,
           Video, or Live.
         </p>
       )}
 
-      {!loading && sessions.length > 0 && (
+      {pageReady && sessions.length > 0 && (
         <>
-          <div className="page-heading">
-            <div>
-              <p className="eyebrow">Your practice</p>
-              <h1>Progress</h1>
-              <p className="intro">
-                A clear view of the work you have put in—and how far you have come.
-              </p>
-            </div>
-            <div className="date-control" aria-label="Reporting period">
-              <CalendarIcon />
-              Last 30 days
-            </div>
-          </div>
 
           <section className="metric-grid" aria-label="Progress summary">
             {metrics.map((metric, index) => (
