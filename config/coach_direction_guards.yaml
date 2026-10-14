@@ -1,0 +1,27 @@
+# Phrase guards per (criterion, direction). Empty list = no extra guard.
+# Reject tips whose text contains a listed phrase (case-insensitive); code direction_guard.
+
+wrist_height:
+  too_low: []
+  too_high: []
+  generic: []
+
+finger_curvature:
+  too_low: []
+  too_high: []
+  generic: []
+
+thumb_position:
+  too_low: []
+  too_high: []
+  generic: []
+
+wrist_lateral:
+  too_low: []
+  too_high: []
+  generic: []
+
+hand_arch:
+  too_low: []
+  too_high: []
+  generic: []

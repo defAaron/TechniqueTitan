@@ -1,0 +1,86 @@
+[
+  {
+    "name": "live_over_length_cap",
+    "text": "Keep your wrist calm and level with the knuckles while you play this long phrase without rushing the tempo or collapsing through the bridge xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 70,
+      "metric_value": null,
+      "ideal": [0, 1]
+    },
+    "expect": "fail",
+    "code": "length"
+  },
+  {
+    "name": "deny_word_doctor",
+    "text": "Ease your wrist down until it sits level with the knuckle line like your doctor suggested.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_low",
+      "score": 62,
+      "metric_value": null,
+      "ideal": [0, 1]
+    },
+    "expect": "fail",
+    "code": "deny_word"
+  },
+  {
+    "name": "missing_allow_word",
+    "text": "Try to keep your shoulders relaxed and your spine tall while you play.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "generic",
+      "score": 70,
+      "metric_value": null,
+      "ideal": [0, 1]
+    },
+    "expect": "fail",
+    "code": "allow_word"
+  },
+  {
+    "name": "number_not_allowed",
+    "text": "Lift your wrist gently until it lines up with your knuckles near 99.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [-0.0711, 0.966]
+    },
+    "expect": "fail",
+    "code": "number"
+  },
+  {
+    "name": "clean_wrist_height_warning_too_high",
+    "text": "Your wrist is starting to drop below the knuckle line.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [-0.0711, 0.966]
+    },
+    "expect": "pass",
+    "code": null
+  },
+  {
+    "name": "lift_wrist_passes_empty_guards",
+    "text": "Gently lift the wrist until it lines up with your knuckles.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 70,
+      "metric_value": null,
+      "ideal": [0, 1]
+    },
+    "expect": "pass",
+    "code": null
+  }
+]
