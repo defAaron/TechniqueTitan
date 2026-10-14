@@ -2,7 +2,7 @@
 
 **Status:** Plan only. Nothing in this document is implemented.
 **Last updated:** 2026-10-13
-**Companions:** [`ML_UPGRADE.md`](./ML_UPGRADE.md), [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md), [`DEPLOY.md`](./DEPLOY.md), [`supabase/README.md`](../supabase/README.md)
+**Companions:** [`ML_UPGRADE.md`](./ML_UPGRADE.md), [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md), [`DEPLOY.md`](./DEPLOY.md), [`supabase/README.md`](../supabase/README.md), [`superpowers/plans/2026-10-13-personalized-coach.md`](./superpowers/plans/2026-10-13-personalized-coach.md) (agent build guide)
 
 This is the start-to-finish plan for weekly-focus coaching and varied
 wording. Scoring stays geometry. Wording stays a separate renderer.
