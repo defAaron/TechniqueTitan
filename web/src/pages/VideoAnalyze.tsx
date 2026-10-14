@@ -69,7 +69,7 @@ export function VideoAnalyze() {
 
   return (
     <div className="space-y-10">
-      <PageHeader eyebrow="Video" title="Video review">
+      <PageHeader title="Video review">
         Upload a short clip; frames are sampled to build a posture timeline and a landmark
         replay. Prefer under ~30 seconds.
       </PageHeader>

@@ -1,35 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
-
 .progress-dashboard {
   --pd-bg: #050505;
   --pd-surface: #0a0a0a;
   --pd-line: #232323;
   --pd-line-soft: #181818;
   --pd-text: #f2efe9;
-  --pd-muted: #87837f;
-  --pd-dim: #55514e;
-  --pd-accent: #a55d59;
-  --pd-accent-light: #c9807b;
-  --pd-sans: 'DM Sans', var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --pd-muted: #a8a39e;
+  --pd-dim: #6b6662;
+  --pd-accent: #3d7ea6;
+  --pd-accent-light: #6eb0d4;
+  --pd-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-family: var(--pd-sans);
-  font-weight: 300;
+  font-weight: 400;
   color: var(--pd-text);
 }
 
 .progress-dashboard .page-heading {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 2.25rem;
   gap: 1.5rem;
 }
 
+.progress-dashboard .page-heading > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .progress-dashboard .eyebrow,
 .progress-dashboard .section-kicker {
   color: var(--pd-accent-light);
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  font-weight: 600;
   margin: 0 0 10px;
   text-transform: uppercase;
 }
@@ -44,12 +47,20 @@
   color: var(--pd-text);
 }
 
+.progress-dashboard h1.page-greeting {
+  font-size: clamp(1.05rem, 1.35rem + 1.35vw, 2.65rem);
+  line-height: 1.15;
+  margin: 0;
+  white-space: nowrap;
+}
+
 .progress-dashboard .intro {
   color: var(--pd-muted);
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 1.55;
   margin: 0;
   letter-spacing: 0.01em;
-  max-width: 32rem;
+  max-width: 36rem;
 }
 
 .progress-dashboard .date-control {
@@ -60,8 +71,9 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 12px;
-  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 500;
+  flex: 0 0 auto;
 }
 
 .progress-dashboard .metric-grid {
@@ -82,22 +94,13 @@
   border-right: 0;
 }
 
-.progress-dashboard .metric-topline {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.progress-dashboard .metric-topline p {
-  color: var(--pd-muted);
-  font-size: 12px;
+.progress-dashboard .metric-label {
+  color: var(--pd-text);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   margin: 0;
-}
-
-.progress-dashboard .metric-topline span {
-  color: #393633;
-  font-size: 9px;
-  letter-spacing: 0.15em;
+  line-height: 1.25;
 }
 
 .progress-dashboard .metric-value {
@@ -110,14 +113,9 @@
 .progress-dashboard .metric-value small {
   color: var(--pd-muted);
   font-family: var(--pd-sans);
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 500;
   margin-left: 6px;
-}
-
-.progress-dashboard .metric-delta {
-  color: var(--pd-accent-light);
-  font-size: 10px;
-  margin: 0;
 }
 
 .progress-dashboard .dashboard-grid {
@@ -150,18 +148,18 @@
 .progress-dashboard .panel-heading h2 {
   font-family: var(--font-cinematic);
   font-weight: 400;
-  font-size: 24px;
+  font-size: 28px;
   margin: 0;
   color: var(--pd-text);
 }
 
 .progress-dashboard .section-kicker {
   margin-bottom: 7px;
-  font-size: 9px;
 }
 
 .progress-dashboard .legend {
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--pd-muted);
   display: flex;
   align-items: center;
@@ -181,29 +179,57 @@
   margin-top: 23px;
 }
 
-.progress-dashboard .score-ring {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.progress-dashboard .chart-placeholder {
+  height: 100%;
+  min-height: 221px;
+}
+
+.progress-dashboard .pd-reveal {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+}
+
+.progress-dashboard.pd-entered .pd-reveal {
+  animation: pd-reveal-in 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--pd-delay, 0ms);
+}
+
+@keyframes pd-reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.progress-dashboard .score-donut {
   flex-shrink: 0;
 }
 
-.progress-dashboard .score-ring b {
+.progress-dashboard .score-donut--placeholder {
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
+}
+
+.progress-dashboard .score-donut-value {
   font-family: var(--font-cinematic);
   font-size: 18px;
   font-weight: 400;
   line-height: 1;
+  color: var(--pd-text);
 }
 
-.progress-dashboard .score-ring small {
+.progress-dashboard .score-donut-label {
   color: var(--pd-dim);
-  font-size: 6px;
+  font-size: 8px;
+  font-weight: 600;
   letter-spacing: 0.13em;
   margin-top: 3px;
+  text-transform: uppercase;
 }
 
 .progress-dashboard .alignment-list {
@@ -217,27 +243,45 @@
 .progress-dashboard .alignment-row > div {
   display: flex;
   justify-content: space-between;
-  color: #a7a29e;
-  font-size: 11px;
-  margin-bottom: 7px;
+  color: #c4bfba;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 .progress-dashboard .alignment-row b {
   color: var(--pd-text);
-  font-size: 10px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .progress-dashboard .progress-track {
   display: block;
-  height: 2px;
+  height: 3px;
   background: var(--pd-line);
 }
 
-.progress-dashboard .progress-track span {
+.progress-dashboard .progress-track-fill {
   display: block;
   height: 100%;
+  width: var(--bar-target, 0%);
   background: var(--pd-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.progress-dashboard.pd-entered .progress-track-fill {
+  animation: pd-bar-draw 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--bar-delay, 0ms);
+}
+
+@keyframes pd-bar-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .progress-dashboard .quote-panel {
@@ -280,39 +324,19 @@
 
 .progress-dashboard .quote-panel blockquote {
   font-family: var(--font-cinematic);
-  font-size: 22px;
-  line-height: 1.4;
+  font-size: 24px;
+  line-height: 1.45;
   margin: 0 0 17px;
   font-weight: 400;
 }
 
 .progress-dashboard .quote-panel cite {
   color: var(--pd-accent-light);
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.13em;
   font-style: normal;
   text-transform: uppercase;
-}
-
-.progress-dashboard .quote-dots {
-  position: absolute;
-  right: 26px;
-  bottom: 25px;
-  display: flex;
-  gap: 7px;
-}
-
-.progress-dashboard .quote-dot {
-  width: 17px;
-  height: 2px;
-  padding: 0;
-  border: 0;
-  background: #333;
-  cursor: pointer;
-}
-
-.progress-dashboard .quote-dot.active {
-  background: var(--pd-accent-light);
 }
 
 .progress-dashboard .sessions-panel {
@@ -336,12 +360,13 @@
 }
 
 .progress-dashboard .session-row {
-  min-height: 41px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 8px;
   border-top: 1px solid var(--pd-line-soft);
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .progress-dashboard .session-row-button {
@@ -375,13 +400,14 @@
 .progress-dashboard .session-score {
   color: var(--pd-text);
   font-family: var(--font-cinematic);
-  font-size: 14px;
+  font-size: 17px;
 }
 
 .progress-dashboard .session-score small {
   color: var(--pd-dim);
   font-family: var(--pd-sans);
-  font-size: 7px;
+  font-size: 10px;
+  font-weight: 500;
 }
 
 .progress-dashboard .session-change {
@@ -393,7 +419,8 @@
   border: 0;
   background: none;
   color: var(--pd-dim);
-  font-size: 9px;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -420,7 +447,8 @@
 
 .progress-dashboard .empty-state {
   color: var(--pd-muted);
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 1.55;
   border: 1px solid var(--pd-line);
   background: var(--pd-surface);
   padding: 2rem 1.5rem;
@@ -474,5 +502,18 @@
 
   .progress-dashboard .session-row {
     grid-template-columns: 52px 1fr 44px 28px auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-dashboard .pd-reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .progress-dashboard .progress-track-fill {
+    transform: scaleX(1);
+    animation: none;
   }
 }

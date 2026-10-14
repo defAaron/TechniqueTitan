@@ -47,6 +47,14 @@ export function resolveDisplayName(user: User | null, record: ProfileRecord): st
   return providerName(user) || emailLabel(user?.email)
 }
 
+/** First word of a display name (e.g. "Aaron Dutta" → "Aaron"). */
+export function firstName(displayName: string): string {
+  const trimmed = displayName.trim()
+  if (!trimmed) return displayName
+  const word = trimmed.split(/\s+/)[0]
+  return word || trimmed
+}
+
 export function resolveAvatarSrc(user: User | null, record: ProfileRecord): string | null {
   if (record.avatarUrl === '') return null
   if (record.avatarUrl) return record.avatarUrl

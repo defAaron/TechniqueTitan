@@ -29,6 +29,7 @@ import {
 import { rewordTip } from '../lib/coachModel'
 import { createScoreSmoother } from '../lib/scoreSmooth'
 import { CoachWordingToggle } from '../components/coach'
+import { useAuth } from '../lib/auth'
 
 const SCORING_IDEALS: Record<string, [number, number]> = {
   wrist_height: [-0.0711, 0.966],
@@ -48,6 +49,7 @@ const SEVERITY_RANK: Record<string, number> = {
 type Mode = 'landmarks' | 'frames'
 
 export function LivePractice() {
+  const { isAdmin } = useAuth()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -57,7 +59,8 @@ export function LivePractice() {
   const backoffUntilRef = useRef(0)
 
   const [running, setRunning] = useState(false)
-  const [mode, setMode] = useState<Mode>('landmarks')
+  const [adminMode, setAdminMode] = useState<Mode>('landmarks')
+  const scoringMode: Mode = isAdmin ? adminMode : 'landmarks'
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState('Camera idle')
   const [hands, setHands] = useState<HandResult[]>([])
@@ -308,12 +311,12 @@ export function LivePractice() {
     }
 
     // Landmarks ~4 Hz; frames ~2 Hz — matches API per-path budgets.
-    const interval = mode === 'landmarks' ? 250 : 500
+    const interval = scoringMode === 'landmarks' ? 250 : 500
     if (!inFlightRef.current && now - lastSendRef.current >= interval) {
       lastSendRef.current = now
       inFlightRef.current = true
       try {
-        if (mode === 'landmarks') {
+        if (scoringMode === 'landmarks') {
           const detected = await detectHandsVideo(video, now)
           if (detected.length) {
             const res = await scoreLandmarks(detected, {
@@ -358,7 +361,7 @@ export function LivePractice() {
     }
 
     rafRef.current = requestAnimationFrame(() => void tick())
-  }, [applyResults, mode, paintFrame])
+  }, [applyResults, scoringMode, paintFrame])
 
   async function startCamera() {
     setError(null)
@@ -386,9 +389,9 @@ export function LivePractice() {
       await video.play()
       setRunning(true)
       setStatus(
-        mode === 'landmarks'
-          ? 'Loading MediaPipe… first frame may take a moment'
-          : 'Streaming frames to API…',
+        scoringMode === 'landmarks'
+          ? 'Loading hand tracking… first frame may take a moment'
+          : 'Streaming frames to API (admin fallback)…',
       )
       rafRef.current = requestAnimationFrame(() => void tick())
     } catch (err) {
@@ -408,43 +411,46 @@ export function LivePractice() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <header>
-          <p className="mb-1 font-body text-sm uppercase tracking-[0.4em] text-white/40">
-            Live
-          </p>
           <h1 className="font-cinematic text-3xl font-normal tracking-tight text-white sm:text-4xl">
             Live practice
           </h1>
         </header>
         <p className="max-w-md font-body text-sm font-light text-white/40">
-          Browser camera with real-time overlays. Landmarks stay on-device; frame
-          upload posts JPEGs to the API.
+          Real-time feedback from your camera. Hand tracking runs in your browser; only
+          scores are sent to the server.
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex border border-white/15 text-sm">
-          {(
-            [
-              ['landmarks', 'Landmarks (fast)'],
-              ['frames', 'Frame upload'],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              disabled={running}
-              onClick={() => setMode(value)}
-              className={[
-                'px-4 py-2.5 font-body uppercase tracking-[0.18em] transition-colors duration-300',
-                mode === value
-                  ? 'bg-white text-black'
-                  : 'text-white/50 hover:text-white',
-              ].join(' ')}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        {isAdmin ? (
+          <div
+            className="flex border border-white/15 text-sm"
+            role="group"
+            aria-label="Live scoring mode (admin)"
+          >
+            {(
+              [
+                ['landmarks', 'Landmarks'],
+                ['frames', 'Frame upload (fallback)'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                disabled={running}
+                onClick={() => setAdminMode(value)}
+                className={[
+                  'px-4 py-2.5 font-body uppercase tracking-[0.18em] transition-colors duration-300',
+                  adminMode === value
+                    ? 'bg-white text-black'
+                    : 'text-white/50 hover:text-white',
+                ].join(' ')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
         {!running ? (
           <button
             type="button"

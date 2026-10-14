@@ -115,7 +115,7 @@ export function PhotoAnalyze() {
 
   return (
     <div className="space-y-10">
-      <PageHeader eyebrow="Photo" title="Photo review">
+      <PageHeader title="Photo review">
         {CAPTURE}
       </PageHeader>
 
@@ -147,12 +147,8 @@ export function PhotoAnalyze() {
         </p>
       )}
 
-      {result && (
+      {result?.progress_draft?.hands?.length ? (
         <AddToProgressButton draft={result.progress_draft} className="mb-2" />
-      )}
-
-      {result && result.progress_draft?.hands?.length ? (
-        <AddToProgressButton draft={result.progress_draft} />
       ) : null}
 
       {result && (

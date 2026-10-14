@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import {
   Area,
   AreaChart,
@@ -10,12 +10,9 @@ import {
 } from 'recharts'
 import { useAuth } from '../lib/auth'
 import { CRITERION_LABELS } from '../lib/api'
-import {
-  formatCoachFocusMessage,
-  loadCoachFocusRow,
-  syncWeeklyCoachFocus,
-  type CoachFocusLock,
-} from '../lib/coachFocus'
+import { loadCoachFocusRow, syncWeeklyCoachFocus, type CoachFocusLock } from '../lib/coachFocus'
+import { useProfile } from '../lib/profile'
+import { firstName } from '../lib/profileModel'
 import {
   deletePracticeSession,
   getPracticeSession,
@@ -24,6 +21,7 @@ import {
   type PracticeSessionDetail,
   type PracticeSessionListRow,
 } from '../lib/progress'
+import { ScoreDonutRing } from '../components/progress/ScoreDonutRing'
 import { supabase } from '../lib/supabase'
 import './ProgressDashboard.css'
 
@@ -35,6 +33,36 @@ const CRITERIA = [
   'hand_arch',
 ] as const
 
+const GREETING_TEMPLATES = [
+  (name: string) => `Hey ${name}, good to see you again.`,
+  (name: string) => `Great to have you back, ${name}.`,
+  (name: string) => `Ready to practice, ${name}?`,
+  (name: string) => `Welcome back, ${name}.`,
+  (name: string) => `Here's how you've been doing so far, ${name}.`,
+] as const
+
+function randomGreetingIndex(): number {
+  return Math.floor(Math.random() * GREETING_TEMPLATES.length)
+}
+
+function usePrefersReducedMotion(): boolean {
+  const [reduce, setReduce] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    if (!mq) return
+    const onChange = () => setReduce(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  return reduce
+}
+
 const QUOTES = [
   {
     text: 'The body achieves what the mind believes.',
@@ -45,8 +73,55 @@ const QUOTES = [
     author: 'John C. Maxwell',
   },
   {
-    text: 'Strength does not come from physical capacity. It comes from an indomitable will.',
-    author: 'Mahatma Gandhi',
+    text: 'I think I am making progress.',
+    author: 'Pablo Casals',
+  },
+  {
+    text: 'Knowledge is not skill. Knowledge plus ten thousand times is skill.',
+    author: 'Shinichi Suzuki',
+  },
+  {
+    text: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.',
+    author: 'Aristotle',
+  },
+  {
+    text:
+      'I fear not the man who has practiced 10,000 kicks once, but the man who has practiced one kick 10,000 times.',
+    author: 'Bruce Lee',
+  },
+  {
+    text:
+      "If I don't practice for one day, I know it; two days, the critics know it; three days, the public knows it.",
+    author: 'Jascha Heifetz',
+  },
+  {
+    text:
+      'Practice with your fingers and you need all day. Practice with your mind and you will do as much in one and a half hours.',
+    author: 'Leopold Auer',
+  },
+  {
+    text: 'Great dancers are not great because of their technique, they are great because of their passion.',
+    author: 'Martha Graham',
+  },
+  {
+    text: 'Practice does not make perfect. Only perfect practice makes perfect.',
+    author: 'Vince Lombardi',
+  },
+  {
+    text: 'To achieve great things, two things are needed: a plan, and not quite enough time.',
+    author: 'Leonard Bernstein',
+  },
+  {
+    text: 'Life is denied by lack of attention, whether it be to cleaning windows or trying to write a masterpiece.',
+    author: 'Nadia Boulanger',
+  },
+  {
+    text: "The difference between the impossible and the possible lies in a person's determination.",
+    author: 'Vladimir Horowitz',
+  },
+  {
+    text: 'Mastery is not a function of genius or talent. It is a function of time and intense focus applied to a particular field of knowledge.',
+    author: 'Robert Greene',
   },
 ] as const
 
@@ -113,23 +188,28 @@ function formatShortDate(iso: string): string {
 
 export function ProgressPage() {
   const { user, loading: authLoading } = useAuth()
+  const { displayName } = useProfile()
+  const [greetingIndex] = useState(randomGreetingIndex)
+  const greeting = useMemo(
+    () => GREETING_TEMPLATES[greetingIndex](firstName(displayName)),
+    [greetingIndex, displayName],
+  )
   const [sessions, setSessions] = useState<PracticeSessionListRow[]>([])
-  const [focusLock, setFocusLock] = useState<CoachFocusLock | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [detail, setDetail] = useState<PracticeSessionDetail | null>(null)
   const [detailBusy, setDetailBusy] = useState(false)
   const [quoteIndex, setQuoteIndex] = useState(0)
-
-  const weeklyFocusText = useMemo(() => formatCoachFocusMessage(focusLock), [focusLock])
+  const [entered, setEntered] = useState(false)
+  const [chartReady, setChartReady] = useState(false)
+  const reduceMotion = usePrefersReducedMotion()
 
   const reload = useCallback(async () => {
     setLoading(true)
     setError(null)
     if (!user || !supabase) {
       setSessions([])
-      setFocusLock(null)
       setLoading(false)
       return
     }
@@ -137,19 +217,17 @@ export function ProgressPage() {
     let storedLock: CoachFocusLock | null = null
     try {
       storedLock = await loadCoachFocusRow(user.id)
-      setFocusLock(storedLock)
     } catch {
-      setFocusLock(null)
+      storedLock = null
     }
 
     try {
       const rows = await listPracticeSessions()
       setSessions(rows)
       try {
-        const refreshed = await syncWeeklyCoachFocus(user.id, rows, storedLock)
-        setFocusLock(refreshed)
+        await syncWeeklyCoachFocus(user.id, rows, storedLock)
       } catch {
-        // Keep stored row or empty sentence; session list stays loaded.
+        // Coach focus sync is best-effort; session list stays loaded.
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load progress')
@@ -218,16 +296,6 @@ export function ProgressPage() {
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
   }, [focusScores])
 
-  const scoreDelta = useMemo(() => {
-    if (chartData.length < 2) return null
-    const first = chartData[0].score as number
-    const last = chartData[chartData.length - 1].score as number
-    const diff = last - first
-    if (diff === 0) return 'Holding steady'
-    const sign = diff > 0 ? '+' : ''
-    return `${sign}${diff} since first save`
-  }, [chartData])
-
   const practiceHours = useMemo(() => {
     const hrs = stats.practiceMinutes / 60
     return hrs >= 10 ? hrs.toFixed(0) : hrs.toFixed(1)
@@ -253,28 +321,24 @@ export function ProgressPage() {
         label: 'Overall score',
         value: stats.meanComposite != null ? String(stats.meanComposite) : '—',
         suffix: stats.meanComposite != null ? '/100' : '',
-        delta: scoreDelta ?? 'Save sessions to track trend',
       },
       {
         label: 'Practice sessions',
         value: String(stats.sessionCount),
         suffix: '',
-        delta: stats.sessionCount > 0 ? 'Last 30 days' : 'None yet',
       },
       {
         label: 'Practice time',
         value: stats.practiceMinutes > 0 ? practiceHours : '0',
         suffix: stats.practiceMinutes > 0 ? 'hrs' : '',
-        delta: stats.practiceMinutes > 0 ? `${stats.practiceMinutes} min total` : 'Last 30 days',
       },
       {
         label: 'Current streak',
         value: String(streak),
         suffix: streak === 1 ? 'day' : 'days',
-        delta: streak > 0 ? 'Keep it going' : 'Practice today',
       },
     ],
-    [stats, streak, scoreDelta, practiceHours],
+    [stats, streak, practiceHours],
   )
 
   async function onDelete(id: string) {
@@ -290,24 +354,41 @@ export function ProgressPage() {
 
   const pageReady = !loading && !authLoading
 
+  useEffect(() => {
+    if (!pageReady) {
+      setEntered(false)
+      setChartReady(false)
+      return
+    }
+    if (reduceMotion) {
+      setEntered(true)
+      setChartReady(true)
+      return
+    }
+    const id = requestAnimationFrame(() => setEntered(true))
+    return () => cancelAnimationFrame(id)
+  }, [pageReady, reduceMotion])
+
+  useEffect(() => {
+    if (!entered || reduceMotion || sessions.length === 0) {
+      if (!entered || sessions.length === 0) setChartReady(false)
+      return
+    }
+    const t = window.setTimeout(() => setChartReady(true), 420)
+    return () => clearTimeout(t)
+  }, [entered, reduceMotion, sessions.length])
+
   return (
-    <div className="progress-dashboard">
+    <div className={`progress-dashboard${entered ? ' pd-entered' : ''}`}>
       {(loading || authLoading) && (
         <p className="intro" role="status">Loading your saved sessions…</p>
       )}
       {error && <p className="status-banner" role="alert">{error}</p>}
 
       {pageReady && (
-        <div className="page-heading">
+        <div className="page-heading pd-reveal" style={{ '--pd-delay': '0ms' } as CSSProperties}>
           <div>
-            <p className="eyebrow">Your practice</p>
-            <h1>Progress</h1>
-            <p className="intro">
-              A clear view of the work you have put in—and how far you have come.
-            </p>
-            <p className="intro" style={{ marginTop: '0.75rem' }}>
-              {weeklyFocusText}
-            </p>
+            <h1 className="page-greeting">{greeting}</h1>
           </div>
           {sessions.length > 0 ? (
             <div className="date-control" aria-label="Reporting period">
@@ -319,7 +400,10 @@ export function ProgressPage() {
       )}
 
       {pageReady && sessions.length === 0 && !error && (
-        <p className="empty-state">
+        <p
+          className="empty-state pd-reveal"
+          style={{ '--pd-delay': '120ms' } as CSSProperties}
+        >
           No saved sessions yet. After you analyze your posture, tap Add to progress on Photo,
           Video, or Live.
         </p>
@@ -330,22 +414,25 @@ export function ProgressPage() {
 
           <section className="metric-grid" aria-label="Progress summary">
             {metrics.map((metric, index) => (
-              <article className="metric-card" key={metric.label}>
-                <div className="metric-topline">
-                  <p>{metric.label}</p>
-                  <span>0{index + 1}</span>
-                </div>
+              <article
+                className="metric-card pd-reveal"
+                key={metric.label}
+                style={{ '--pd-delay': `${100 + index * 85}ms` } as CSSProperties}
+              >
+                <p className="metric-label">{metric.label}</p>
                 <div className="metric-value">
                   {metric.value}
                   {metric.suffix ? <small>{metric.suffix}</small> : null}
                 </div>
-                <p className="metric-delta">{metric.delta}</p>
               </article>
             ))}
           </section>
 
           <section className="dashboard-grid" aria-label="Detailed progress">
-            <article className="panel trend-panel">
+            <article
+              className="panel trend-panel pd-reveal"
+              style={{ '--pd-delay': '440ms' } as CSSProperties}
+            >
               <div className="panel-heading">
                 <div>
                   <p className="section-kicker">Performance</p>
@@ -357,26 +444,26 @@ export function ProgressPage() {
                 </div>
               </div>
               <div className="chart-wrap">
-                {chartData.length > 0 ? (
+                {chartData.length > 0 && chartReady ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="progressChartFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#c9807b" stopOpacity={0.23} />
-                          <stop offset="100%" stopColor="#c9807b" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#6eb0d4" stopOpacity={0.28} />
+                          <stop offset="100%" stopColor="#6eb0d4" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid stroke="#181818" vertical={false} />
                       <XAxis
                         dataKey="date"
-                        tick={{ fill: '#55514e', fontSize: 8 }}
+                        tick={{ fill: '#6b6662', fontSize: 11 }}
                         axisLine={false}
                         tickLine={false}
                         interval="preserveStartEnd"
                       />
                       <YAxis
                         domain={[0, 100]}
-                        tick={{ fill: '#55514e', fontSize: 9 }}
+                        tick={{ fill: '#6b6662', fontSize: 11 }}
                         axisLine={false}
                         tickLine={false}
                         width={28}
@@ -386,48 +473,48 @@ export function ProgressPage() {
                           background: '#0a0a0a',
                           border: '1px solid #232323',
                           borderRadius: 0,
-                          fontSize: 12,
+                          fontSize: 14,
                         }}
-                        labelStyle={{ color: '#87837f' }}
+                        labelStyle={{ color: '#a8a39e' }}
                       />
                       <Area
                         type="monotone"
                         dataKey="score"
-                        stroke="#c9807b"
+                        stroke="#6eb0d4"
                         strokeWidth={2}
                         fill="url(#progressChartFill)"
+                        isAnimationActive={!reduceMotion}
+                        animationDuration={1400}
+                        animationEasing="ease-out"
                         dot={{
                           r: 3.5,
                           fill: '#0a0a0a',
-                          stroke: '#c9807b',
+                          stroke: '#6eb0d4',
                           strokeWidth: 1.5,
                         }}
                         connectNulls
                       />
                     </AreaChart>
                   </ResponsiveContainer>
+                ) : chartData.length > 0 ? (
+                  <div className="chart-placeholder" aria-hidden />
                 ) : (
                   <p className="intro">Save more sessions to draw your trend line.</p>
                 )}
               </div>
             </article>
 
-            <article className="panel focus-panel">
+            <article
+              className="panel focus-panel pd-reveal"
+              style={{ '--pd-delay': '560ms' } as CSSProperties}
+            >
               <div className="panel-heading">
                 <div>
                   <p className="section-kicker">Focus areas</p>
                   <h2>Hand technique</h2>
                 </div>
                 {focusComposite != null ? (
-                  <span
-                    className="score-ring"
-                    style={{
-                      background: `radial-gradient(circle, #0a0a0a 59%, transparent 61%), conic-gradient(#c9807b 0 ${focusComposite}%, #232323 ${focusComposite}% 100%)`,
-                    }}
-                  >
-                    <b>{focusComposite}</b>
-                    <small>Score</small>
-                  </span>
+                  <ScoreDonutRing value={focusComposite} active={entered} />
                 ) : null}
               </div>
               <div className="alignment-list">
@@ -436,14 +523,22 @@ export function ProgressPage() {
                     Your latest session will show criterion scores here.
                   </p>
                 ) : (
-                  focusScores.map(({ label, value }) => (
+                  focusScores.map(({ label, value }, index) => (
                     <div className="alignment-row" key={label}>
                       <div>
                         <span>{label}</span>
                         <b>{Math.round(value)}</b>
                       </div>
                       <span className="progress-track">
-                        <span style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+                        <span
+                          className="progress-track-fill"
+                          style={
+                            {
+                              '--bar-target': `${Math.min(100, Math.max(0, value))}%`,
+                              '--bar-delay': `${720 + index * 90}ms`,
+                            } as CSSProperties
+                          }
+                        />
                       </span>
                     </div>
                   ))
@@ -451,26 +546,22 @@ export function ProgressPage() {
               </div>
             </article>
 
-            <article className="panel quote-panel" aria-live="polite">
+            <article
+              className="panel quote-panel pd-reveal"
+              style={{ '--pd-delay': '680ms' } as CSSProperties}
+              aria-live="polite"
+            >
               <span className="quote-mark" aria-hidden>“</span>
               <div className="quote-content" key={quoteIndex}>
                 <blockquote>{QUOTES[quoteIndex].text}</blockquote>
                 <cite>— {QUOTES[quoteIndex].author}</cite>
               </div>
-              <div className="quote-dots">
-                {QUOTES.map((quote, index) => (
-                  <button
-                    type="button"
-                    key={quote.author}
-                    className={index === quoteIndex ? 'quote-dot active' : 'quote-dot'}
-                    onClick={() => setQuoteIndex(index)}
-                    aria-label={`Show quote ${index + 1}`}
-                  />
-                ))}
-              </div>
             </article>
 
-            <article className="panel sessions-panel">
+            <article
+              className="panel sessions-panel pd-reveal"
+              style={{ '--pd-delay': '800ms' } as CSSProperties}
+            >
               <div className="panel-heading">
                 <div>
                   <p className="section-kicker">History</p>
@@ -510,7 +601,10 @@ export function ProgressPage() {
           </section>
 
           {selectedId && (
-            <article className="panel detail-panel">
+            <article
+              className="panel detail-panel pd-reveal"
+              style={{ '--pd-delay': '0ms' } as CSSProperties}
+            >
               <div className="panel-heading">
                 <div>
                   <p className="section-kicker">Session</p>
