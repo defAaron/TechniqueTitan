@@ -66,7 +66,7 @@ data volume and throws away explainability (PRD FR-SC-6).
 | # | Phase | When | Why | Work |
 |---|---|---|---|---|
 | 1 | Evaluation loop | **Shipped** (Sep 2026) | Cannot promote ML until heuristics are measured on a frozen split | `technique_titan.eval`, `holdout_split.json`, `notebooks/scoring_tuning.ipynb`, promote YAML only when hold-out rises |
-| 2 | Learned scoring | **Offline shipped**; **production gate open** | YAML bands are a 1-D guess; ML must beat hold-out heuristics before serving | `technique_titan.ml.{synthetic,train,predict}`; `--scorer compare`. **Next:** beat **0.689** hold-out macro on real images, then wire API fallback |
+| 2 | Learned scoring | **Offline shipped**; **production gate open** | YAML bands are a 1-D guess; ML must beat hold-out heuristics before serving | `technique_titan.ml.{synthetic,train,predict}`; `--scorer compare`; API flag `SCORER=ml_with_fallback` wired (default `yaml`). **Next:** beat **0.689** hold-out macro on real images, then ship the joblib files and set the flag |
 | 3 | Temporal intelligence | After Phase 3b or in parallel | Every frame is independent today; habits live in time | Landmark smoothing, dwell detection, session-level habit classifier |
 | 4 | Piano-specific vision | After scoring is calibrated | MediaPipe is generic | Key-plane detection, Pose/Holistic forearm, viewpoint rejector |
 
@@ -227,6 +227,6 @@ the offline trainer.
 |---|---|
 | Frozen hold-out split + reproducible CLI / notebook agreement report | **Done** — `data/eval/holdout_split.json`, `python -m technique_titan.eval`, `notebooks/scoring_tuning.ipynb` |
 | Heuristic severity agreement ≥ 85% on hold-out (NFR-ACC-2) | **Not met** — macro **0.689** after 2026-09-19 YAML promotion |
-| Learned scorer ≥ heuristics on hold-out, YAML fallback wired in API | **Not met** — offline trainer **done**; ML hold-out macro **0.622** on full feature table (Sep 2026 local run); **no API wiring** |
+| Learned scorer ≥ heuristics on hold-out, YAML fallback wired in API | **Not met** — offline trainer **done**; ML hold-out macro **0.622** vs YAML **0.689** (re-run 2026-10-14, unchanged). API fallback **wired** behind `SCORER=ml_with_fallback` (`api/scorer.py`, per-criterion YAML on error or `unknown`); production stays `SCORER=yaml` and the image ships no joblib files until the gate passes |
 | Viewpoint-unsuitable frames rejected or flagged | **Not started** |
 | Live/video reports habits beyond a single frame | **Not started** |

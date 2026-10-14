@@ -4,6 +4,8 @@
 venv
 venv*
 data/coach
+# Learned scorer stays out of the image until the hold-out gate passes (docs/ML_UPGRADE.md).
+config/models
 __pycache__
 *.pyc
 .pytest_cache
