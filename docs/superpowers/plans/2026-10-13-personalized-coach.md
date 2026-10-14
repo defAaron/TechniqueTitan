@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 1. Do not start it until the user asks.
+**Next problem:** 2. Do not start it until the user asks.
 
 ---
 
@@ -292,20 +292,22 @@ Run the items that match the problem before committing. Fix failures inside the 
 
 Parent writes `tests/fixtures/temporal_cases.json` first, with these cases, then starts A and B together:
 
+Severity is the band of the EMA (spec §3.6), not the band of the raw score. A new EMA band is published only after a later sample is still in that band at least 1200 ms after the first sample that entered it. The opening sample publishes immediately. These are the fixture cases:
+
 1. First frame score 40 → severity `critical`, ema 40.
-2. Frame at t=0 score 40, frame at t=100 score 90 → severity stays `critical` (dwell not met).
-3. Frames at t=0 score 40 and t=1200 score 90, with the high score held on the second sample’s timestamp delta ≥ 1200 → severity becomes `good`.
+2. Frame at t=0 score 40, frame at t=100 score 90 → ema 57.5, severity stays `critical` (the warning band has not been held).
+3. Score 40 at t=0, then score 100 at t=1200, 2400, 3600, and 4800 → ema ends at 89.289625 and severity becomes `good` only on the last sample. One sample of 90 at t=1200 does not: its ema is still 57.5, so it cannot be `good`.
 4. Metric on the `too_low` side of ideal, then one sample on `too_high` at +100 ms → direction stays `too_low`.
-5. Same flip held until +1200 ms → direction `too_high`.
+5. That `too_high` side is still present 1200 ms after it first appeared → direction `too_high`.
 6. Score `NaN` → previous ema held.
 7. Score 140 → clamped to 100 before the ema.
 
 **Subproblems:**
 
-- [ ] **1.1** Fixture file, then agent A implements `ScoreSmoother` to match it. Tests fail before the implementation exists.
-- [ ] **1.2** Agent A calls `ScoreSmoother.update` inside `reducer.py` on kept ticks **before** `primary_issue` / mean scores are computed. Existing `tests/engine/test_progress.py` still passes. Add one reducer test: a single critical tick between warnings does not become `primary_issue` when timestamps are 100 ms apart.
-- [ ] **1.3** Agent B adds Vitest and ports the fixture. `cd web && npm run test` passes.
-- [ ] **1.4** Agent B feeds landmark-score severities through `createScoreSmoother()` in `web/src/pages/LivePractice.tsx` before the tip string changes. Do not add an endpoint, a table, or a model.
+- [x] **1.1** Fixture file, then agent A implements `ScoreSmoother` to match it. Tests fail before the implementation exists.
+- [x] **1.2** Agent A calls `ScoreSmoother.update` inside `reducer.py` on kept ticks **before** `primary_issue` / mean scores are computed. Existing `tests/engine/test_progress.py` still passes. Add one reducer test: a single critical tick between warnings does not become `primary_issue` when timestamps are 100 ms apart.
+- [x] **1.3** Agent B adds Vitest and ports the fixture. `cd web && npm run test` passes.
+- [x] **1.4** Agent B feeds landmark-score severities through `createScoreSmoother()` in `web/src/pages/LivePractice.tsx` before the tip string changes. Do not add an endpoint, a table, or a model.
 
 **Commands:**
 
@@ -321,7 +323,7 @@ cd web && npm run test && npm run build
 
 **Commit subject:** `Smooth live and saved posture scores before choosing a tip`
 
-- [ ] Problem 1 committed
+- [x] Problem 1 committed
 
 ---
 
