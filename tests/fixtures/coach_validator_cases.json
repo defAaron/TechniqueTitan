@@ -8,7 +8,10 @@
       "direction": "too_high",
       "score": 70,
       "metric_value": null,
-      "ideal": [0, 1]
+      "ideal": [
+        0,
+        1
+      ]
     },
     "expect": "fail",
     "code": "length"
@@ -22,7 +25,10 @@
       "direction": "too_low",
       "score": 62,
       "metric_value": null,
-      "ideal": [0, 1]
+      "ideal": [
+        0,
+        1
+      ]
     },
     "expect": "fail",
     "code": "deny_word"
@@ -36,7 +42,10 @@
       "direction": "generic",
       "score": 70,
       "metric_value": null,
-      "ideal": [0, 1]
+      "ideal": [
+        0,
+        1
+      ]
     },
     "expect": "fail",
     "code": "allow_word"
@@ -50,7 +59,10 @@
       "direction": "too_high",
       "score": 62,
       "metric_value": 1.12,
-      "ideal": [-0.0711, 0.966]
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
     },
     "expect": "fail",
     "code": "number"
@@ -64,7 +76,10 @@
       "direction": "too_high",
       "score": 62,
       "metric_value": 1.12,
-      "ideal": [-0.0711, 0.966]
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
     },
     "expect": "pass",
     "code": null
@@ -78,7 +93,197 @@
       "direction": "too_high",
       "score": 70,
       "metric_value": null,
-      "ideal": [0, 1]
+      "ideal": [
+        0,
+        1
+      ]
+    },
+    "expect": "pass",
+    "code": null
+  },
+  {
+    "name": "empty_text",
+    "text": "   ",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "fail",
+    "code": "empty"
+  },
+  {
+    "name": "three_sentences",
+    "text": "Your wrist dips. Lift the wrist. Keep it level.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "fail",
+    "code": "sentences"
+  },
+  {
+    "name": "markdown_bold",
+    "text": "Lift the **wrist** a little.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "fail",
+    "code": "markdown"
+  },
+  {
+    "name": "emoji",
+    "text": "Lift the wrist a little 🎹",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "fail",
+    "code": "emoji"
+  },
+  {
+    "name": "number_near_score",
+    "text": "Your wrist score is 61, so lift the wrist a little.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "pass",
+    "code": null
+  },
+  {
+    "name": "number_ideal_bound",
+    "text": "Keep the wrist under 0.966 on the gauge.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "pass",
+    "code": null
+  },
+  {
+    "name": "decimal_is_not_sentence_break",
+    "text": "Your wrist reads 1.12 today. Lift the wrist a little.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "pass",
+    "code": null
+  },
+  {
+    "name": "photo_cap_allows_longer_text",
+    "text": "Your wrist is starting to drop below the knuckle line, which pulls the hand down onto the keys. Gently lift the wrist until it lines up with your knuckles and keep that level shape while you play the next few bars slowly.",
+    "plan": {
+      "tip_kind": "photo",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "pass",
+    "code": null
+  },
+  {
+    "name": "live_cap_rejects_same_text",
+    "text": "Your wrist is starting to drop below the knuckle line, which pulls the hand down onto the keys. Gently lift the wrist until it lines up with your knuckles and keep that level shape while you play the next few bars slowly.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "fail",
+    "code": "length"
+  },
+  {
+    "name": "deny_word_case_insensitive",
+    "text": "Wrist PAIN means you should stop.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "wrist_height",
+      "direction": "too_high",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
+    },
+    "expect": "fail",
+    "code": "deny_word"
+  },
+  {
+    "name": "hand_arch_palm_allow_word",
+    "text": "Let the palm stay soft and lifted.",
+    "plan": {
+      "tip_kind": "live",
+      "criterion": "hand_arch",
+      "direction": "too_low",
+      "score": 62,
+      "metric_value": 1.12,
+      "ideal": [
+        -0.0711,
+        0.966
+      ]
     },
     "expect": "pass",
     "code": null
