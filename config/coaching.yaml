@@ -14,107 +14,377 @@ criteria:
       too_low:
         problem: "Your wrist is lifted a bit higher than your knuckles."
         fix: "Ease the wrist down until it sits level with the knuckle line."
+        variants:
+          - problem: "Your wrist is lifted a bit higher than your knuckles."
+            fix: "Ease the wrist down until it sits level with the knuckle line."
+          - problem: "Your wrist sits a little above the knuckles."
+            fix: "Let the wrist settle down until it is level with the knuckle line."
+          - problem: "Your wrist is raised a little higher than the knuckle bridge."
+            fix: "Lower the wrist gently until it lines up with the knuckles."
+          - problem: "Your wrist is hovering a little over the knuckles."
+            fix: "Ease it down so the wrist rests level with the knuckle line."
       too_high:
         problem: "Your wrist is starting to drop below the knuckle line."
         fix: "Gently lift the wrist until it lines up with your knuckles."
+        variants:
+          - problem: "Your wrist is starting to drop below the knuckle line."
+            fix: "Gently lift the wrist until it lines up with your knuckles."
+          - problem: "Your wrist has dipped a little below the knuckles."
+            fix: "Bring the wrist up until it sits level with the knuckle line."
+          - problem: "Your wrist is sinking a little under the knuckle line."
+            fix: "Lift the wrist gently so it meets the knuckles."
+          - problem: "Your wrist is dropping a little beneath the knuckles."
+            fix: "Raise the wrist until it rests level with the knuckle line."
       generic:
         problem: "Your wrist height is a little off balance."
         fix: "Aim for a calm, level wrist even with the knuckles."
+        variants:
+          - problem: "Your wrist height is a little off balance."
+            fix: "Aim for a calm, level wrist even with the knuckles."
+          - problem: "Your wrist height is a little out of place."
+            fix: "Set the wrist level with the knuckles and keep it calm."
+          - problem: "Your wrist height looks a little uneven."
+            fix: "Find a level wrist that matches the knuckle line."
+          - problem: "Your wrist height sits a little away from level."
+            fix: "Bring the wrist even with the knuckles and hold it steady."
     critical:
       too_low:
         problem: "Your wrist is raised well above the knuckles."
         fix: "Lower the wrist so it rests level with the knuckle bridge."
+        variants:
+          - problem: "Your wrist is raised well above the knuckles."
+            fix: "Lower the wrist so it rests level with the knuckle bridge."
+          - problem: "Your wrist is lifted far above the knuckles."
+            fix: "Drop the wrist down until it sits level with the knuckle bridge."
+          - problem: "Your wrist is pushed high above the knuckle line."
+            fix: "Bring the wrist down so it rests level with the knuckles."
+          - problem: "Your wrist stands well above the knuckle bridge."
+            fix: "Lower it until the wrist is level with the knuckles."
       too_high:
         problem: "Your wrist is collapsing below the keys."
         fix: "Lift the wrist until it sits level with your knuckles."
+        variants:
+          - problem: "Your wrist is collapsing below the keys."
+            fix: "Lift the wrist until it sits level with your knuckles."
+          - problem: "Your wrist has dropped far below the knuckles."
+            fix: "Lift the wrist up until it is level with the knuckle line."
+          - problem: "Your wrist is sunk well below the knuckle line."
+            fix: "Raise the wrist so it sits level with your knuckles."
+          - problem: "Your wrist has fallen clearly below the knuckles."
+            fix: "Bring the wrist up until it rests level with the knuckle line."
       generic:
         problem: "Your wrist height needs a clear reset."
         fix: "Bring the wrist level with the knuckles and hold that shape."
+        variants:
+          - problem: "Your wrist height needs a clear reset."
+            fix: "Bring the wrist level with the knuckles and hold that shape."
+          - problem: "Your wrist height is clearly off."
+            fix: "Reset the wrist so it sits level with the knuckles."
+          - problem: "Your wrist height has drifted far from level."
+            fix: "Set the wrist even with the knuckles and keep that line."
+          - problem: "Your wrist height needs a firm correction."
+            fix: "Place the wrist level with the knuckle line and hold it there."
 
   finger_curvature:
     warning:
       too_low:
         problem: "Your fingers are curling a little too tightly."
         fix: "Soften the joints — imagine holding a small soft bubble."
+        variants:
+          - problem: "Your fingers are curling a little too tightly."
+            fix: "Soften the joints — imagine holding a small soft bubble."
+          - problem: "Your fingers are curling a little too hard."
+            fix: "Soften them into a round, easy shape."
+          - problem: "Your fingers are a little too curled in."
+            fix: "Ease the curve until the fingers feel softly rounded."
+          - problem: "Your fingers grip a little too tightly."
+            fix: "Release into a gentle, rounded curve."
       too_high:
         problem: "Your fingers look a bit flat on the keys."
         fix: "Round the knuckles gently, as if holding a soft bubble."
+        variants:
+          - problem: "Your fingers look a bit flat on the keys."
+            fix: "Round the knuckles gently, as if holding a soft bubble."
+          - problem: "Your fingers are a little too straight."
+            fix: "Round them into a soft, easy curve."
+          - problem: "Your fingers look a little flat."
+            fix: "Add a gentle round shape, as if holding a soft bubble."
+          - problem: "Your fingers have gone a little too flat."
+            fix: "Curve them softly so they feel rounded, not stiff."
       generic:
         problem: "Your finger curve could be more natural."
         fix: "Keep a soft, rounded shape in each long finger."
+        variants:
+          - problem: "Your finger curve could be more natural."
+            fix: "Keep a soft, rounded shape in each long finger."
+          - problem: "Your finger curve is a little off."
+            fix: "Settle into a soft, rounded shape."
+          - problem: "Your finger curve could use a little softening."
+            fix: "Find a gentle round shape in each long finger."
+          - problem: "Your fingers need a little more natural curve."
+            fix: "Keep the shape soft and rounded."
     critical:
       too_low:
         problem: "Your fingers are clenched too tightly."
         fix: "Release the fist and find a soft, rounded curve."
+        variants:
+          - problem: "Your fingers are clenched too tightly."
+            fix: "Release the fist and find a soft, rounded curve."
+          - problem: "Your fingers are curled into a tight fist."
+            fix: "Open them into a soft, rounded curve."
+          - problem: "Your fingers are locked in a hard curl."
+            fix: "Release that grip and rebuild a gentle round shape."
+          - problem: "Your fingers are squeezing far too tightly."
+            fix: "Let them open into a soft, rounded curve."
       too_high:
         problem: "Your fingers are lying flat across the keys."
         fix: "Lift into a gentle curve — imagine holding a soft bubble."
+        variants:
+          - problem: "Your fingers are lying flat across the keys."
+            fix: "Lift into a gentle curve — imagine holding a soft bubble."
+          - problem: "Your fingers are stretched flat on the keys."
+            fix: "Round them as if you were holding a soft bubble."
+          - problem: "Your fingers have gone completely flat."
+            fix: "Lift a clear, gentle curve through each long finger."
+          - problem: "Your fingers lie rigid and flat."
+            fix: "Shape them into a soft, rounded curve."
       generic:
         problem: "Your finger curve needs a clear reset."
         fix: "Rebuild a soft, rounded shape in each long finger."
+        variants:
+          - problem: "Your finger curve needs a clear reset."
+            fix: "Rebuild a soft, rounded shape in each long finger."
+          - problem: "Your finger curve is far from a natural shape."
+            fix: "Reset each long finger into a soft, rounded curve."
+          - problem: "Your finger curve has lost its shape."
+            fix: "Rebuild a clear, soft round form in the fingers."
+          - problem: "Your fingers need a firm curve reset."
+            fix: "Form a soft, rounded shape and keep it steady."
 
   thumb_position:
     warning:
       too_low:
         problem: "Your thumb is tucked a little too close to the hand."
         fix: "Ease the thumb out so it rests on its side, ready to play."
+        variants:
+          - problem: "Your thumb is tucked a little too close to the hand."
+            fix: "Ease the thumb out so it rests on its side, ready to play."
+          - problem: "Your thumb is tucked a little inward."
+            fix: "Ease the thumb out until it rests on its side."
+          - problem: "Your thumb sits a little too tucked in."
+            fix: "Bring the thumb out onto its side, ready to play."
+          - problem: "Your thumb is hiding a little too close to the hand."
+            fix: "Slide the thumb out so it rests calmly on its side."
       too_high:
         problem: "Your thumb is flaring out a bit wide."
         fix: "Draw the thumb in so it rests calmly on its side."
+        variants:
+          - problem: "Your thumb is flaring out a bit wide."
+            fix: "Draw the thumb in so it rests calmly on its side."
+          - problem: "Your thumb is reaching a little too far out."
+            fix: "Draw the thumb in until it rests on its side."
+          - problem: "Your thumb flares a little wide of the hand."
+            fix: "Guide the thumb inward so it lies on its side."
+          - problem: "Your thumb is angled a little too far outward."
+            fix: "Bring the thumb closer so it rests on its side."
       generic:
         problem: "Your thumb position is a little off."
         fix: "Rest the thumb on its side, neither tucked nor flared."
+        variants:
+          - problem: "Your thumb position is a little off."
+            fix: "Rest the thumb on its side, neither tucked nor flared."
+          - problem: "Your thumb is a little out of place."
+            fix: "Set the thumb on its side, not tucked and not flared."
+          - problem: "Your thumb position needs a little correction."
+            fix: "Rest the thumb on its side, away from a tuck or a flare."
+          - problem: "Your thumb placement is a little off."
+            fix: "Place the thumb on its side, neither tucked nor flared."
     critical:
       too_low:
         problem: "Your thumb is tucked tightly against the hand."
         fix: "Open the thumb onto its side so it can move freely."
+        variants:
+          - problem: "Your thumb is tucked tightly against the hand."
+            fix: "Open the thumb onto its side so it can move freely."
+          - problem: "Your thumb is jammed tightly into the hand."
+            fix: "Open the thumb out onto its side."
+          - problem: "Your thumb is tucked hard against the hand."
+            fix: "Release the thumb so it rests on its side."
+          - problem: "Your thumb is buried tightly beside the hand."
+            fix: "Ease the thumb fully onto its side so it can move."
       too_high:
         problem: "Your thumb is sticking out far from the keys."
         fix: "Bring the thumb in to rest on its side near the hand."
+        variants:
+          - problem: "Your thumb is sticking out far from the keys."
+            fix: "Bring the thumb in to rest on its side near the hand."
+          - problem: "Your thumb is flung wide of the keys."
+            fix: "Draw the thumb in until it rests on its side."
+          - problem: "Your thumb juts far out from the hand."
+            fix: "Pull the thumb in to lie on its side near the keys."
+          - problem: "Your thumb is stretched far away from the hand."
+            fix: "Bring the thumb back onto its side, close to the keys."
       generic:
         problem: "Your thumb needs a clear position reset."
         fix: "Place the thumb on its side — relaxed, not tucked or flared."
+        variants:
+          - problem: "Your thumb needs a clear position reset."
+            fix: "Place the thumb on its side — relaxed, not tucked or flared."
+          - problem: "Your thumb position is clearly off."
+            fix: "Reset the thumb onto its side, neither tucked nor flared."
+          - problem: "Your thumb has lost its playing place."
+            fix: "Set the thumb on its side, relaxed and not flared or tucked."
+          - problem: "Your thumb needs a firm position reset."
+            fix: "Place the thumb on its side, free of a tuck or a flare."
 
   wrist_lateral:
     warning:
       too_low:
         problem: "Your wrist is bending a little toward the thumb side."
         fix: "Guide the hand so the wrist sits straighter over the forearm."
+        variants:
+          - problem: "Your wrist is bending a little toward the thumb side."
+            fix: "Guide the hand so the wrist sits straighter over the forearm."
+          - problem: "Your wrist leans a little toward the thumb side."
+            fix: "Straighten the wrist so it sits over the forearm."
+          - problem: "Your wrist is angling a little to the thumb side."
+            fix: "Guide the wrist back to a straight line over the forearm."
+          - problem: "Your wrist bends a little toward the thumb side."
+            fix: "Ease the hand so the wrist is straighter over the forearm."
       too_high:
         problem: "Your wrist is bending a little toward the pinky side."
         fix: "Guide the hand so the wrist sits straighter over the forearm."
+        variants:
+          - problem: "Your wrist is bending a little toward the pinky side."
+            fix: "Guide the hand so the wrist sits straighter over the forearm."
+          - problem: "Your wrist leans a little toward the pinky side."
+            fix: "Straighten the wrist so it sits over the forearm."
+          - problem: "Your wrist is angling a little to the pinky side."
+            fix: "Guide the wrist back to a straight line over the forearm."
+          - problem: "Your wrist bends a little toward the pinky side."
+            fix: "Ease the hand so the wrist is straighter over the forearm."
       generic:
         problem: "Your wrist is angled a little sideways."
         fix: "Align the hand so the wrist stays straight with the forearm."
+        variants:
+          - problem: "Your wrist is angled a little sideways."
+            fix: "Align the hand so the wrist stays straight with the forearm."
+          - problem: "Your wrist is tilted a little to one side."
+            fix: "Line the wrist up straight with the forearm."
+          - problem: "Your wrist sits a little off to the side."
+            fix: "Bring the wrist into a straight line over the forearm."
+          - problem: "Your wrist has a little sideways angle."
+            fix: "Align the wrist so it stays straight with the forearm."
     critical:
       too_low:
         problem: "Your wrist is bent sharply toward the thumb side."
         fix: "Straighten the wrist so the hand lines up with the forearm."
+        variants:
+          - problem: "Your wrist is bent sharply toward the thumb side."
+            fix: "Straighten the wrist so the hand lines up with the forearm."
+          - problem: "Your wrist is bent hard toward the thumb side."
+            fix: "Straighten the wrist until the hand lines up with the forearm."
+          - problem: "Your wrist has a sharp bend toward the thumb side."
+            fix: "Reset the wrist so it sits straight over the forearm."
+          - problem: "Your wrist angles sharply to the thumb side."
+            fix: "Bring the wrist back in line with the forearm."
       too_high:
         problem: "Your wrist is bent sharply toward the pinky side."
         fix: "Straighten the wrist so the hand lines up with the forearm."
+        variants:
+          - problem: "Your wrist is bent sharply toward the pinky side."
+            fix: "Straighten the wrist so the hand lines up with the forearm."
+          - problem: "Your wrist is bent hard toward the pinky side."
+            fix: "Straighten the wrist until the hand lines up with the forearm."
+          - problem: "Your wrist has a sharp bend toward the pinky side."
+            fix: "Reset the wrist so it sits straight over the forearm."
+          - problem: "Your wrist angles sharply to the pinky side."
+            fix: "Bring the wrist back in line with the forearm."
       generic:
         problem: "Your wrist has a strong sideways bend."
         fix: "Reset so the wrist sits straight in line with the forearm."
+        variants:
+          - problem: "Your wrist has a strong sideways bend."
+            fix: "Reset so the wrist sits straight in line with the forearm."
+          - problem: "Your wrist is bent sharply to the side."
+            fix: "Straighten the wrist so it lines up with the forearm."
+          - problem: "Your wrist shows a strong sideways angle."
+            fix: "Reset the wrist into a straight line over the forearm."
+          - problem: "Your wrist has a clear bend to the side."
+            fix: "Set the wrist straight in line with the forearm."
 
   hand_arch:
     warning:
       too_low:
         problem: "The arch across your knuckles is starting to flatten."
         fix: "Lift the knuckle bridge into a gentle, supported dome."
+        variants:
+          - problem: "The arch across your knuckles is starting to flatten."
+            fix: "Lift the knuckle bridge into a gentle, supported dome."
+          - problem: "Your knuckle arch is a little flat."
+            fix: "Lift a gentle dome across the knuckles."
+          - problem: "Your arch is starting to sit a little low."
+            fix: "Raise the knuckle bridge into a soft, supported dome."
+          - problem: "Your knuckles are a little too flat."
+            fix: "Build a gentle arch so the hand has a small dome."
       too_high:
         problem: "Your hand arch looks a little too high and stiff."
         fix: "Ease the dome so the knuckle bridge feels soft and springy."
+        variants:
+          - problem: "Your hand arch looks a little too high and stiff."
+            fix: "Ease the dome so the knuckle bridge feels soft and springy."
+          - problem: "Your hand arch is a little too tall and rigid."
+            fix: "Soften the dome across the knuckles."
+          - problem: "Your arch is held a little too high."
+            fix: "Ease the knuckle bridge into a softer dome."
+          - problem: "Your knuckle arch feels a little stiff and high."
+            fix: "Let the dome settle into a gentler arch."
       generic:
         problem: "Your hand arch could use a small adjustment."
         fix: "Keep a gentle dome across the knuckles, not flat or rigid."
+        variants:
+          - problem: "Your hand arch could use a small adjustment."
+            fix: "Keep a gentle dome across the knuckles, not flat or rigid."
+          - problem: "Your hand arch is a little off."
+            fix: "Aim for a gentle dome across the knuckles."
+          - problem: "Your arch could use a little reset."
+            fix: "Shape a soft dome over the knuckles, neither flat nor rigid."
+          - problem: "Your knuckle arch needs a small adjustment."
+            fix: "Keep a gentle, easy dome through the hand."
     critical:
       too_low:
         problem: "Your knuckle bridge has collapsed flat."
         fix: "Rebuild a clear dome across the knuckles, soft but lifted."
+        variants:
+          - problem: "Your knuckle bridge has collapsed flat."
+            fix: "Rebuild a clear dome across the knuckles, soft but lifted."
+          - problem: "Your knuckle arch has fallen completely flat."
+            fix: "Lift a clear, soft dome across the knuckles."
+          - problem: "Your arch across the knuckles has collapsed."
+            fix: "Rebuild a lifted dome that stays soft."
+          - problem: "Your hand arch is pressed flat."
+            fix: "Raise a clear knuckle dome, supported but not stiff."
       too_high:
         problem: "Your hand arch is over-domed and tense."
         fix: "Soften the arch into a gentle, easy knuckle bridge."
+        variants:
+          - problem: "Your hand arch is over-domed and tense."
+            fix: "Soften the arch into a gentle, easy knuckle bridge."
+          - problem: "Your hand arch is peaked and rigid."
+            fix: "Soften the dome into an easy knuckle bridge."
+          - problem: "Your arch is forced too high and tense."
+            fix: "Release the dome so the knuckles sit in a gentler arch."
+          - problem: "Your knuckle bridge is over-lifted and stiff."
+            fix: "Ease the arch down into a soft, natural dome."
       generic:
         problem: "Your hand arch needs a clear reset."
         fix: "Find a gentle dome across the knuckles — lifted, not locked."
+        variants:
+          - problem: "Your hand arch needs a clear reset."
+            fix: "Find a gentle dome across the knuckles — lifted, not locked."
+          - problem: "Your hand arch is clearly out of shape."
+            fix: "Reset a gentle dome across the knuckles."
+          - problem: "Your arch needs a firm correction."
+            fix: "Build a soft knuckle dome that is lifted, not locked."
+          - problem: "Your knuckle arch has lost its balance."
+            fix: "Find a clear, gentle dome and keep it easy."
