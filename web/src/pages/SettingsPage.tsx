@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
+import { CoachWordingToggle } from '../components/coach'
 import { PageHeader } from '../components/layout'
 import { useAuth } from '../lib/auth'
+import { coachModelSourceConfig } from '../lib/coachModel'
 import { supabase } from '../lib/supabase'
 
 export function SettingsPage() {
@@ -66,6 +68,13 @@ export function SettingsPage() {
           <dd className="font-body text-base capitalize text-white">{provider ?? 'email'}</dd>
         </div>
       </dl>
+
+      {coachModelSourceConfig && (
+        <section className="mb-10 space-y-3">
+          <h2 className="font-cinematic text-2xl font-normal text-white">Coaching</h2>
+          <CoachWordingToggle />
+        </section>
+      )}
 
       {canChangePassword ? (
         <form className="space-y-4" onSubmit={(event) => void onSubmit(event)}>

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { CoachingTips, OverlayImage, ScorePanel } from '../components/analyze'
+import { CoachWordingToggle } from '../components/coach'
 import { PageHeader } from '../components/layout'
 import { AddToProgressButton } from '../components/progress'
 import {
@@ -10,6 +11,7 @@ import {
   type AnalyzeResponse,
   type HandResult,
 } from '../lib/api'
+import { rewordTip } from '../lib/coachModel'
 
 const CAPTURE =
   'Side or ¾ view, good lighting, hand fully in frame, roughly forearm height.'
@@ -75,18 +77,34 @@ export function PhotoAnalyze() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<AnalyzeResponse | null>(null)
+  const [wording, setWording] = useState<{ problem: string; fix: string } | null>(null)
+  const requestRef = useRef(0)
+
+  function requestWording(coachPlan: AnalyzeCoachPlan | null | undefined) {
+    const request = ++requestRef.current
+    setWording(null)
+    if (!coachPlan?.plan || !coachPlan.problem || !coachPlan.fix) return
+    void rewordTip(coachPlan.plan, { problem: coachPlan.problem, fix: coachPlan.fix }).then(
+      (tip) => {
+        if (request === requestRef.current && tip.renderer === 'model') setWording(tip)
+      },
+    )
+  }
 
   async function onFile(file: File | undefined) {
     if (!file) return
     setBusy(true)
     setError(null)
     setResult(null)
+    requestRef.current += 1
+    setWording(null)
     try {
       if (file.size > 8 * 1024 * 1024) {
         throw new Error('Image is too large (max 8 MB).')
       }
       const res = await analyzeImage(file)
       setResult(res)
+      requestWording(res.coach_plan)
       if (res.message && !res.hands.length) setError(res.message)
     } catch (err) {
       setError(formatApiError(err, 'Analysis failed'))
@@ -101,6 +119,7 @@ export function PhotoAnalyze() {
         {CAPTURE}
       </PageHeader>
 
+      <CoachWordingToggle />
       <label className="flex cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-white/20 bg-zinc-950 px-6 py-16 text-center transition-colors duration-500 hover:border-white/50">
         <span className="font-cinematic text-xl text-white">
           Drop a JPEG or PNG, or click to browse
@@ -153,12 +172,10 @@ export function PhotoAnalyze() {
             {[...result.hands]
               .sort((a, b) => a.label.localeCompare(b.label))
               .map((hand) => {
-                const coachHand = handForCoachPlan(result.hands, result.coach_plan)
-                const displayHand = applyCoachPlanToHand(
-                  hand,
-                  result.coach_plan,
-                  coachHand,
-                )
+                const coachPlan =
+                  result.coach_plan && wording ? { ...result.coach_plan, ...wording } : result.coach_plan
+                const coachHand = handForCoachPlan(result.hands, coachPlan)
+                const displayHand = applyCoachPlanToHand(hand, coachPlan, coachHand)
                 return (
                   <div key={hand.label} className="space-y-4">
                     <ScorePanel hand={displayHand} compact />

@@ -25,6 +25,10 @@ export interface CoachPlanResponse {
     severity: string
     direction: string
     renderer: string
+    score?: number | null
+    tip_kind?: string | null
+    metric_value?: number | null
+    ideal?: number[] | null
   } | null
   problem: string | null
   fix: string | null
@@ -126,6 +130,25 @@ export function applyCoachPlanToCoaching(
   }
 
   return { coaching: previous, appliedPlanKey: planKey, changed: false }
+}
+
+/** Swap the primary tip's sentences, keeping criterion and severity from the plan. */
+export function withPrimaryWording(
+  coaching: Coaching,
+  wording: { problem: string; fix: string },
+): Coaching {
+  const primary = coaching.primary
+  if (!primary) return coaching
+  const reworded: CoachingTip = { ...primary, problem: wording.problem, fix: wording.fix }
+  return {
+    ...coaching,
+    primary: reworded,
+    tips: coaching.tips.map((tip) =>
+      tip.criterion === primary.criterion && tip.problem === primary.problem && tip.fix === primary.fix
+        ? reworded
+        : tip,
+    ),
+  }
 }
 
 export type CoachPlanFetchOutcome =

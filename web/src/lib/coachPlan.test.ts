@@ -4,6 +4,7 @@ import {
   applyCoachPlanToCoaching,
   buildHandCoachSignature,
   mergeCoachPlanFetch,
+  withPrimaryWording,
   type CoachPlanResponse,
   type SmoothedCriterionSnapshot,
 } from './coachPlan'
@@ -76,6 +77,25 @@ describe('applyCoachPlanToCoaching', () => {
     expect(coaching.primary?.fix).toBe('Curve your hand more')
     expect(coaching.tips).toHaveLength(1)
     expect(coaching.tips[0]?.problem).toBe('Arch is flat')
+  })
+})
+
+describe('withPrimaryWording', () => {
+  it('replaces only the primary sentences and keeps criterion and severity', () => {
+    const out = withPrimaryWording(PREVIOUS_COACHING, { problem: 'New problem', fix: 'New fix' })
+    expect(out.primary).toMatchObject({
+      criterion: 'wrist_height',
+      severity: 'warning',
+      problem: 'New problem',
+      fix: 'New fix',
+    })
+    expect(out.tips[0]?.problem).toBe('New problem')
+    expect(PREVIOUS_COACHING.primary?.problem).toBe('Old problem')
+  })
+
+  it('leaves encouragement-only coaching alone', () => {
+    const encouragement: Coaching = { tips: [], primary: null, encouragement: 'Nice' }
+    expect(withPrimaryWording(encouragement, { problem: 'x', fix: 'y' })).toBe(encouragement)
   })
 })
 

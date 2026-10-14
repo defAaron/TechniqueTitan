@@ -23,9 +23,12 @@ import {
   fetchCoachPlan,
   mergeCoachPlanFetch,
   normalizeApiHand,
+  withPrimaryWording,
   type SmoothedCriterionSnapshot,
 } from '../lib/coachPlan'
+import { rewordTip } from '../lib/coachModel'
 import { createScoreSmoother } from '../lib/scoreSmooth'
+import { CoachWordingToggle } from '../components/coach'
 
 const SCORING_IDEALS: Record<string, [number, number]> = {
   wrist_height: [-0.0711, 0.966],
@@ -228,9 +231,20 @@ export function LivePractice() {
         if (merged.appliedPlanKey !== lastKey) {
           lastAppliedPlanKeyRef.current.set(hand.label, merged.appliedPlanKey)
         }
-        if (merged.coaching !== previousCoaching) {
-          applyCoachPlanToDisplay(hand.label, merged.coaching)
-        }
+        if (merged.coaching === previousCoaching) return
+        applyCoachPlanToDisplay(hand.label, merged.coaching)
+
+        const response = outcome.ok ? outcome.response : null
+        const plan = response?.plan
+        const appliedKey = merged.appliedPlanKey
+        if (!plan || !response?.problem || !response.fix || !appliedKey) return
+        void rewordTip(plan, { problem: response.problem, fix: response.fix }).then((tip) => {
+          if (tip.renderer !== 'model') return
+          if (lastAppliedPlanKeyRef.current.get(hand.label) !== appliedKey) return
+          const latest = lastResultsRef.current?.hands.find((h) => h.label === hand.label)
+          if (latest?.coaching.primary?.criterion !== plan.criterion) return
+          applyCoachPlanToDisplay(hand.label, withPrimaryWording(latest.coaching, tip))
+        })
       })
     },
     [applyCoachPlanToDisplay],
@@ -449,6 +463,7 @@ export function LivePractice() {
           </button>
         )}
         <span className="font-body text-sm text-white/40">{status}</span>
+        <CoachWordingToggle className="sm:ml-auto" />
       </div>
 
       {!running && (progressDraft || finalizing) && (
