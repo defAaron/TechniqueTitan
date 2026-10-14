@@ -9,11 +9,29 @@ import {
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 
-const PIN_STORAGE_KEY = 'tt-app-nav-collapsed'
 const DOCK_STORAGE_KEY = 'tt-app-nav-dock'
 
 const EDGE_INSET = 16
 const VIEW_MARGIN = 12
+/** Gap between the site header chrome and a top-docked floating nav. */
+const TOP_DOCK_GAP = 8
+
+function measureSiteChromeHeight(): number {
+  const landingChrome = document.querySelector<HTMLElement>('.fixed.inset-x-0.top-0.z-50')
+  if (landingChrome) {
+    return landingChrome.getBoundingClientRect().height
+  }
+
+  const flexCol = document.querySelector<HTMLElement>('div.flex.min-h-screen.flex-col')
+  if (!flexCol) return 0
+
+  let height = 0
+  for (const child of Array.from(flexCol.children)) {
+    if (child.tagName === 'MAIN') break
+    height += (child as HTMLElement).getBoundingClientRect().height
+  }
+  return height
+}
 
 type DockEdge = 'left' | 'right' | 'top' | 'bottom'
 
@@ -84,6 +102,7 @@ function dockToStyle(
   dock: DockState,
   width: number,
   height: number,
+  topChromeHeight: number,
 ): { style: CSSProperties; vertical: boolean } {
   const vertical = isVerticalEdge(dock.edge)
   const vh = window.innerHeight
@@ -107,9 +126,10 @@ function dockToStyle(
   const travel = Math.max(0, vw - width - VIEW_MARGIN * 2)
   const left = VIEW_MARGIN + dock.offset * travel
   if (dock.edge === 'top') {
+    const top = Math.max(EDGE_INSET, topChromeHeight + TOP_DOCK_GAP)
     return {
       vertical: false,
-      style: { position: 'fixed', left, top: EDGE_INSET, zIndex: 30 },
+      style: { position: 'fixed', left, top, zIndex: 30 },
     }
   }
   return {
@@ -192,21 +212,17 @@ function DragGrip({ vertical }: { vertical: boolean }) {
 export function FloatingAppNav() {
   const { user, isAdmin } = useAuth()
   const asideRef = useRef<HTMLElement>(null)
-  const [pinnedOpen, setPinnedOpen] = useState(() => {
-    try {
-      const stored = localStorage.getItem(PIN_STORAGE_KEY)
-      if (stored === null) return false
-      return stored !== '1'
-    } catch {
-      return false
-    }
-  })
   const [hovered, setHovered] = useState(false)
+  /** Collapsed via chevron; cleared when hover-expand is allowed again. */
+  const [expandSuppressed, setExpandSuppressed] = useState(false)
+  /** After chevron collapse: skip auto-expand on the next enter only (six-dot drag window). */
+  const [skippedExpandEntersRemaining, setSkippedExpandEntersRemaining] = useState(0)
   const [dock, setDock] = useState<DockState>(readDockState)
   const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null)
   const [size, setSize] = useState({ width: 48, height: 200 })
+  const [topChromeHeight, setTopChromeHeight] = useState(0)
 
-  const expanded = hovered || pinnedOpen
+  const expanded = hovered && !expandSuppressed
   const dragging = dragPoint !== null
   const vertical = isVerticalEdge(dock.edge)
 
@@ -219,9 +235,42 @@ export function FloatingAppNav() {
     }
   }, [])
 
+  const measureChrome = useCallback(() => {
+    setTopChromeHeight(measureSiteChromeHeight())
+  }, [])
+
   useLayoutEffect(() => {
     measure()
-  }, [measure, expanded, dock.edge, vertical])
+    measureChrome()
+  }, [measure, measureChrome, expanded, dock.edge, vertical])
+
+  useEffect(() => {
+    measureChrome()
+    window.addEventListener('resize', measureChrome)
+
+    const observed: Element[] = []
+    const landingChrome = document.querySelector('.fixed.inset-x-0.top-0.z-50')
+    if (landingChrome) observed.push(landingChrome)
+
+    const flexCol = document.querySelector('div.flex.min-h-screen.flex-col')
+    if (flexCol) {
+      for (const child of Array.from(flexCol.children)) {
+        if (child.tagName === 'MAIN') break
+        observed.push(child)
+      }
+    }
+
+    let observer: ResizeObserver | undefined
+    if (observed.length > 0 && typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => measureChrome())
+      for (const el of observed) observer.observe(el)
+    }
+
+    return () => {
+      window.removeEventListener('resize', measureChrome)
+      observer?.disconnect()
+    }
+  }, [measureChrome])
 
   useEffect(() => {
     const el = asideRef.current
@@ -230,14 +279,6 @@ export function FloatingAppNav() {
     observer.observe(el)
     return () => observer.disconnect()
   }, [measure])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(PIN_STORAGE_KEY, pinnedOpen ? '0' : '1')
-    } catch {
-      /* ignore */
-    }
-  }, [pinnedOpen])
 
   useEffect(() => {
     if (dragging) return
@@ -286,9 +327,8 @@ export function FloatingAppNav() {
   }, [dragPoint, finishDrag])
 
   function onGripPointerDown(event: React.PointerEvent<HTMLButtonElement>) {
-    if (event.button !== 0) return
+    if (event.button !== 0 || expanded) return
     event.preventDefault()
-    setHovered(true)
     setDragPoint({ x: event.clientX, y: event.clientY })
     event.currentTarget.setPointerCapture(event.pointerId)
   }
@@ -297,7 +337,7 @@ export function FloatingAppNav() {
 
   const items = APP_NAV.filter((item) => !item.adminOnly || isAdmin)
 
-  const docked = dockToStyle(dock, size.width, size.height)
+  const docked = dockToStyle(dock, size.width, size.height, topChromeHeight)
   const asideStyle: CSSProperties = dragging
     ? {
         position: 'fixed',
@@ -329,9 +369,25 @@ export function FloatingAppNav() {
       ].join(' ')}
       style={asideStyle}
       aria-label="App navigation"
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        setHovered(true)
+        setSkippedExpandEntersRemaining((remaining) => {
+          if (remaining > 0) {
+            setExpandSuppressed(true)
+            return remaining - 1
+          }
+          setExpandSuppressed(false)
+          return 0
+        })
+      }}
       onMouseLeave={() => {
-        if (!dragging) setHovered(false)
+        if (!dragging) {
+          setHovered(false)
+          setSkippedExpandEntersRemaining((remaining) => {
+            if (remaining === 0) setExpandSuppressed(false)
+            return remaining
+          })
+        }
       }}
     >
       <div
@@ -342,49 +398,51 @@ export function FloatingAppNav() {
             : ['flex-row items-center gap-0.5 px-1.5 py-1.5', expanded ? '' : ''].join(' '),
         ].join(' ')}
       >
-        <button
-          type="button"
-          aria-label="Drag navigation to screen edge"
-          className={[
-            'flex shrink-0 touch-none text-white/50 transition-colors hover:text-white/80',
-            panelVertical ? 'justify-center px-1 pb-0.5' : 'px-0.5',
-          ].join(' ')}
-          onPointerDown={onGripPointerDown}
-        >
-          <DragGrip vertical={panelVertical} />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setPinnedOpen((value) => !value)}
-          aria-expanded={expanded}
-          aria-label={pinnedOpen ? 'Collapse navigation' : 'Pin navigation open'}
-          className={[
-            'flex shrink-0 items-center text-white/50 transition-colors hover:text-white',
-            panelVertical
-              ? expanded
-                ? 'justify-end px-2 py-0.5'
-                : 'justify-center px-0 py-0.5'
-              : 'px-1 py-1',
-          ].join(' ')}
-        >
-          <svg
-            viewBox="0 0 12 12"
+        {!expanded ? (
+          <button
+            type="button"
+            aria-label="Drag navigation to screen edge"
             className={[
-              'h-3 w-3 fill-none stroke-current transition-transform duration-300',
-              panelVertical
-                ? expanded
-                  ? 'rotate-180'
-                  : ''
-                : expanded
-                  ? 'rotate-90'
-                  : '-rotate-90',
+              'flex shrink-0 touch-none text-white/50 transition-colors hover:text-white/80',
+              panelVertical ? 'justify-center px-1 pb-0.5' : 'px-0.5',
             ].join(' ')}
-            aria-hidden="true"
+            onPointerDown={onGripPointerDown}
           >
-            <path d="M8 2 4 6l4 4" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+            <DragGrip vertical={panelVertical} />
+          </button>
+        ) : null}
+
+        {expanded ? (
+          <button
+            type="button"
+            onClick={() => {
+              setExpandSuppressed(true)
+              setSkippedExpandEntersRemaining(1)
+            }}
+            aria-expanded={true}
+            aria-label="Collapse navigation"
+            className={[
+              'flex shrink-0 items-center text-white/50 transition-colors hover:text-white',
+              panelVertical ? 'justify-end px-2 py-0.5' : 'px-1 py-1',
+            ].join(' ')}
+          >
+            <svg
+              viewBox="0 0 12 12"
+              className={[
+                'h-3 w-3 fill-none stroke-current transition-transform duration-300',
+                panelVertical ? 'rotate-180' : 'rotate-90',
+              ].join(' ')}
+              aria-hidden="true"
+            >
+              <path
+                d="M8 2 4 6l4 4"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ) : null}
 
         <nav
           className={[
