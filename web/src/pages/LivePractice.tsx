@@ -17,6 +17,14 @@ import {
   drawHandOverlays,
   severityHex,
 } from '../lib/mediapipe'
+import {
+  buildCoachPlanRequestBody,
+  buildHandCoachSignature,
+  fetchCoachPlan,
+  mergeCoachPlanFetch,
+  normalizeApiHand,
+  type SmoothedCriterionSnapshot,
+} from '../lib/coachPlan'
 import { createScoreSmoother } from '../lib/scoreSmooth'
 
 const SCORING_IDEALS: Record<string, [number, number]> = {
@@ -56,6 +64,12 @@ export function LivePractice() {
   const prevHandSnapshotRef = useRef<
     Map<string, { severities: Record<string, string>; coaching: Coaching }>
   >(new Map())
+  const smoothedCriteriaRef = useRef<Map<string, Record<string, SmoothedCriterionSnapshot>>>(
+    new Map(),
+  )
+  const lastRequestedCoachSignatureRef = useRef<Map<string, string>>(new Map())
+  const lastAppliedPlanKeyRef = useRef<Map<string, string | null>>(new Map())
+  const coachRequestGenRef = useRef<Map<string, number>>(new Map())
   const sessionStartRef = useRef(0)
   const ticksRef = useRef<ProgressTick[]>([])
   const framesSeenRef = useRef(0)
@@ -133,10 +147,13 @@ export function LivePractice() {
 
       const scores = { ...hand.scores }
       const severities = { ...hand.severities }
+      const criteriaSnap: Record<string, SmoothedCriterionSnapshot> = {}
       for (const [key, out] of Object.entries(smoothed.criteria)) {
         if (out.score != null) scores[key] = out.score
         severities[key] = out.severity
+        criteriaSnap[key] = { severity: out.severity, direction: out.direction }
       }
+      smoothedCriteriaRef.current.set(hand.label, criteriaSnap)
 
       let composite_severity = hand.composite_severity
       let worstRank = -1
@@ -164,6 +181,61 @@ export function LivePractice() {
     })
   }, [])
 
+  const applyCoachPlanToDisplay = useCallback((handLabel: string, coaching: Coaching) => {
+    const display = lastResultsRef.current
+    if (!display) return
+    const hand = display.hands.find((h) => h.label === handLabel)
+    if (!hand) return
+    const severities = { ...hand.severities }
+    prevHandSnapshotRef.current.set(handLabel, { severities, coaching })
+    const updatedHands = display.hands.map((h) =>
+      h.label === handLabel ? { ...h, coaching } : h,
+    )
+    const nextDisplay = { ...display, hands: updatedHands }
+    lastResultsRef.current = nextDisplay
+    setHands([...updatedHands].sort((a, b) => a.label.localeCompare(b.label)))
+  }, [])
+
+  const maybeRequestCoachPlan = useCallback(
+    (hand: HandResult) => {
+      const apiHand = normalizeApiHand(hand.label)
+      if (!apiHand) return
+
+      const criteria = smoothedCriteriaRef.current.get(hand.label)
+      if (!criteria) return
+
+      const signature = buildHandCoachSignature(hand.label, criteria)
+      if (signature === lastRequestedCoachSignatureRef.current.get(hand.label)) return
+      lastRequestedCoachSignatureRef.current.set(hand.label, signature)
+
+      const gen = (coachRequestGenRef.current.get(hand.label) ?? 0) + 1
+      coachRequestGenRef.current.set(hand.label, gen)
+
+      const body = buildCoachPlanRequestBody({
+        hand: apiHand,
+        scores: hand.scores,
+        severities: hand.severities as Record<string, string>,
+        metrics: hand.criterion_metrics,
+      })
+
+      void fetchCoachPlan(body).then((outcome) => {
+        if (coachRequestGenRef.current.get(hand.label) !== gen) return
+
+        const current = lastResultsRef.current?.hands.find((h) => h.label === hand.label)
+        const previousCoaching = current?.coaching ?? hand.coaching
+        const lastKey = lastAppliedPlanKeyRef.current.get(hand.label) ?? null
+        const merged = mergeCoachPlanFetch(previousCoaching, lastKey, outcome)
+        if (merged.appliedPlanKey !== lastKey) {
+          lastAppliedPlanKeyRef.current.set(hand.label, merged.appliedPlanKey)
+        }
+        if (merged.coaching !== previousCoaching) {
+          applyCoachPlanToDisplay(hand.label, merged.coaching)
+        }
+      })
+    },
+    [applyCoachPlanToDisplay],
+  )
+
   const applyResults = useCallback(
     (res: AnalyzeResponse) => {
       const tMs = sessionStartRef.current
@@ -183,6 +255,9 @@ export function LivePractice() {
       paintFrame(display)
       if (display.message && !display.hands.length) setStatus(display.message)
       else setStatus(display.hands.length ? `${display.hands.length} hand(s)` : 'No hand')
+      for (const hand of display.hands) {
+        maybeRequestCoachPlan(hand)
+      }
       if (display.hands.length && sessionStartRef.current) {
         framesSeenRef.current += 1
         const rawByLabel = new Map(res.hands.map((hand) => [hand.label, hand]))
@@ -200,7 +275,7 @@ export function LivePractice() {
         }
       }
     },
-    [paintFrame, smoothHands],
+    [maybeRequestCoachPlan, paintFrame, smoothHands],
   )
 
   const tick = useCallback(async () => {
@@ -280,6 +355,10 @@ export function LivePractice() {
     sessionStartRef.current = Date.now()
     scoreSmootherRef.current = createScoreSmoother()
     prevHandSnapshotRef.current = new Map()
+    smoothedCriteriaRef.current = new Map()
+    lastRequestedCoachSignatureRef.current = new Map()
+    lastAppliedPlanKeyRef.current = new Map()
+    coachRequestGenRef.current = new Map()
     backoffUntilRef.current = 0
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
