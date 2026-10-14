@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 4. Do not start it until the user asks.
+**Next problem:** 5. Do not start it until the user asks.
 
 ---
 
@@ -455,9 +455,9 @@ Agent B does not invent new sentences. Agent A does not change hash code.
 
 **Subproblems:**
 
-- [ ] **4.1** Four variants per existing cell. YAML still loads with `load_coaching_config`.
-- [ ] **4.2** Hash selection. A test freezes the date and asserts index stability.
-- [ ] **4.3** Every variant passes `validate_tip` for a matching plan. One test loops the catalog.
+- [x] **4.1** Four variants per existing cell. YAML still loads with `load_coaching_config`.
+- [x] **4.2** Hash selection. A test freezes the date and asserts index stability.
+- [x] **4.3** Every variant passes `validate_tip` for a matching plan. One test loops the catalog.
 
 **Commands:**
 
@@ -472,7 +472,7 @@ pytest tests/engine/test_coaching.py tests/engine/test_coach_validate.py tests/a
 
 **Commit subject:** `Rotate approved coaching sentences by day`
 
-- [ ] Problem 4 committed
+- [x] Problem 4 committed
 
 ---
 
