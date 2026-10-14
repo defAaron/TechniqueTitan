@@ -2,12 +2,33 @@
 
 from __future__ import annotations
 
+from datetime import date, datetime, timezone
+
+import pytest
+
+import api.analyze_coach_plan as analyze_coach_plan_mod
 from api.analyze_coach_plan import build_coach_plan_payload
 from api.deps import get_coaching_config, get_scoring_config
-from technique_titan.coaching import _lookup_tip
+from technique_titan.coach.plan import plan_key
+from technique_titan.coaching import lookup_variant
+
+_FROZEN_TODAY = date(2026, 10, 13)
 
 
-def test_build_coach_plan_payload_wrist_height_warning_too_high() -> None:
+@pytest.fixture
+def frozen_utc_today(monkeypatch: pytest.MonkeyPatch) -> date:
+    class FrozenDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 10, 13, 12, 0, 0, tzinfo=timezone.utc)
+
+    monkeypatch.setattr(analyze_coach_plan_mod, "datetime", FrozenDateTime)
+    return _FROZEN_TODAY
+
+
+def test_build_coach_plan_payload_wrist_height_warning_too_high(
+    frozen_utc_today: date,
+) -> None:
     scoring = get_scoring_config()
     coaching = get_coaching_config()
     scores = {
@@ -43,7 +64,16 @@ def test_build_coach_plan_payload_wrist_height_warning_too_high() -> None:
     assert plan["direction"] == "too_high"
     assert plan["renderer"] == "template"
 
-    expected = _lookup_tip(coaching, "wrist_height", "warning", "too_high")
+    pk = plan_key(plan)
+    expected = lookup_variant(
+        coaching,
+        plan["criterion"],
+        plan["severity"],
+        plan["direction"],
+        user_id=None,
+        plan_key=pk,
+        on=frozen_utc_today,
+    )
     assert expected is not None
     assert payload["problem"] == expected.problem
     assert payload["fix"] == expected.fix

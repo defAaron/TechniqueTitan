@@ -12,7 +12,7 @@ from technique_titan.coach.focus import FocusSession, LockedFocus, choose_focus
 from technique_titan.coach.plan import build_plan, plan_key
 from technique_titan.coach.temporal import SmoothedCriterion, SmoothedHand
 from technique_titan.coach.validate import validate_tip
-from technique_titan.coaching import _lookup_tip, metric_direction
+from technique_titan.coaching import lookup_variant, metric_direction
 
 from ..deps import get_coaching_config, get_scoring_config
 from ..schemas import COACH_CRITERIA, CoachPlanHistoryEntryIn, CoachPlanRequest
@@ -226,11 +226,14 @@ async def coach_plan(request: Request) -> dict:
             "lock": lock_json,
         }
 
-    tip = _lookup_tip(
+    tip = lookup_variant(
         coaching_config,
         plan["criterion"],
         plan["severity"],
         plan["direction"],
+        user_id=body.user_id,
+        plan_key=plan_key(plan),
+        on=today,
     )
     if tip is None:
         raise HTTPException(

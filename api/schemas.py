@@ -239,6 +239,7 @@ class CoachPlanRequest(BaseModel):
     history: List[CoachPlanHistoryEntryIn] = Field(default_factory=list, max_length=40)
     tip_kind: CoachTipKind
     locked_focus: Optional[CoachPlanLockedFocusIn] = None
+    user_id: Optional[str] = None
 
     @field_validator("scores", mode="before")
     @classmethod

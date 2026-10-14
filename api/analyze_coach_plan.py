@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime, timezone
 from typing import Any
 
 from technique_titan.coach.focus import CRITERIA, FocusDecision
 from technique_titan.coach.plan import CRITERION_METRICS, build_plan, plan_key
 from technique_titan.coach.temporal import SmoothedCriterion, SmoothedHand
 from technique_titan.coach.validate import validate_tip
-from technique_titan.coaching import _lookup_tip, generate_coaching, metric_direction
+from technique_titan.coaching import generate_coaching, lookup_variant, metric_direction
 
 from .schemas import COACH_CRITERIA, HandResultOut, HandSummaryOut, SessionDraftOut, VideoFrameScore
 
@@ -134,11 +135,15 @@ def build_coach_plan_payload(
 
     problem: str | None = None
     fix: str | None = None
-    tip = _lookup_tip(
+    on = datetime.now(timezone.utc).date()
+    tip = lookup_variant(
         coaching_config,
         plan["criterion"],
         plan["severity"],
         plan["direction"],
+        user_id=None,
+        plan_key=plan_key(plan),
+        on=on,
     )
     if tip is not None:
         errors = validate_tip(f"{tip.problem} {tip.fix}", plan)

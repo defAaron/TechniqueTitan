@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import json
-from datetime import date, timedelta
-
+from datetime import date, datetime, timedelta, timezone
 import pytest
 from fastapi.testclient import TestClient
 
+import api.routes.coach as coach_route
 from api.deps import get_coaching_config
 from api.main import app
 from api.rate_limit import build_limiters_from_env, limiter_bucket
+from technique_titan.coach.plan import plan_key
+from technique_titan.coaching import lookup_variant
+
+_FROZEN_TODAY = date(2026, 10, 13)
 
 client = TestClient(app)
 
@@ -51,9 +55,19 @@ VALID_BODY = {
 }
 
 
-def test_spec_shaped_body_returns_plan_and_templates() -> None:
+@pytest.fixture
+def frozen_utc_today(monkeypatch: pytest.MonkeyPatch) -> date:
+    class FrozenDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 10, 13, 12, 0, 0, tzinfo=timezone.utc)
+
+    monkeypatch.setattr(coach_route, "datetime", FrozenDateTime)
+    return _FROZEN_TODAY
+
+
+def test_spec_shaped_body_returns_plan_and_templates(frozen_utc_today: date) -> None:
     coaching = get_coaching_config()
-    tmpl = coaching["criteria"]["wrist_height"]["warning"]["too_high"]
 
     resp = client.post("/v1/coach/plan", json=VALID_BODY)
     assert resp.status_code == 200
@@ -65,13 +79,45 @@ def test_spec_shaped_body_returns_plan_and_templates() -> None:
     assert plan["severity"] == "warning"
     assert plan["direction"] == "too_high"
     assert plan["renderer"] == "template"
-    assert data["problem"] == tmpl["problem"]
-    assert data["fix"] == tmpl["fix"]
+    pk = plan_key(plan)
+    expected = lookup_variant(
+        coaching,
+        plan["criterion"],
+        plan["severity"],
+        plan["direction"],
+        user_id=None,
+        plan_key=pk,
+        on=frozen_utc_today,
+    )
+    assert expected is not None
+    assert data["problem"] == expected.problem
+    assert data["fix"] == expected.fix
     assert data["problem"]
     assert data["fix"]
     assert data["plan_key"] == "v1|right|wrist_height|warning|too_high|live||"
     assert data["lock"] is None
     assert data["encouragement"] is None
+
+
+def test_invalid_user_id_matches_unsigned(frozen_utc_today: date) -> None:
+    base = client.post("/v1/coach/plan", json=VALID_BODY)
+    assert base.status_code == 200
+    bad = client.post(
+        "/v1/coach/plan",
+        json={**VALID_BODY, "user_id": "not-a-uuid"},
+    )
+    assert bad.status_code == 200
+    assert bad.json()["problem"] == base.json()["problem"]
+    assert bad.json()["fix"] == base.json()["fix"]
+
+
+def test_valid_user_id_accepted_not_persisted(frozen_utc_today: date) -> None:
+    uid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    resp = client.post("/v1/coach/plan", json={**VALID_BODY, "user_id": uid})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert uid not in resp.text
+    assert data["plan"] is not None
 
 
 def test_history_over_max_length_422() -> None:
