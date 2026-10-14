@@ -45,6 +45,12 @@ data/eval/reports/
 config/models/**
 !config/models/.gitkeep
 
+# Coach model drafts and weights (accepted.jsonl / probe.jsonl stay tracked)
+data/coach/drafts/
+data/coach/merged/
+data/coach/adapters/
+.venv-coach/
+
 # Raw labeled images (keep folder structure via .gitkeep)
 data/raw/**
 !data/raw/.gitkeep
