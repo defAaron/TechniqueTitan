@@ -23,6 +23,7 @@ if str(_ROOT) not in sys.path:
 from api.deps import get_coaching_config, get_scoring_config
 from api.rate_limit import build_limiters_from_env, client_ip, limiter_bucket
 from api.routes.analyze import router as analyze_router
+from api.routes.coach import router as coach_router
 from api.routes.progress import router as progress_router
 from api.schemas import CRITERION_LABELS, PublicConfigResponse
 
@@ -94,3 +95,4 @@ def public_config() -> PublicConfigResponse:
 
 app.include_router(analyze_router)
 app.include_router(progress_router)
+app.include_router(coach_router)

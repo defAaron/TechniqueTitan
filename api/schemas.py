@@ -2,9 +2,30 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from datetime import date
+from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+COACH_CRITERIA = (
+    "wrist_height",
+    "finger_curvature",
+    "thumb_position",
+    "wrist_lateral",
+    "hand_arch",
+)
+
+COACH_METRICS = (
+    "wrist_height_delta",
+    "mean_finger_curvature",
+    "thumb_index_angle",
+    "wrist_lateral_deviation_deg",
+    "hand_arch_ratio",
+)
+
+CoachSeverity = Literal["good", "warning", "critical", "unknown"]
+CoachHand = Literal["left", "right"]
+CoachTipKind = Literal["live", "photo", "recap"]
 
 
 CRITERION_LABELS = {
@@ -76,11 +97,21 @@ class SessionDraftOut(BaseModel):
     samples: List[SessionSampleOut] = Field(default_factory=list)
 
 
+class AnalyzeCoachPlanOut(BaseModel):
+    plan: Optional[Dict[str, Any]] = None
+    problem: Optional[str] = None
+    fix: Optional[str] = None
+    encouragement: Optional[str] = None
+    plan_key: Optional[str] = None
+    lock: Optional[Any] = None
+
+
 class AnalyzeResponse(BaseModel):
     hands: List[HandResultOut]
     overlay_png_base64: Optional[str] = None
     message: Optional[str] = None
     progress_draft: Optional[SessionDraftOut] = None
+    coach_plan: Optional[AnalyzeCoachPlanOut] = None
 
 
 class LandmarkHandIn(BaseModel):
@@ -113,6 +144,7 @@ class VideoAnalyzeResponse(BaseModel):
     fps: float = 0.0
     message: Optional[str] = None
     progress_draft: Optional[SessionDraftOut] = None
+    coach_plan: Optional[AnalyzeCoachPlanOut] = None
 
 
 class ProgressTickIn(BaseModel):
@@ -135,3 +167,119 @@ class ReduceProgressRequest(BaseModel):
 class PublicConfigResponse(BaseModel):
     criterion_labels: Dict[str, str]
     modes: List[str]
+
+
+class CoachPlanLockedFocusIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    criterion: Literal[
+        "wrist_height",
+        "finger_curvature",
+        "thumb_position",
+        "wrist_lateral",
+        "hand_arch",
+    ]
+    locked_on: date
+    locked_until: date
+    burden: Dict[str, float] = Field(default_factory=dict)
+
+
+class CoachPlanHistoryHandIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    hand: CoachHand
+    mean_composite: Optional[float] = None
+    mean_scores: Dict[str, Optional[float]] = Field(default_factory=dict)
+    frac_warning: Dict[str, float] = Field(default_factory=dict)
+    frac_critical: Dict[str, float] = Field(default_factory=dict)
+    primary_issue: Optional[str] = None
+
+
+class CoachPlanHistoryEntryIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    started_on: date
+    hands: List[CoachPlanHistoryHandIn] = Field(..., min_length=1, max_length=2)
+
+
+class CoachPlanRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    hand: CoachHand
+    scores: Dict[
+        Literal[
+            "wrist_height",
+            "finger_curvature",
+            "thumb_position",
+            "wrist_lateral",
+            "hand_arch",
+        ],
+        Optional[float],
+    ] = Field(default_factory=dict)
+    severities: Dict[
+        Literal[
+            "wrist_height",
+            "finger_curvature",
+            "thumb_position",
+            "wrist_lateral",
+            "hand_arch",
+        ],
+        CoachSeverity,
+    ] = Field(default_factory=dict)
+    metrics: Dict[
+        Literal[
+            "wrist_height_delta",
+            "mean_finger_curvature",
+            "thumb_index_angle",
+            "wrist_lateral_deviation_deg",
+            "hand_arch_ratio",
+        ],
+        Optional[float],
+    ] = Field(default_factory=dict)
+    history: List[CoachPlanHistoryEntryIn] = Field(default_factory=list, max_length=40)
+    tip_kind: CoachTipKind
+    locked_focus: Optional[CoachPlanLockedFocusIn] = None
+
+    @field_validator("scores", mode="before")
+    @classmethod
+    def validate_scores(cls, value: object) -> object:
+        if not isinstance(value, dict):
+            return value
+        import math
+
+        out: dict = {}
+        for key, raw in value.items():
+            if raw is None:
+                out[key] = None
+                continue
+            try:
+                score = float(raw)
+            except (TypeError, ValueError):
+                raise ValueError("invalid score")
+            if not math.isfinite(score):
+                raise ValueError("non-finite score")
+            if score < 0 or score > 100:
+                raise ValueError("score out of range")
+            out[key] = score
+        return out
+
+    @field_validator("metrics", mode="before")
+    @classmethod
+    def validate_metrics(cls, value: object) -> object:
+        if not isinstance(value, dict):
+            return value
+        import math
+
+        out: dict = {}
+        for key, raw in value.items():
+            if raw is None:
+                out[key] = None
+                continue
+            try:
+                metric = float(raw)
+            except (TypeError, ValueError):
+                raise ValueError("invalid metric")
+            if not math.isfinite(metric):
+                raise ValueError("non-finite metric")
+            out[key] = metric
+        return out

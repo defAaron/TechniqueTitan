@@ -67,6 +67,8 @@ def limiter_bucket(path: str) -> str:
     Live landmark scoring is cheap (no MediaPipe on the server) and runs at
     ~4 Hz from the browser. Frame/image/video uploads are much heavier.
     """
+    if path.rstrip("/").endswith("/coach/plan"):
+        return "landmarks"
     if path.rstrip("/").endswith("/score/landmarks"):
         return "landmarks"
     if path.rstrip("/").endswith("/analyze/frame"):
