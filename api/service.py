@@ -24,6 +24,7 @@ from technique_titan.detection import HandDetection, HandDetector
 from technique_titan.progress.reducer import draft_from_analyze_hands, draft_from_video_frames
 
 from .progress_helpers import draft_to_out, min_confidence
+from .scorer import apply_scorer
 from .schemas import (
     AnalyzeCoachPlanOut,
     AnalyzeResponse,
@@ -129,7 +130,7 @@ def analyze_image_bgr(
     *,
     include_overlay: bool = True,
 ) -> AnalyzeResponse:
-    results = analyze_hands(image_bgr, detector, scoring_config)
+    results = apply_scorer(analyze_hands(image_bgr, detector, scoring_config))
     if not results:
         return AnalyzeResponse(
             hands=[],
@@ -184,7 +185,7 @@ def score_landmark_hands(
     image_height: int = 480,
 ) -> AnalyzeResponse:
     detections = [landmark_hand_to_detection(h) for h in hands_in]
-    results = score_detected_hands(detections, scoring_config)
+    results = apply_scorer(score_detected_hands(detections, scoring_config))
     if not results:
         return AnalyzeResponse(hands=[], message="No hands provided.")
 
@@ -234,7 +235,7 @@ def analyze_video_bytes(
                 if not ok:
                     break
                 if frame_idx % stride == 0:
-                    results = analyze_hands(frame, detector, scoring_config)
+                    results = apply_scorer(analyze_hands(frame, detector, scoring_config))
                     hands = [
                         serialize_hand(r, scoring_config, coaching_config)
                         for r in results
