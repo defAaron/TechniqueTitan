@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 2. Do not start it until the user asks.
+**Next problem:** 3. Do not start it until the user asks.
 
 ---
 
@@ -356,9 +356,9 @@ cd web && npm run test && npm run build
 
 **Subproblems:**
 
-- [ ] **2.1** Agent A: tests first. Empty list → null focus. Two sessions → null. Three sessions → burden winner using spec §3.4. Tie on burden → higher weight (`finger_curvature` beats `thumb_position`). Locked criterion stays when the challenger leads by 0.07. Challenger leading by 0.08 switches and sets `locked_until = today + 7 days`. Three latest sessions with focus score ≥ 80 clear the lock and recompute. Unknown criterion names in `primary_issue` are ignored, not trusted.
-- [ ] **2.2** Agent B: SQL from spec §3.7. `check` constraint is the five criterion names. RLS policy name `coach_focus_own`. Enable RLS. No insert policy for the service role. No storage bucket.
-- [ ] **2.3** Parent: do not apply the migration to a remote database from the agent session. Tell the user to paste the migration into the Supabase SQL editor for the existing Technique Titan project.
+- [x] **2.1** Agent A: tests first. Empty list → null focus. Two sessions → null. Three sessions → burden winner using spec §3.4. Tie on burden → higher weight (`finger_curvature` beats `thumb_position`). Locked criterion stays when the challenger leads by 0.07. Challenger leading by 0.08 switches and sets `locked_until = today + 7 days`. Three latest sessions with focus score ≥ 80 clear the lock and recompute. Unknown criterion names in `primary_issue` are ignored, not trusted.
+- [x] **2.2** Agent B: SQL from spec §3.7. `check` constraint is the five criterion names. RLS policy name `coach_focus_own`. Enable RLS. No insert policy for the service role. No storage bucket.
+- [x] **2.3** Parent: do not apply the migration to a remote database from the agent session. Tell the user to paste the migration into the Supabase SQL editor for the existing Technique Titan project.
 
 **Commands:**
 
@@ -373,7 +373,7 @@ pytest tests/engine/test_coach_focus.py tests/engine/test_coach_temporal.py -q
 
 **Commit subject:** `Add weekly-focus selection and coach_focus table`
 
-- [ ] Problem 2 committed
+- [x] Problem 2 committed
 
 ---
 
