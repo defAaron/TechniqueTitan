@@ -7,7 +7,7 @@ detect -> features -> score pipeline used by the batch CLI.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 import cv2
@@ -48,6 +48,7 @@ class AnalysisResult:
     scores: dict
     severities: dict
     composite_score: Optional[float]
+    angles_deg: dict = field(default_factory=dict)
 
     @property
     def composite_severity(self) -> str:
@@ -99,6 +100,7 @@ def _score_hand(hand: HandDetection, label: str, config: dict) -> AnalysisResult
         scores=scoring["scores"],
         severities=scoring["severities"],
         composite_score=scoring["composite_score"],
+        angles_deg=features["angles_deg"],
     )
 
 
