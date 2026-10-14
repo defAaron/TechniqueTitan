@@ -49,6 +49,7 @@ config/models/**
 data/coach/drafts/
 data/coach/merged/
 data/coach/adapters/
+data/coach/split/
 .venv-coach/
 
 # Raw labeled images (keep folder structure via .gitkeep)

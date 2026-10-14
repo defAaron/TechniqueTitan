@@ -1,7 +1,9 @@
 .git
 .venv
+.venv*
 venv
 venv*
+data/coach
 __pycache__
 *.pyc
 .pytest_cache
