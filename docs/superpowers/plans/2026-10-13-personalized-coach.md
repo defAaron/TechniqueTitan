@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 7. Do not start it until the user asks.
+**Next problem:** 8. Do not start it until the user asks.
 
 ---
 
@@ -584,10 +584,10 @@ Wave 2:
 
 **Subproblems:**
 
-- [ ] **7.1** TS validator matches the Python fixture.
-- [ ] **7.2** Worker loads `@huggingface/transformers` only after the toggle is turned on. `device: "webgpu"`, `dtype: "q4f16"`, `revision` from `VITE_COACH_MODEL_REVISION`. User message is the short plan JSON only. Parse `{problem, fix}`. Any error posts `{ ok: false }`.
-- [ ] **7.3** `navigator.gpu` missing → leave the toggle off and show “This browser can’t run on-device wording.” Download progress does not remove the camera or the template tip.
-- [ ] **7.4** Add the two vars to `web/.env.example` with empty values and a comment that they are public repo ids, not secrets. Do not fill `.env.local`.
+- [x] **7.1** TS validator matches the Python fixture.
+- [x] **7.2** Worker loads `@huggingface/transformers` only after the toggle is turned on. `device: "webgpu"`, `dtype: "q4f16"`, `revision` from `VITE_COACH_MODEL_REVISION`. User message is the short plan JSON only. Parse `{problem, fix}`. Any error posts `{ ok: false }`.
+- [x] **7.3** `navigator.gpu` missing → leave the toggle off and show “This browser can’t run on-device wording.” Download progress does not remove the camera or the template tip.
+- [x] **7.4** Add the two vars to `web/.env.example` with empty values and a comment that they are public repo ids, not secrets. Do not fill `.env.local`.
 
 **Commands:**
 
@@ -606,7 +606,7 @@ grep -n "mlx\|transformers" ../Dockerfile ../requirements-api.txt || true
 
 **Commit subject:** `Add opt-in on-device coaching wording`
 
-- [ ] Problem 7 committed
+- [x] Problem 7 committed
 
 ---
 
