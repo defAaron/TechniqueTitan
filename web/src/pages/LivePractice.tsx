@@ -7,6 +7,7 @@ import {
   reduceProgressSession,
   scoreLandmarks,
   type AnalyzeResponse,
+  type Coaching,
   type HandResult,
   type ProgressTick,
   type SessionDraftOut,
@@ -16,6 +17,22 @@ import {
   drawHandOverlays,
   severityHex,
 } from '../lib/mediapipe'
+import { createScoreSmoother } from '../lib/scoreSmooth'
+
+const SCORING_IDEALS: Record<string, [number, number]> = {
+  wrist_height: [-0.0711, 0.966],
+  finger_curvature: [117.5, 161.9],
+  thumb_position: [18.15, 47.41],
+  wrist_lateral: [-10.0, 10.0],
+  hand_arch: [0.0324, 0.1616],
+}
+
+const SEVERITY_RANK: Record<string, number> = {
+  critical: 3,
+  warning: 2,
+  good: 1,
+  unknown: 0,
+}
 
 type Mode = 'landmarks' | 'frames'
 
@@ -35,6 +52,10 @@ export function LivePractice() {
   const [hands, setHands] = useState<HandResult[]>([])
 
   const lastResultsRef = useRef<AnalyzeResponse | null>(null)
+  const scoreSmootherRef = useRef(createScoreSmoother())
+  const prevHandSnapshotRef = useRef<
+    Map<string, { severities: Record<string, string>; coaching: Coaching }>
+  >(new Map())
   const sessionStartRef = useRef(0)
   const ticksRef = useRef<ProgressTick[]>([])
   const framesSeenRef = useRef(0)
@@ -100,30 +121,86 @@ export function LivePractice() {
     }
   }, [])
 
+  const smoothHands = useCallback((handsIn: HandResult[], tMs: number): HandResult[] => {
+    return handsIn.map((hand) => {
+      const smoothed = scoreSmootherRef.current.update({
+        hand: hand.label,
+        tMs,
+        scores: hand.scores,
+        metrics: hand.criterion_metrics,
+        ideals: SCORING_IDEALS,
+      })
+
+      const scores = { ...hand.scores }
+      const severities = { ...hand.severities }
+      for (const [key, out] of Object.entries(smoothed.criteria)) {
+        if (out.score != null) scores[key] = out.score
+        severities[key] = out.severity
+      }
+
+      let composite_severity = hand.composite_severity
+      let worstRank = -1
+      for (const sev of Object.values(severities)) {
+        const rank = SEVERITY_RANK[String(sev)] ?? 0
+        if (rank > worstRank) {
+          worstRank = rank
+          composite_severity = sev
+        }
+      }
+
+      let coaching = hand.coaching
+      const prev = prevHandSnapshotRef.current.get(hand.label)
+      if (prev && severitiesMatch(severities, prev.severities)) {
+        coaching = prev.coaching
+      }
+
+      return {
+        ...hand,
+        scores,
+        severities,
+        composite_severity,
+        coaching,
+      }
+    })
+  }, [])
+
   const applyResults = useCallback(
     (res: AnalyzeResponse) => {
-      lastResultsRef.current = res
-      setHands([...res.hands].sort((a, b) => a.label.localeCompare(b.label)))
-      paintFrame(res)
-      if (res.message && !res.hands.length) setStatus(res.message)
-      else setStatus(res.hands.length ? `${res.hands.length} hand(s)` : 'No hand')
-      if (res.hands.length && sessionStartRef.current) {
+      const tMs = sessionStartRef.current
+        ? Math.max(0, Date.now() - sessionStartRef.current)
+        : 0
+      const smoothedHands = smoothHands(res.hands, tMs)
+      for (const hand of smoothedHands) {
+        prevHandSnapshotRef.current.set(hand.label, {
+          severities: { ...hand.severities },
+          coaching: hand.coaching,
+        })
+      }
+
+      const display: AnalyzeResponse = { ...res, hands: smoothedHands }
+      lastResultsRef.current = display
+      setHands([...smoothedHands].sort((a, b) => a.label.localeCompare(b.label)))
+      paintFrame(display)
+      if (display.message && !display.hands.length) setStatus(display.message)
+      else setStatus(display.hands.length ? `${display.hands.length} hand(s)` : 'No hand')
+      if (display.hands.length && sessionStartRef.current) {
         framesSeenRef.current += 1
-        const t_ms = Math.max(0, Date.now() - sessionStartRef.current)
-        for (const hand of res.hands) {
+        const rawByLabel = new Map(res.hands.map((hand) => [hand.label, hand]))
+        for (const hand of display.hands) {
+          const raw = rawByLabel.get(hand.label) ?? hand
           ticksRef.current.push({
-            t_ms,
-            hand: hand.label,
-            confidence: hand.confidence,
-            composite_score: hand.composite_score,
-            scores: hand.scores,
-            severities: hand.severities,
+            t_ms: tMs,
+            hand: raw.label,
+            confidence: raw.confidence,
+            composite_score: raw.composite_score,
+            scores: raw.scores,
+            severities: raw.severities,
             coaching: hand.coaching,
           })
         }
       }
     },
-    [paintFrame],
+    [paintFrame, smoothHands],
   )
 
   const tick = useCallback(async () => {
@@ -157,12 +234,6 @@ export function LivePractice() {
             setError(null)
             applyResults(res)
           } else {
-            lastResultsRef.current = {
-              hands: [],
-              overlay_png_base64: null,
-              message: null,
-            }
-            setHands([])
             setStatus('No hand')
             paintFrame(lastResultsRef.current)
           }
@@ -207,6 +278,8 @@ export function LivePractice() {
     ticksRef.current = []
     framesSeenRef.current = 0
     sessionStartRef.current = Date.now()
+    scoreSmootherRef.current = createScoreSmoother()
+    prevHandSnapshotRef.current = new Map()
     backoffUntilRef.current = 0
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -331,6 +404,17 @@ export function LivePractice() {
       </div>
     </div>
   )
+}
+
+function severitiesMatch(
+  a: Record<string, string | unknown>,
+  b: Record<string, string>,
+): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)])
+  for (const key of keys) {
+    if (String(a[key] ?? '') !== String(b[key] ?? '')) return false
+  }
+  return true
 }
 
 function HandSlot({
