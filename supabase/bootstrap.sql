@@ -371,3 +371,27 @@ create policy "Users delete their own avatar"
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = (select auth.uid()::text)
   );
+
+-- Coach weekly focus (see migrations/20261014000006_coach_focus.sql)
+create table if not exists public.coach_focus (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  criterion text not null check (criterion in (
+    'wrist_height', 'finger_curvature', 'thumb_position',
+    'wrist_lateral', 'hand_arch'
+  )),
+  locked_on date not null,
+  locked_until date not null,
+  burden jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.coach_focus enable row level security;
+
+drop policy if exists coach_focus_own on public.coach_focus;
+create policy coach_focus_own on public.coach_focus
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+revoke all on table public.coach_focus from anon, authenticated;
+grant select, insert, update, delete on table public.coach_focus to authenticated;

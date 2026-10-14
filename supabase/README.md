@@ -5,13 +5,25 @@ another app’s database (the connected calendar project with `public.accounts`
 is the wrong target).
 
 Stores **identity** (`profiles`, `app_admins`), a public **`avatars`** bucket for
-profile photos, and **opt-in practice progress** (`practice_sessions`,
-`session_hands`). Do not store analyze photos, video, or frames in Supabase.
+profile photos, **opt-in practice progress** (`practice_sessions`,
+`session_hands`), and **coach focus** (`coach_focus`, one weekly focus row per
+user). Do not store analyze photos, video, or frames in Supabase.
 
-Apply [`migrations/20260923000004_practice_sessions.sql`](migrations/20260923000004_practice_sessions.sql)
-and [`migrations/20261013000005_profile_avatar.sql`](migrations/20261013000005_profile_avatar.sql)
+Apply [`migrations/20260923000004_practice_sessions.sql`](migrations/20260923000004_practice_sessions.sql),
+[`migrations/20261013000005_profile_avatar.sql`](migrations/20261013000005_profile_avatar.sql),
+and [`migrations/20261014000006_coach_focus.sql`](migrations/20261014000006_coach_focus.sql)
 on the production project (or re-run [`bootstrap.sql`](bootstrap.sql))
 after the auth migrations.
+
+Apply [`migrations/20261014000006_coach_focus.sql`](migrations/20261014000006_coach_focus.sql)
+once in the Supabase SQL editor on the existing Technique Titan project (or
+re-run [`bootstrap.sql`](bootstrap.sql)). Paste it yourself; the app and the API
+do not apply this migration. RLS policy `coach_focus_own` requires `auth.uid() = user_id` for both
+`using` and `with check`. There is no service-role insert policy. The API does
+not write this table; the signed-in client upserts with the anon key. `burden`
+jsonb may hold only the five numeric burden values (`wrist_height`,
+`finger_curvature`, `thumb_position`, `wrist_lateral`, `hand_arch`). It is not a
+place for images or analyze media. No new storage bucket.
 
 ### Free-tier storage rules (500 MB database quota)
 
