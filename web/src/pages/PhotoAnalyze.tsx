@@ -13,9 +13,6 @@ import {
 } from '../lib/api'
 import { rewordTip } from '../lib/coachModel'
 
-const CAPTURE =
-  'Side or ¾ view, good lighting, hand fully in frame, roughly forearm height.'
-
 function pickLowerCompositeHand(hands: HandResult[]): HandResult | null {
   if (!hands.length) return null
   return [...hands].sort((a, b) => {
@@ -115,9 +112,7 @@ export function PhotoAnalyze() {
 
   return (
     <div className="space-y-10">
-      <PageHeader title="Photo review">
-        {CAPTURE}
-      </PageHeader>
+      <PageHeader title="Photo review" />
 
       <CoachWordingToggle />
       <label className="flex cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-white/20 bg-zinc-950 px-6 py-16 text-center transition-colors duration-500 hover:border-white/50">
