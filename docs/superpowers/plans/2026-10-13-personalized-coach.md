@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 3. Do not start it until the user asks.
+**Next problem:** 4. Do not start it until the user asks.
 
 ---
 
@@ -408,12 +408,12 @@ Wave 3 (parallel, after C’s response JSON is fixed):
 
 **Subproblems:**
 
-- [ ] **3.1** Agent A: `build_plan` and `plan_key` per Shared contracts. Acute critical beats a warning focus. All-good hand returns `None`.
-- [ ] **3.2** Agent B: validator cases for too long, deny-word `doctor`, missing allow-word, a number that is not the score, and a clean template sentence that passes.
-- [ ] **3.3** Agent C: route spec §3 in the spec’s request/response example. Call `validate_tip` on the template strings; if a template fails, return 500 with a fixed detail `coaching template failed validation` (that is a bug, not user input). Rate-limit test uses a limiter with `max_requests=2` via the existing `build_limiters_from_env` pattern in API tests, not by hammering the real default of 360.
-- [ ] **3.4** Agent D: call `/v1/coach/plan` only when `plan_key` would change. On network failure, keep the tip already on screen. Do not clear the camera.
-- [ ] **3.5** Agent E: photo and video responses include the same `problem` / `fix` fields the pages already render, sourced from `build_plan`. Do not remove `AddToProgressButton`.
-- [ ] **3.6** Agent F: upsert `coach_focus` only for a signed-in user when `lock` is non-null. Use the user id from the Supabase session.
+- [x] **3.1** Agent A: `build_plan` and `plan_key` per Shared contracts. Acute critical beats a warning focus. All-good hand returns `None`.
+- [x] **3.2** Agent B: validator cases for too long, deny-word `doctor`, missing allow-word, a number that is not the score, and a clean template sentence that passes.
+- [x] **3.3** Agent C: route spec §3 in the spec’s request/response example. Call `validate_tip` on the template strings; if a template fails, return 500 with a fixed detail `coaching template failed validation` (that is a bug, not user input). Rate-limit test uses a limiter with `max_requests=2` via the existing `build_limiters_from_env` pattern in API tests, not by hammering the real default of 360.
+- [x] **3.4** Agent D: call `/v1/coach/plan` only when `plan_key` would change. On network failure, keep the tip already on screen. Do not clear the camera.
+- [x] **3.5** Agent E: photo and video responses include the same `problem` / `fix` fields the pages already render, sourced from `build_plan`. Do not remove `AddToProgressButton`.
+- [x] **3.6** Agent F: upsert `coach_focus` only for a signed-in user when `lock` is non-null. Use the user id from the Supabase session.
 
 **Commands:**
 
@@ -434,7 +434,7 @@ cd web && npm run test && npm run build
 
 **Commit subject:** `Serve template coaching from a coach plan`
 
-- [ ] Problem 3 committed
+- [x] Problem 3 committed
 
 ---
 

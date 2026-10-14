@@ -37,6 +37,7 @@ new significant error, append an entry here in the same format.
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
 | Tests | Synthetic hand fixtures must be non-collinear for plane fits. |
 | Filenames | Git-tracked names must match import and markdown-link **case** (Linux/CI is case-sensitive; macOS often is not). |
+| Pytest | Keep `addopts = "--import-mode=importlib"` in `pyproject.toml`. Two test files may share a basename (`tests/engine/test_coach_plan.py` and `tests/api/test_coach_plan.py`); the default prepend importer collides. |
 | GitHub mermaid | Quote node labels; avoid reserved IDs (`end`, `graph`, `input`); do not use subgraphs with edges that cross groups — GitHub/Safari crashes with `t.render`. |
 | API unreachable | UI **Load failed** / **Failed to fetch** — check Render `/v1/health`; free tier cold start ~30–60s after idle; update `VITE_API_BASE_URL` + redeploy Vercel if API URL changed. |
 | Root clutter | Keep Streamlit/Render entry files at repo root (`app.py`, `Dockerfile`, `requirements*.txt`). Do not commit source `*.mp4` or a root `package-lock.json` — frontend lockfile is `web/package-lock.json`; masters live in `assets/source/` (gitignored). |
@@ -490,6 +491,18 @@ When a significant bug is found and fixed, add the next `E##` entry:
 | **Root cause** | `web/.env.local` pointed at a different or deleted Supabase project ref than production (`VITE_SUPABASE_URL` / JWT `ref` mismatch) |
 | **Fix** | Copy **Project URL** and anon key from the same dedicated project Vercel uses into `web/.env.local`; restart `npm run dev` |
 | **Prevention** | Quick checklist: local env must match Vercel project ref; see `web/.env.example` |
+
+---
+
+### E37 — Pytest collected two `test_coach_plan` modules as one
+| | |
+|---|---|
+| **When** | 2026-10-13 |
+| **Stage** | Coach plan tests |
+| **Symptom** | `pytest tests/engine/test_coach_plan.py tests/api/test_coach_plan.py` stopped with `import file mismatch` |
+| **Root cause** | Pytest's default prepend importer keys modules by basename, so the engine and API files collided |
+| **Fix** | Set `addopts = "--import-mode=importlib"` in `pyproject.toml` |
+| **Prevention** | Leave that setting in place; do not switch collection back to prepend |
 
 ---
 
