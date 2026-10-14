@@ -1,0 +1,363 @@
+{
+  "alpha": 0.35,
+  "dwell_ms": 1200,
+  "good_min": 80,
+  "warning_min": 50,
+  "score_abs_tol": 1e-6,
+  "cases": [
+    {
+      "id": "first_frame_copies_raw",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 40 },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "severity_dwell_not_met",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 40 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 100,
+          "scores": { "wrist_height": 90 },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 57.5,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "severity_becomes_good_after_dwell",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 40 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 1200,
+          "scores": { "wrist_height": 100 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 2400,
+          "scores": { "wrist_height": 100 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 3600,
+          "scores": { "wrist_height": 100 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 4800,
+          "scores": { "wrist_height": 100 },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 61,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 74.65,
+            "severity": "warning",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 83.5225,
+            "severity": "warning",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 89.289625,
+            "severity": "good",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "direction_flip_ignored_inside_dwell",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": -1 }
+        },
+        {
+          "t_ms": 100,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": 15 }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "too_low"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "too_low"
+          }
+        }
+      ]
+    },
+    {
+      "id": "direction_flip_after_dwell",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": -1 }
+        },
+        {
+          "t_ms": 100,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": 15 }
+        },
+        {
+          "t_ms": 1300,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": 15 }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "too_low"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "too_low"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "too_high"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nan_holds_previous_ema",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 40 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 500,
+          "scores": { "wrist_height": "NaN" },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "clamp_high_before_ema",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 140 },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 100,
+            "severity": "good",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "infinity_holds_previous_ema",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 40 },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 100,
+          "scores": { "wrist_height": "Infinity" },
+          "metrics": { "wrist_height": null }
+        },
+        {
+          "t_ms": 200,
+          "scores": { "wrist_height": "-Infinity" },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 40,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "clamp_low_before_ema",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": -20 },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 0,
+            "severity": "critical",
+            "direction": "generic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "missing_metric_is_generic_immediately",
+      "hand": "right",
+      "ideals": { "wrist_height": [0.0, 10.0] },
+      "frames": [
+        {
+          "t_ms": 0,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": -1 }
+        },
+        {
+          "t_ms": 100,
+          "scores": { "wrist_height": 55 },
+          "metrics": { "wrist_height": null }
+        }
+      ],
+      "expect": [
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "too_low"
+          }
+        },
+        {
+          "wrist_height": {
+            "score": 55,
+            "severity": "warning",
+            "direction": "generic"
+          }
+        }
+      ]
+    }
+  ]
+}
