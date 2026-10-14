@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 5. Do not start it until the user asks.
+**Next problem:** 6. Do not start it until the user asks.
 
 ---
 
@@ -491,9 +491,9 @@ pytest tests/engine/test_coaching.py tests/engine/test_coach_validate.py tests/a
 
 **Subproblems:**
 
-- [ ] **5.1** Gitignore and README. README states drafts are unreviewed and must not be trained on.
-- [ ] **5.2** Seed `accepted.jsonl` from templates. A test loads every line and runs `validate_tip`.
-- [ ] **5.3** Drafter CLI with an injected generator in tests. Path escape `data/coach/drafts/../../.env` is rejected.
+- [x] **5.1** Gitignore and README. README states drafts are unreviewed and must not be trained on.
+- [x] **5.2** Seed `accepted.jsonl` from templates. A test loads every line and runs `validate_tip`.
+- [x] **5.3** Drafter CLI with an injected generator in tests. Path escape `data/coach/drafts/../../.env` is rejected.
 
 **Commands:**
 
@@ -517,7 +517,7 @@ python -m technique_titan.coach.draft_paraphrases \
 
 **Commit subject:** `Add reviewed-only coaching training set tools`
 
-- [ ] Problem 5 committed
+- [x] Problem 5 committed
 
 ---
 
