@@ -216,7 +216,7 @@ export function FloatingAppNav() {
   /** Collapsed via chevron; cleared when hover-expand is allowed again. */
   const [expandSuppressed, setExpandSuppressed] = useState(false)
   /** After chevron collapse: skip auto-expand on the next enter only (six-dot drag window). */
-  const [skippedExpandEntersRemaining, setSkippedExpandEntersRemaining] = useState(0)
+  const [, setSkippedExpandEntersRemaining] = useState(0)
   const [dock, setDock] = useState<DockState>(readDockState)
   const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null)
   const [size, setSize] = useState({ width: 48, height: 200 })
