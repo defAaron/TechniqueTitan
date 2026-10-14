@@ -17,6 +17,15 @@ Roadmap detail: [`docs/ROADMAP.md`](docs/ROADMAP.md). ML sequence: [`docs/ML_UPG
 2. Skim the **Quick checklist** at the top of that file and confirm your plan will not reintroduce a known failure mode.
 3. When you fix a new significant error, **append** an entry to `docs/errors.md` (and update the checklist if it may recur).
 
+## Git history (agents)
+
+Prefer **staggered commits** over one large commit at the end of a task. Each commit should be a coherent slice a human can review in isolation (fixture → engine + tests → integration → web lib + tests → UI → docs). Aim for roughly **3–8 commits** on a typical feature-sized change; avoid a single squashed dump and avoid **30+** tiny commits.
+
+- Write messages as complete sentences focused on **why** (use a HEREDOC for `git commit -m`).
+- Only commit when the user asks, except where a task plan explicitly requires commits at the end of a problem (e.g. [`docs/superpowers/plans/2026-10-13-personalized-coach.md`](docs/superpowers/plans/2026-10-13-personalized-coach.md)).
+- Do not push unless the user asks. Do not amend or force-push to rewrite history unless the user explicitly requests it (e.g. splitting unpushed work with `git reset --soft`).
+- Never commit secrets (`.env`, `.env.local`, `service_role`, tokens, adapter weights under gitignored paths).
+
 ## Expert labeling (Notion)
 
 The **classification table** for ground-truth labels lives in Notion, not in the
@@ -48,3 +57,4 @@ See [`data/README.md`](data/README.md) for batch intake and CSV export notes.
 - [`docs/ML_LOGISTIC_REGRESSION.md`](docs/ML_LOGISTIC_REGRESSION.md) — offline learned scorer math and rationale
 - [`README.md`](README.md) — setup and architecture
 - [`data/README.md`](data/README.md) — raw data layout + labeling
+- [`docs/superpowers/plans/2026-10-13-personalized-coach.md`](docs/superpowers/plans/2026-10-13-personalized-coach.md) — personalized coach build plan (problem-at-a-time + staggered commits)

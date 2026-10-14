@@ -17,23 +17,33 @@
 Read this section every time, then read only the one problem the user named.
 
 1. Read [`docs/errors.md`](../../errors.md) Quick checklist before editing. Do not reintroduce a listed failure.
-2. Read [`docs/PERSONALIZED_COACH.md`](../../PERSONALIZED_COACH.md) sections cited by that problem. If this guide and the spec disagree, the spec wins. Update this guide in the same commit so they match.
+2. Read [`docs/PERSONALIZED_COACH.md`](../../PERSONALIZED_COACH.md) sections cited by that problem. If this guide and the spec disagree, the spec wins. Update this guide’s checkbox in the doc commit for that problem so they match.
 3. Dispatch the subagents listed for that problem. Subagents edit files. They do **not** commit, push, or start the next problem.
-4. The parent integrates, runs the problem’s commands, runs the security checklist, makes **one** commit, starts the dev servers, reports to the user, and **stops**.
+4. The parent integrates, runs the problem’s commands, runs the security checklist, makes a **staggered** set of commits (see **Commit rule**), starts the dev servers, reports to the user, and **stops**.
 
 ### Stop rule
 
-After the commit for the current problem:
+After the commits for the current problem:
 
-- Do not push.
+- Do not push (unless the user explicitly asks).
 - Do not start the next problem.
-- Do not amend the commit.
+- Do not amend commits to fold slices together.
 - Do not keep working on follow-up polish.
 - Wait for the user to say which problem is next.
 
 ### Commit rule
 
-One commit at the end of the problem, from the repo root. Stage only files that problem lists, plus this guide’s checkbox for that problem, plus an `docs/errors.md` entry if the problem fixed a new significant failure.
+**Stagger commits, don’t dump one blob.** At the end of each problem, record work as several reviewable commits from the repo root — typically **3–8 per problem**, not one squashed change and not dozens of one-line drive-bys. Order slices so `git log` tells a story:
+
+1. Shared fixtures or contracts (if the problem adds any).
+2. Pure Python engine or library code **with its tests**.
+3. Integration (reducer, API route, schema, rate limit) **with API/engine tests**.
+4. Frontend library + Vitest (and `package.json` / lockfile when adding test tooling), then UI wiring.
+5. Plan checkbox and small doc edits (often last; include this guide’s problem checkbox).
+
+Stage only files that problem lists (plus `docs/errors.md` when the problem fixed a new significant failure). Each commit gets one HEREDOC message: complete sentence(s), **why** not just what. Subagents never commit; the parent stages each slice and commits in order.
+
+Before the first commit of a problem:
 
 ```bash
 git status
@@ -41,7 +51,11 @@ git diff
 git log -5 --oneline
 ```
 
-Then commit with a HEREDOC. Never commit `.env`, `.env.local`, `service_role`, `data/coach/drafts/`, `data/coach/merged/`, `data/coach/adapters/`, `.venv-coach/`, or Hugging Face tokens.
+Never commit `.env`, `.env.local`, `service_role`, `data/coach/drafts/`, `data/coach/merged/`, `data/coach/adapters/`, `.venv-coach/`, or Hugging Face tokens.
+
+If the user asks to split an existing commit on a branch that is **not** pushed yet, `git reset --soft HEAD~N`, unstage, and recommit in the slices above without changing the tree. Do not force-push unless the user explicitly requests it.
+
+Repo-wide habit: [`AGENTS.md`](../../../AGENTS.md) § Git history.
 
 ### Dev environment rule
 
@@ -74,7 +88,7 @@ The user-facing message contains only:
 
 - What changed (files and behavior).
 - How to test (clicks and commands), with the links above.
-- The commit hash and subject.
+- The commit subjects (and short hashes if there are only a few commits); say how many commits if staggered.
 - The name of the next problem, and that you are waiting.
 
 ### Subagent rule
