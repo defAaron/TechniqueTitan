@@ -8,7 +8,7 @@
 
 **Tech stack:** Python 3.11, FastAPI, existing in-memory rate limiter, React 19 + Vite, Supabase free tier (anon key + RLS only), scikit-learn joblib for the severity model, `mlx-lm` LoRA of `Qwen/Qwen2.5-0.5B-Instruct` trained from `mlx-community/Qwen2.5-0.5B-Instruct-4bit`, browser runtime `@huggingface/transformers` WebGPU `q4f16`.
 
-**Next problem:** 6. Do not start it until the user asks.
+**Next problem:** 7. Do not start it until the user asks.
 
 ---
 
@@ -536,9 +536,9 @@ python -m technique_titan.coach.draft_paraphrases \
 
 **Subproblems:**
 
-- [ ] **6.1** Eval gate unit tests. A 94% pass rate fails the gate. A 95% pass rate on both sets passes.
-- [ ] **6.2** `requirements-coach.txt` and `TRAIN.md`. Install into `.venv-coach` only: `python3.11 -m venv .venv-coach && .venv-coach/bin/pip install -r requirements-coach.txt`.
-- [ ] **6.3** If `arm64` and `accepted.jsonl` has at least 200 lines, run `mlx_lm.lora` with the spec flags, then `eval_adapter`. If the gate fails, do not fuse and do not treat that as a commit failure: commit the scripts and write the measured rate in `TRAIN.md`. If there are fewer than 200 accepted lines, do not train; `TRAIN.md` says the seed set is templates only and training waits for a human review. Do not pad the file with unreviewed drafts to fake the count.
+- [x] **6.1** Eval gate unit tests. A 94% pass rate fails the gate. A 95% pass rate on both sets passes.
+- [x] **6.2** `requirements-coach.txt` and `TRAIN.md`. Install into `.venv-coach` only: `python3.11 -m venv .venv-coach && .venv-coach/bin/pip install -r requirements-coach.txt`.
+- [x] **6.3** If `arm64` and `accepted.jsonl` has at least 200 lines, run `mlx_lm.lora` with the spec flags, then `eval_adapter`. If the gate fails, do not fuse and do not treat that as a commit failure: commit the scripts and write the measured rate in `TRAIN.md`. If there are fewer than 200 accepted lines, do not train; `TRAIN.md` says the seed set is templates only and training waits for a human review. Do not pad the file with unreviewed drafts to fake the count.
 
 **Commands:**
 
@@ -557,7 +557,7 @@ The `grep` must print nothing.
 
 **Commit subject:** `Add local LoRA eval gate for coaching copy`
 
-- [ ] Problem 6 committed
+- [x] Problem 6 committed
 
 ---
 
