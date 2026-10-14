@@ -2,15 +2,25 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 import pytest
 
+from technique_titan.coach.validate import validate_tip
 from technique_titan.coaching import (
+    canonical_user_id,
     generate_coaching,
     load_coaching_config,
+    lookup_variant,
     metric_direction,
     tip_for_label,
+    variant_index,
 )
 from technique_titan.scoring import load_config
+
+_FROZEN_DATE = date(2026, 10, 13)
+_SAMPLE_PLAN_KEY = "v1|right|wrist_height|warning|too_high|live||"
+_SAMPLE_UUID = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 
 
 @pytest.fixture(scope="module")
@@ -171,3 +181,69 @@ def test_tip_for_label(coaching_config):
     assert tip.severity == "warning"
     assert tip.direction == "generic"
     assert tip_for_label(coaching_config, "Unknown", labels) is None
+
+
+def test_unsigned_user_ids_share_variant_index() -> None:
+    key = _SAMPLE_PLAN_KEY
+    on = _FROZEN_DATE
+    a = variant_index(None, key, on)
+    b = variant_index("", key, on)
+    c = variant_index("not-a-uuid", key, on)
+    assert a == b == c
+    assert 0 <= a <= 3
+
+
+def test_variant_index_stable_for_same_inputs() -> None:
+    on = _FROZEN_DATE
+    idx = variant_index(_SAMPLE_UUID, _SAMPLE_PLAN_KEY, on)
+    assert variant_index(_SAMPLE_UUID, _SAMPLE_PLAN_KEY, on) == idx
+    assert 0 <= idx <= 3
+
+
+def test_variant_index_stable_across_date_and_uuid() -> None:
+    on_a = date(2026, 1, 1)
+    on_b = date(2026, 1, 2)
+    uuid_a = "11111111-1111-4111-8111-111111111111"
+    uuid_b = "22222222-2222-4222-8222-222222222222"
+    assert variant_index(uuid_a, _SAMPLE_PLAN_KEY, on_a) == variant_index(
+        uuid_a, _SAMPLE_PLAN_KEY, on_a
+    )
+    assert variant_index(uuid_b, _SAMPLE_PLAN_KEY, on_b) == variant_index(
+        uuid_b, _SAMPLE_PLAN_KEY, on_b
+    )
+
+
+def test_canonical_user_id() -> None:
+    assert canonical_user_id(_SAMPLE_UUID) == _SAMPLE_UUID
+    assert canonical_user_id(None) == ""
+    assert canonical_user_id("") == ""
+    assert canonical_user_id("not-a-uuid") == ""
+
+
+def test_catalog_variants_length_and_validation(coaching_config) -> None:
+    for criterion, crit_block in coaching_config["criteria"].items():
+        for severity in ("warning", "critical"):
+            block = crit_block[severity]
+            for direction in ("too_low", "too_high", "generic"):
+                cell = block[direction]
+                variants = cell.get("variants")
+                assert variants is not None, (
+                    f"missing variants on {criterion}/{severity}/{direction}"
+                )
+                assert len(variants) == 4, (
+                    f"expected 4 variants on {criterion}/{severity}/{direction}"
+                )
+                assert variants[0]["problem"] == cell["problem"]
+                assert variants[0]["fix"] == cell["fix"]
+                for variant in variants:
+                    plan = {
+                        "criterion": criterion,
+                        "severity": severity,
+                        "direction": direction,
+                        "tip_kind": "live",
+                        "score": 70,
+                    }
+                    text = f"{variant['problem']} {variant['fix']}"
+                    assert validate_tip(text, plan) == [], (
+                        f"validate_tip failed for {criterion}/{severity}/{direction}"
+                    )

@@ -6,8 +6,11 @@ a YAML message catalog. Does not alter detection, features, or score math.
 
 from __future__ import annotations
 
+import hashlib
 import math
+import re
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import List, Optional
 
@@ -16,6 +19,10 @@ import numpy as np
 import yaml
 
 DEFAULT_COACHING_CONFIG = Path(__file__).resolve().parents[2] / "config" / "coaching.yaml"
+
+_USER_ID_RE = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
 
 # Landmark indices to emphasize for the primary tip (additive overlay).
 CRITERION_LANDMARKS = {
@@ -74,6 +81,52 @@ def _template_for(
     block = coaching_config["criteria"][criterion][severity]
     key = direction if direction in ("too_low", "too_high") else "generic"
     return block.get(key) or block["generic"]
+
+
+def canonical_user_id(user_id: str | None) -> str:
+    """UUID string stays; None, '', and anything else become '' (unsigned)."""
+    if user_id and _USER_ID_RE.match(user_id):
+        return user_id
+    return ""
+
+
+def variant_index(user_id: str | None, plan_key: str, on: date) -> int:
+    """stable_hash(canonical_user_id + plan_key + on.isoformat()) mod 4."""
+    payload = f"{canonical_user_id(user_id)}{plan_key}{on.isoformat()}"
+    digest = hashlib.sha256(payload.encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % 4
+
+
+def lookup_variant(
+    coaching_config: dict,
+    criterion: str,
+    severity: str,
+    direction: str,
+    *,
+    user_id: str | None,
+    plan_key: str,
+    on: date,
+) -> Optional[CoachingTip]:
+    """Pick a daily variant when the catalog cell has four variants; else cell copy."""
+    criteria = coaching_config.get("criteria") or {}
+    if criterion not in criteria or severity not in ("warning", "critical"):
+        return None
+    resolved_dir = direction if direction in ("too_low", "too_high") else "generic"
+    tmpl = _template_for(coaching_config, criterion, severity, direction)
+    variants = tmpl.get("variants")
+    if isinstance(variants, list) and len(variants) == 4:
+        picked = variants[variant_index(user_id, plan_key, on)]
+        problem, fix = picked["problem"], picked["fix"]
+    else:
+        problem, fix = tmpl["problem"], tmpl["fix"]
+    return CoachingTip(
+        criterion=criterion,
+        severity=severity,
+        direction=resolved_dir,
+        problem=problem,
+        fix=fix,
+        priority=0,
+    )
 
 
 def _lookup_tip(
