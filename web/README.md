@@ -60,7 +60,6 @@ show “not configured”).
 | TanStack Query 5 | Query client provider (ready for caching) |
 | `@mediapipe/tasks-vision` | In-browser hand landmarks (live) |
 | Recharts | Video posture timeline |
-| OGL | Specular WebGL button effect |
 | `@supabase/supabase-js` | Optional email / Google auth |
 | Tailwind CSS 4 | Styling via `@tailwindcss/vite` |
 

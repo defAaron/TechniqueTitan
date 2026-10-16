@@ -209,14 +209,6 @@ export async function deletePracticeSession(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
-const CRITERION_KEYS = [
-  'wrist_height',
-  'finger_curvature',
-  'thumb_position',
-  'wrist_lateral',
-  'hand_arch',
-] as const
-
 export function last30DayStats(sessions: PracticeSessionListRow[]) {
   const cutoff = Date.now() - 30 * 86400000
   const recent = sessions.filter((s) => new Date(s.started_at).getTime() >= cutoff)
@@ -236,60 +228,4 @@ export function last30DayStats(sessions: PracticeSessionListRow[]) {
         ? Math.round(composites.reduce((a, b) => a + b, 0) / composites.length)
         : null,
   }
-}
-
-export function compositeTrendData(sessions: PracticeSessionListRow[]) {
-  const ordered = [...sessions].sort(
-    (a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime(),
-  )
-  return ordered.map((s) => {
-    const row: Record<string, string | number | null> = {
-      date: new Date(s.started_at).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-      }),
-    }
-    for (const h of s.session_hands ?? []) {
-      row[`${h.hand} hand`] = h.mean_composite
-    }
-    return row
-  })
-}
-
-export function criterionTrendData(
-  sessions: PracticeSessionListRow[],
-  hand: 'Left' | 'Right' = 'Right',
-) {
-  const ordered = [...sessions].sort(
-    (a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime(),
-  )
-  return ordered.map((s) => {
-    const row: Record<string, string | number | null> = {
-      date: new Date(s.started_at).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-      }),
-    }
-    const match = (s.session_hands ?? []).find((h) => h.hand === hand)
-    for (const key of CRITERION_KEYS) {
-      row[key] = match?.mean_scores?.[key] ?? null
-    }
-    return row
-  })
-}
-
-export function habitInsight(sessions: PracticeSessionListRow[], days = 30): string | null {
-  const cutoff = Date.now() - days * 86400000
-  const issues: Record<string, number> = {}
-  for (const session of sessions) {
-    if (new Date(session.started_at).getTime() < cutoff) continue
-    for (const row of session.session_hands ?? []) {
-      if (!row.primary_issue) continue
-      issues[row.primary_issue] = (issues[row.primary_issue] ?? 0) + 1
-    }
-  }
-  if (!Object.keys(issues).length) return null
-  const top = Object.entries(issues).sort((a, b) => b[1] - a[1])[0]
-  const label = top[0].replace(/_/g, ' ')
-  return `In your recent saved sessions, “${label}” was the most common focus area (${top[1]} session(s)).`
 }

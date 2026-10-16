@@ -1,7 +1,7 @@
 """Shared single-frame analysis and overlay drawing for the UI.
 
 Keeps the Streamlit app thin: photo, video, and live modes all call
-``analyze_frame`` and ``draw_overlay`` instead of duplicating the
+``analyze_hands`` and ``draw_all_overlays`` instead of duplicating the
 detect -> features -> score pipeline used by the batch CLI.
 """
 
@@ -152,17 +152,6 @@ def _draw_hand(
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 4, cv2.LINE_AA)
         cv2.putText(annotated, marker, (wx - 10, wy + 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2, cv2.LINE_AA)
-
-
-def draw_overlay(image_bgr: np.ndarray, hand: HandDetection, severity: str = "good") -> np.ndarray:
-    """Draw one hand's 21 joints and bone connections onto a copy of the frame.
-
-    The skeleton is colored by ``severity`` so problems are visible at a
-    glance; joints are drawn in white for contrast.
-    """
-    annotated = image_bgr.copy()
-    _draw_hand(annotated, hand, severity)
-    return annotated
 
 
 def draw_all_overlays(image_bgr: np.ndarray, results: List[AnalysisResult]) -> np.ndarray:

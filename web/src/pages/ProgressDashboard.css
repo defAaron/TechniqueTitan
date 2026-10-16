@@ -27,7 +27,6 @@
   min-width: 0;
 }
 
-.progress-dashboard .eyebrow,
 .progress-dashboard .section-kicker {
   color: var(--pd-accent-light);
   font-size: 12px;
@@ -341,18 +340,6 @@
 
 .progress-dashboard .sessions-panel {
   padding: 25px 24px 11px;
-}
-
-.progress-dashboard .text-button {
-  border: 0;
-  background: none;
-  color: var(--pd-accent-light);
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  padding: 7px 0;
 }
 
 .progress-dashboard .session-list {

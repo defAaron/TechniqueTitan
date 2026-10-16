@@ -16,7 +16,6 @@
     "@supabase/supabase-js": "^2.116.0",
     "@tanstack/react-query": "^5.101.4",
     "framer-motion": "^14.2.0",
-    "ogl": "^1.0.11",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.11.0",

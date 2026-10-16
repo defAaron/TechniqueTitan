@@ -407,7 +407,7 @@ technique_titan/
 │       │   ├── layout/       # chrome (Layout, CinematicChrome, ApiStatusBanner)
 │       │   ├── marketing/    # landing (CinematicHero)
 │       │   ├── analyze/      # results (ScorePanel, CoachingTips, OverlayImage)
-│       │   └── ui/           # primitives (Reveal, SpecularButton)
+│       │   └── ui/           # primitives (DonutChart)
 │       ├── pages/
 │       └── lib/
 ├── src/technique_titan/      # Core library (detect → features → score → coach)

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ..eval.constants import CRITERIA, SEVERITIES
-from .features import FEATURE_NAMES, matrix_from_rows, row_to_vector
+from .features import FEATURE_NAMES, matrix_from_rows
 
 try:
     import joblib
@@ -83,8 +83,3 @@ def _predict_matrix(matrix, bundle: ModelBundle) -> list[dict[str, str]]:
         for i, label in enumerate(labels):
             results[i][criterion] = _normalize_label(label)
     return results
-
-
-# Imported by train for a stable pickle path if DummyClassifier is not used.
-def row_vector(row: dict, feature_names: list[str] | None = None) -> list[float]:
-    return row_to_vector(row, feature_names or FEATURE_NAMES)
