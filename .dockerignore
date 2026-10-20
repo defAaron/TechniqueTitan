@@ -1,4 +1,14 @@
 .git
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
 .venv
 .venv*
 venv

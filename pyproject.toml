@@ -9,14 +9,16 @@ dependencies = [
     "opencv-python>=4.8,<5",
     "numpy>=1.26,<2",
     "PyYAML>=6.0",
-    "streamlit>=1.30",
+    "streamlit>=1.54.0",
 ]
 
 [project.optional-dependencies]
 api = [
-    "fastapi>=0.110",
+    "fastapi>=0.133.0",
+    "starlette>=1.0.1",
     "uvicorn[standard]>=0.27",
-    "python-multipart>=0.0.9",
+    "h11>=0.16.0",
+    "python-multipart>=0.0.27",
     "pydantic>=2.0",
 ]
 ml = [

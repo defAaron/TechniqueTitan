@@ -4,7 +4,11 @@ mediapipe==0.10.21
 opencv-python-headless==4.10.0.84
 numpy>=1.26,<2
 PyYAML>=6.0
-fastapi>=0.110
+# Floors are patched minimums: Starlette host-header (1.0.1), multipart DoS (0.0.27), h11 (0.16.0).
+# fastapi 0.133 is the first release whose metadata allows Starlette >=1.0.1.
+fastapi>=0.133.0
+starlette>=1.0.1
 uvicorn[standard]>=0.27
-python-multipart>=0.0.9
+h11>=0.16.0
+python-multipart>=0.0.27
 pydantic>=2.0

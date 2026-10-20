@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# Checkout, install, test, and build only. Default GITHUB_TOKEN is broader than this.
+permissions:
+  contents: read
+
 jobs:
   python:
     runs-on: ubuntu-latest

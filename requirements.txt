@@ -5,4 +5,4 @@ mediapipe==0.10.21
 opencv-python-headless==4.10.0.84
 numpy>=1.26,<2
 PyYAML>=6.0
-streamlit>=1.30
+streamlit>=1.54.0
