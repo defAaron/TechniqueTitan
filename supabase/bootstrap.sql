@@ -40,6 +40,9 @@ begin
 end;
 $$;
 
+-- Owner keeps EXECUTE so this trigger can be recreated. API roles do not.
+grant execute on function public.handle_new_user() to postgres;
+
 do $$
 begin
   if not exists (
@@ -59,6 +62,8 @@ begin
 end
 $$;
 
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -77,7 +82,8 @@ as $$
   );
 $$;
 
-grant execute on function public.is_admin() to authenticated;
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to postgres, authenticated;
 
 do $$
 begin
@@ -120,7 +126,10 @@ begin
 end
 $$;
 
+revoke all on table public.profiles from anon, authenticated;
 grant select, update, insert on table public.profiles to authenticated;
+
+revoke all on table public.app_admins from anon, authenticated;
 
 alter table public.profiles
   add column if not exists display_name text,
@@ -171,7 +180,8 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_list_signups() to authenticated;
+revoke all on function public.admin_list_signups() from public, anon;
+grant execute on function public.admin_list_signups() to postgres, authenticated;
 
 -- Practice session progress (see migrations/20260923000004_practice_sessions.sql)
 create table if not exists public.practice_sessions (
@@ -235,10 +245,13 @@ begin
 end;
 $$;
 
+grant execute on function public.set_practice_session_user_id() to postgres;
 drop trigger if exists practice_sessions_set_user on public.practice_sessions;
 create trigger practice_sessions_set_user
   before insert on public.practice_sessions
   for each row execute function public.set_practice_session_user_id();
+
+revoke all on function public.set_practice_session_user_id() from public, anon, authenticated;
 
 drop policy if exists "Users read own practice sessions" on public.practice_sessions;
 create policy "Users read own practice sessions"

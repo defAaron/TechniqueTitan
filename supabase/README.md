@@ -13,7 +13,13 @@ Apply [`migrations/20260923000004_practice_sessions.sql`](migrations/20260923000
 [`migrations/20261013000005_profile_avatar.sql`](migrations/20261013000005_profile_avatar.sql),
 and [`migrations/20261014000006_coach_focus.sql`](migrations/20261014000006_coach_focus.sql)
 on the production project (or re-run [`bootstrap.sql`](bootstrap.sql))
-after the auth migrations.
+after the auth migrations. Also apply
+[`migrations/20261020000007_security_hardening.sql`](migrations/20261020000007_security_hardening.sql)
+(already included in a full bootstrap run). It revokes `anon` and `PUBLIC`
+execute on security-definer functions and re-asserts client table grants.
+Signed-in users can still call `is_admin()` and `admin_list_signups()`;
+non-admins are rejected inside `admin_list_signups()`. The `avatars` bucket
+stays public.
 
 Apply [`migrations/20261014000006_coach_focus.sql`](migrations/20261014000006_coach_focus.sql)
 once in the Supabase SQL editor on the existing Technique Titan project (or
