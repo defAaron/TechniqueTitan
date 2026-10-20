@@ -14,9 +14,8 @@ import {
   resolveDisplayName,
   type ProfileRecord,
 } from './profileModel'
+import { assertJpegAvatarBlob, avatarStoragePath } from './avatarImage'
 import { supabase } from './supabase'
-
-const AVATAR_PATH = 'avatar.jpg'
 
 type SaveProfileInput = {
   displayName: string
@@ -76,10 +75,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       let nextAvatar = record.avatarUrl
 
       if (file) {
-        const path = `${user.id}/${AVATAR_PATH}`
+        await assertJpegAvatarBlob(file)
+        const path = avatarStoragePath(user.id)
         const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, {
           upsert: true,
-          contentType: file.type || 'image/jpeg',
+          contentType: 'image/jpeg',
           cacheControl: '3600',
         })
         if (uploadError) throw uploadError
@@ -88,7 +88,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       } else if (removePhoto) {
         const { error: removeError } = await supabase.storage
           .from('avatars')
-          .remove([`${user.id}/${AVATAR_PATH}`])
+          .remove([avatarStoragePath(user.id)])
         if (removeError) throw removeError
         nextAvatar = ''
       }

@@ -155,9 +155,62 @@ export function useAuth(): AuthContextValue {
   return ctx
 }
 
-/** Internal path only — rejects protocol-relative and external URLs. */
+const SAFE_NEXT_FALLBACK = '/progress'
+const SAFE_NEXT_BASE = 'https://app.local'
+
+/** Tab, CR, and LF are stripped by the URL parser and can turn a path into "//host". */
+function hasUnsafePathChars(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i)
+    if (code <= 0x20 || code === 0x7f) return true
+  }
+  return /\s/u.test(value)
+}
+
+function isSameAppPath(value: string): boolean {
+  if (!value.startsWith('/') || value.startsWith('//')) return false
+  if (value.includes('\\') || value.includes('://')) return false
+  if (/javascript:/i.test(value)) return false
+  if (hasUnsafePathChars(value)) return false
+  let url: URL
+  try {
+    url = new URL(value, SAFE_NEXT_BASE)
+  } catch {
+    return false
+  }
+  return url.origin === SAFE_NEXT_BASE && url.username === '' && url.password === ''
+}
+
+/** Repeated decoding so %252F%252F and %5C cannot hide an external URL. */
+function decodedForms(value: string): string[] | null {
+  const forms = [value]
+  let current = value
+  try {
+    for (let i = 0; i < 3; i++) {
+      const next = decodeURIComponent(current)
+      if (next === current) break
+      forms.push(next)
+      current = next
+    }
+  } catch {
+    return null
+  }
+  return forms
+}
+
+/**
+ * Same-app relative path after login. Anything else, including protocol-relative
+ * URLs, backslash hosts, and control-character bypasses, becomes /progress.
+ */
 export function safeNextPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/progress'
+  if (!raw) return SAFE_NEXT_FALLBACK
+  const candidates = [raw]
+  const normalized = raw.normalize('NFKC')
+  if (normalized !== raw) candidates.push(normalized)
+  for (const candidate of candidates) {
+    const forms = decodedForms(candidate)
+    if (!forms || forms.some((form) => !isSameAppPath(form))) return SAFE_NEXT_FALLBACK
+  }
   return raw
 }
 
