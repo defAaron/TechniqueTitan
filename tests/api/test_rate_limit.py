@@ -54,6 +54,7 @@ def test_build_limiters_from_env_defaults():
     assert limiters["frame"].max_requests == 120
     assert limiters["landmarks"].max_requests == 360
     assert limiters["landmarks"].window_seconds == 60
+    assert limiters["heavy"].max_keys == 4096
 
 
 def test_build_limiters_from_env_overrides():
@@ -95,3 +96,74 @@ def test_client_ip_ignores_forwarded_without_trust_proxy():
     )
     assert client_ip(req, trust_proxy=False) == "1.2.3.4"
     assert client_ip(req, trust_proxy=True) == "9.9.9.9"
+
+
+def test_client_ip_uses_leftmost_forwarded_hop():
+    """Render puts the visitor first. The last hop is a proxy, not the user."""
+    req = SimpleNamespace(
+        headers={"x-forwarded-for": "203.0.113.8, 10.0.0.4"},
+        client=SimpleNamespace(host="10.0.0.1"),
+    )
+    assert client_ip(req, trust_proxy=False) == "10.0.0.1"
+    assert client_ip(req, trust_proxy=True) == "203.0.113.8"
+
+
+def test_cf_connecting_ip_ignores_spoofed_forwarded_chain():
+    keys = {
+        client_ip(
+            SimpleNamespace(
+                headers={
+                    "cf-connecting-ip": "203.0.113.50",
+                    "x-forwarded-for": f"10.0.0.{i}, 198.51.100.8",
+                },
+                client=SimpleNamespace(host="10.1.1.1"),
+            ),
+            trust_proxy=True,
+        )
+        for i in range(20)
+    }
+    assert keys == {"203.0.113.50"}
+
+
+def test_client_ip_prefers_cf_connecting_ip():
+    req = SimpleNamespace(
+        headers={
+            "cf-connecting-ip": "198.51.100.20",
+            "x-forwarded-for": "9.9.9.9, 203.0.113.5",
+        },
+        client=SimpleNamespace(host="10.0.0.1"),
+    )
+    assert client_ip(req, trust_proxy=True) == "198.51.100.20"
+    assert client_ip(req, trust_proxy=False) == "10.0.0.1"
+
+
+def test_client_ip_ignores_oversized_or_garbage_forwarded_header():
+    oversized = SimpleNamespace(
+        headers={"x-forwarded-for": "1.1.1.1," * 100 + "203.0.113.9"},
+        client=SimpleNamespace(host="1.2.3.4"),
+    )
+    assert client_ip(oversized, trust_proxy=True) == "1.2.3.4"
+    garbage = SimpleNamespace(
+        headers={"x-forwarded-for": "not-an-ip", "cf-connecting-ip": "also-bad"},
+        client=SimpleNamespace(host="1.2.3.4"),
+    )
+    assert client_ip(garbage, trust_proxy=True) == "1.2.3.4"
+
+
+def test_rate_limiter_bounds_tracked_keys():
+    limiter = RateLimiter(max_requests=5, window_seconds=60, max_keys=2)
+    limiter.check("a")
+    limiter.check("b")
+    limiter.check("c")
+    assert set(limiter._hits) == {"b", "c"}
+
+
+def test_rate_limiter_cap_does_not_reset_an_existing_key():
+    limiter = RateLimiter(max_requests=1, window_seconds=60, max_keys=2)
+    limiter.check("a")
+    with pytest.raises(HTTPException):
+        limiter.check("a")
+    limiter.check("b")
+    limiter.check("c")
+    with pytest.raises(HTTPException):
+        limiter.check("b")
