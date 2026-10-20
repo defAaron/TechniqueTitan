@@ -43,6 +43,10 @@ new significant error, append an entry here in the same format.
 | Root clutter | Keep Streamlit/Render entry files at repo root (`app.py`, `Dockerfile`, `requirements*.txt`). Do not commit source `*.mp4` or a root `package-lock.json` — frontend lockfile is `web/package-lock.json`; masters live in `assets/source/` (gitignored). |
 | Local CLI | Run `python -m technique_titan.*` from the repo **`.venv`** after `pip install -e .`. Homebrew `python3.11` does not have the package. |
 | MediaPipe Hands laterality | Python `mp.solutions.hands` reports **selfie/mirror** Left/Right. Invert to anatomical labels for unmirrored photos (batch, API photo/video). Do **not** invert Streamlit live frames that are already `cv2.flip`'d. |
+| Client IP for limits | Behind Render, prefer **`CF-Connecting-IP`**, then the **first** `X-Forwarded-For` hop. The last hop is a proxy. Ignore both unless `TRUST_PROXY=1`. |
+| Upload size | Cap image (8 MB) and video (40 MB) **before** buffering the body. Do not `file.read()` first and check length after. |
+| Supabase grants | Revoke `EXECUTE` from **`anon` explicitly**. Revoking `PUBLIC` leaves Supabase’s direct `anon` grant in place. |
+| Login redirect | `safeNextPath` must stay on this app. A leading `/` is not enough (`/\\evil.com`, encoded `//`, backslashes). |
 
 ---
 
@@ -515,6 +519,18 @@ When a significant bug is found and fixed, add the next `E##` entry:
 | **Root cause** | `useState` value was destructured but only its setter was used; `tsconfig.app.json` has `noUnusedLocals: true` and Vite dev does not type-check |
 | **Fix** | `33ac2e1`: destructure only the setter (`const [, setSkippedExpandEntersRemaining]`) |
 | **Prevention** | Run `cd web && npm run build` (not just `npm run dev`) before committing web changes |
+
+---
+
+### E39 — Upload buffering, spoofable rate-limit keys, and login `next`
+| | |
+|---|---|
+| **When** | 2026-10-20 |
+| **Stage** | Repository security pass |
+| **Symptom** | Oversized uploads were fully read before the 413 check. With `TRUST_PROXY=1`, a caller-supplied `X-Forwarded-For` could choose the rate-limit key. Login `next` accepted `/\\host` and encoded `//host`, which the browser treats as another site. |
+| **Root cause** | Size was checked after `UploadFile.read()`. The limiter trusted a forwarded header the edge does not fully replace. `safeNextPath` only rejected a missing slash and a literal `//` prefix. |
+| **Fix** | Cap upload streams and `Content-Length` first. Rate-limit on `CF-Connecting-IP`, then the first `X-Forwarded-For` hop, and only when `TRUST_PROXY=1`. Reject login paths that decode or normalize into another origin. |
+| **Prevention** | See the checklist rows for client IP, upload size, Supabase `anon` grants, and login redirect. |
 
 ---
 
