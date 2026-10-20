@@ -7,33 +7,12 @@ from datetime import datetime, timezone
 from typing import Any
 
 from technique_titan.coach.focus import CRITERIA, FocusDecision
-from technique_titan.coach.plan import CRITERION_METRICS, build_plan, plan_key
-from technique_titan.coach.temporal import SmoothedCriterion, SmoothedHand
+from technique_titan.coach.plan import build_plan, plan_key
 from technique_titan.coach.validate import validate_tip
-from technique_titan.coaching import generate_coaching, lookup_variant, metric_direction
+from technique_titan.coaching import generate_coaching, lookup_variant
 
-from .schemas import COACH_CRITERIA, HandResultOut, HandSummaryOut, SessionDraftOut, VideoFrameScore
-
-
-def _finite(value: float | None) -> bool:
-    if value is None:
-        return False
-    return math.isfinite(value)
-
-
-def _derive_severity(score: float) -> str:
-    if score >= 80:
-        return "good"
-    if score >= 50:
-        return "warning"
-    return "critical"
-
-
-def _direction_for_metric(value: float | None, ideal: list[float]) -> str:
-    direction = metric_direction(value, ideal)
-    if direction in ("too_low", "too_high"):
-        return direction
-    return "generic"
+from .coach_shape import build_smoothed_hand, derive_severity, is_finite
+from .schemas import COACH_CRITERIA, HandResultOut, SessionDraftOut, VideoFrameScore
 
 
 def _empty_focus() -> FocusDecision:
@@ -51,37 +30,6 @@ def _ideals_from_scoring(scoring_config: dict) -> dict[str, list[float]]:
         for c in COACH_CRITERIA
         if c in criteria and "ideal" in criteria[c]
     }
-
-
-def _build_smoothed_hand(
-    hand: str,
-    scores: dict[str, float | None],
-    severities: dict[str, str],
-    metrics: dict[str, float | None],
-    ideals: dict[str, list[float]],
-) -> SmoothedHand:
-    criteria: dict[str, SmoothedCriterion] = {}
-    for criterion in COACH_CRITERIA:
-        score = scores.get(criterion)
-        if score is None or not _finite(score):
-            continue
-        sev_raw = severities.get(criterion)
-        if sev_raw in ("good", "warning", "critical"):
-            severity = sev_raw
-        else:
-            severity = _derive_severity(score)
-        metric_name = CRITERION_METRICS[criterion]
-        metric_val = metrics.get(metric_name)
-        direction = _direction_for_metric(
-            metric_val if _finite(metric_val) else None,
-            ideals.get(criterion) or [],
-        )
-        criteria[criterion] = SmoothedCriterion(
-            score=score,
-            severity=severity,
-            direction=direction,
-        )
-    return SmoothedHand(hand=hand, criteria=criteria)
 
 
 def _fallback_problem_fix(
@@ -112,7 +60,7 @@ def build_coach_plan_payload(
     """Build coach_plan JSON for analyze responses (never raises)."""
     ideals = _ideals_from_scoring(scoring_config)
     focus = _empty_focus()
-    smoothed = _build_smoothed_hand(hand, scores, severities, metrics, ideals)
+    smoothed = build_smoothed_hand(hand, scores, severities, metrics, ideals)
     plan = build_plan(
         hand=hand,
         smoothed=smoothed,
@@ -165,30 +113,17 @@ def build_coach_plan_payload(
     }
 
 
-def _pick_lower_composite_hand(hands: list[HandResultOut]) -> HandResultOut | None:
-    if not hands:
+def _pick_lower_score(items: list, score_of) -> Any | None:
+    if not items:
         return None
 
-    def sort_key(h: HandResultOut) -> tuple[int, float]:
-        cs = h.composite_score
-        if cs is None:
+    def sort_key(item) -> tuple[int, float]:
+        score = score_of(item)
+        if score is None:
             return (1, 0.0)
-        return (0, float(cs))
+        return (0, float(score))
 
-    return min(hands, key=sort_key)
-
-
-def _pick_lower_composite_summary(hands: list[HandSummaryOut]) -> HandSummaryOut | None:
-    if not hands:
-        return None
-
-    def sort_key(h: HandSummaryOut) -> tuple[int, float]:
-        mc = h.mean_composite
-        if mc is None:
-            return (1, 0.0)
-        return (0, float(mc))
-
-    return min(hands, key=sort_key)
+    return min(items, key=sort_key)
 
 
 def _metrics_from_hand(hand: HandResultOut) -> dict[str, float | None]:
@@ -212,9 +147,9 @@ def _severities_from_mean_scores(
     severities: dict[str, str] = {}
     for criterion in COACH_CRITERIA:
         raw = mean_scores.get(criterion)
-        if raw is None or not _finite(raw):
+        if raw is None or not is_finite(raw):
             continue
-        severities[criterion] = _derive_severity(raw)
+        severities[criterion] = derive_severity(raw)
     return severities
 
 
@@ -223,7 +158,7 @@ def coach_plan_for_photo_hands(
     scoring_config: dict,
     coaching_config: dict,
 ) -> dict[str, Any] | None:
-    target = _pick_lower_composite_hand(hands)
+    target = _pick_lower_score(hands, lambda hand: hand.composite_score)
     if target is None:
         return None
     return build_coach_plan_payload(
@@ -245,7 +180,7 @@ def coach_plan_for_video(
     coaching_config: dict,
 ) -> dict[str, Any] | None:
     if progress_draft and progress_draft.hands:
-        target = _pick_lower_composite_summary(progress_draft.hands)
+        target = _pick_lower_score(progress_draft.hands, lambda hand: hand.mean_composite)
         if target is None:
             return None
         return build_coach_plan_payload(
@@ -261,7 +196,7 @@ def coach_plan_for_video(
     if not frames:
         return None
     last_hands = frames[-1].hands
-    target = _pick_lower_composite_hand(last_hands)
+    target = _pick_lower_score(last_hands, lambda hand: hand.composite_score)
     if target is None:
         return None
     return build_coach_plan_payload(

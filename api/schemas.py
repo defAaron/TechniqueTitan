@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import date
 from typing import Any, Dict, List, Literal, Optional
 
@@ -15,14 +16,20 @@ COACH_CRITERIA = (
     "hand_arch",
 )
 
-COACH_METRICS = (
+CoachCriterionName = Literal[
+    "wrist_height",
+    "finger_curvature",
+    "thumb_position",
+    "wrist_lateral",
+    "hand_arch",
+]
+CoachMetricName = Literal[
     "wrist_height_delta",
     "mean_finger_curvature",
     "thumb_index_angle",
     "wrist_lateral_deviation_deg",
     "hand_arch_ratio",
-)
-
+]
 CoachSeverity = Literal["good", "warning", "critical", "unknown"]
 CoachHand = Literal["left", "right"]
 CoachTipKind = Literal["live", "photo", "recap"]
@@ -172,13 +179,7 @@ class PublicConfigResponse(BaseModel):
 class CoachPlanLockedFocusIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    criterion: Literal[
-        "wrist_height",
-        "finger_curvature",
-        "thumb_position",
-        "wrist_lateral",
-        "hand_arch",
-    ]
+    criterion: CoachCriterionName
     locked_on: date
     locked_until: date
     burden: Dict[str, float] = Field(default_factory=dict)
@@ -206,36 +207,9 @@ class CoachPlanRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     hand: CoachHand
-    scores: Dict[
-        Literal[
-            "wrist_height",
-            "finger_curvature",
-            "thumb_position",
-            "wrist_lateral",
-            "hand_arch",
-        ],
-        Optional[float],
-    ] = Field(default_factory=dict)
-    severities: Dict[
-        Literal[
-            "wrist_height",
-            "finger_curvature",
-            "thumb_position",
-            "wrist_lateral",
-            "hand_arch",
-        ],
-        CoachSeverity,
-    ] = Field(default_factory=dict)
-    metrics: Dict[
-        Literal[
-            "wrist_height_delta",
-            "mean_finger_curvature",
-            "thumb_index_angle",
-            "wrist_lateral_deviation_deg",
-            "hand_arch_ratio",
-        ],
-        Optional[float],
-    ] = Field(default_factory=dict)
+    scores: Dict[CoachCriterionName, Optional[float]] = Field(default_factory=dict)
+    severities: Dict[CoachCriterionName, CoachSeverity] = Field(default_factory=dict)
+    metrics: Dict[CoachMetricName, Optional[float]] = Field(default_factory=dict)
     history: List[CoachPlanHistoryEntryIn] = Field(default_factory=list, max_length=40)
     tip_kind: CoachTipKind
     locked_focus: Optional[CoachPlanLockedFocusIn] = None
@@ -246,7 +220,6 @@ class CoachPlanRequest(BaseModel):
     def validate_scores(cls, value: object) -> object:
         if not isinstance(value, dict):
             return value
-        import math
 
         out: dict = {}
         for key, raw in value.items():
@@ -269,7 +242,6 @@ class CoachPlanRequest(BaseModel):
     def validate_metrics(cls, value: object) -> object:
         if not isinstance(value, dict):
             return value
-        import math
 
         out: dict = {}
         for key, raw in value.items():

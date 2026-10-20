@@ -10,22 +10,14 @@ from pydantic import ValidationError
 
 from technique_titan.coach.focus import FocusSession, LockedFocus, choose_focus
 from technique_titan.coach.plan import build_plan, plan_key
-from technique_titan.coach.temporal import SmoothedCriterion, SmoothedHand
 from technique_titan.coach.validate import validate_tip
-from technique_titan.coaching import lookup_variant, metric_direction
+from technique_titan.coaching import lookup_variant
 
+from ..coach_shape import build_smoothed_hand
 from ..deps import get_coaching_config, get_scoring_config
 from ..schemas import COACH_CRITERIA, CoachPlanHistoryEntryIn, CoachPlanRequest
 
 router = APIRouter(prefix="/v1", tags=["coach"])
-
-_CRITERION_METRICS: dict[str, str] = {
-    "wrist_height": "wrist_height_delta",
-    "finger_curvature": "mean_finger_curvature",
-    "thumb_position": "thumb_index_angle",
-    "wrist_lateral": "wrist_lateral_deviation_deg",
-    "hand_arch": "hand_arch_ratio",
-}
 
 _TEMPLATE_VALIDATION_DETAIL = "coaching template failed validation"
 
@@ -39,12 +31,6 @@ def _reject_non_finite(value: object) -> None:
     elif isinstance(value, list):
         for nested in value:
             _reject_non_finite(nested)
-
-
-def _finite(value: float | None) -> bool:
-    if value is None:
-        return False
-    return math.isfinite(value)
 
 
 def _frac_value(raw: float) -> float:
@@ -124,46 +110,6 @@ def _locked_from_request(body: CoachPlanRequest) -> LockedFocus | None:
     )
 
 
-def _derive_severity(score: float) -> str:
-    if score >= 80:
-        return "good"
-    if score >= 50:
-        return "warning"
-    return "critical"
-
-
-def _direction_for_metric(value: float | None, ideal: list[float]) -> str:
-    direction = metric_direction(value, ideal)
-    if direction in ("too_low", "too_high"):
-        return direction
-    return "generic"
-
-
-def _build_smoothed_hand(body: CoachPlanRequest, ideals: dict[str, list[float]]) -> SmoothedHand:
-    criteria: dict[str, SmoothedCriterion] = {}
-    for criterion in COACH_CRITERIA:
-        score = body.scores.get(criterion)
-        if score is None or not _finite(score):
-            continue
-        sev_raw = body.severities.get(criterion)
-        if sev_raw in ("good", "warning", "critical"):
-            severity = sev_raw
-        else:
-            severity = _derive_severity(score)
-        metric_name = _CRITERION_METRICS[criterion]
-        metric_val = body.metrics.get(metric_name)
-        direction = _direction_for_metric(
-            metric_val if _finite(metric_val) else None,
-            ideals.get(criterion) or [],
-        )
-        criteria[criterion] = SmoothedCriterion(
-            score=score,
-            severity=severity,
-            direction=direction,
-        )
-    return SmoothedHand(hand=body.hand, criteria=criteria)
-
-
 def _lock_payload(lock: LockedFocus | None) -> dict | None:
     if lock is None:
         return None
@@ -202,7 +148,13 @@ async def coach_plan(request: Request) -> dict:
     filtered_sessions = _filter_sessions(collapsed, today)
     locked = _locked_from_request(body)
     focus = choose_focus(filtered_sessions, locked, today)
-    smoothed = _build_smoothed_hand(body, ideals)
+    smoothed = build_smoothed_hand(
+        body.hand,
+        body.scores,
+        body.severities,
+        body.metrics,
+        ideals,
+    )
 
     plan = build_plan(
         hand=body.hand,

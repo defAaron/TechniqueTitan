@@ -24,10 +24,6 @@ def _finite(value: float | None) -> bool:
     return math.isfinite(value)
 
 
-def _usable_score(sc_score: float | None) -> bool:
-    return _finite(sc_score)
-
-
 def _known_severity(severity: str) -> bool:
     return severity in ("good", "warning", "critical")
 
@@ -39,7 +35,7 @@ def _should_return_none(smoothed: SmoothedHand) -> bool:
             continue
         if not _known_severity(sc.severity):
             continue
-        if not _usable_score(sc.score):
+        if not _finite(sc.score):
             continue
         if sc.severity != "good":
             return False
@@ -56,7 +52,7 @@ def _pick_acute(focus_criterion: str | None, smoothed: SmoothedHand) -> str | No
             continue
         if not _known_severity(sc.severity):
             continue
-        if not _usable_score(sc.score):
+        if not _finite(sc.score):
             continue
         candidates.append(c)
     if not candidates:
@@ -75,7 +71,7 @@ def _pick_worst_non_good(smoothed: SmoothedHand) -> str | None:
             continue
         if sc.severity == "good":
             continue
-        if not _usable_score(sc.score):
+        if not _finite(sc.score):
             continue
         candidates.append(c)
     if not candidates:
@@ -104,7 +100,7 @@ def _choose_criterion(
             sc is not None
             and _known_severity(sc.severity)
             and sc.severity != "good"
-            and _usable_score(sc.score)
+            and _finite(sc.score)
         ):
             return focus_criterion
     return _pick_worst_non_good(smoothed)
@@ -117,7 +113,7 @@ def _plan_direction(direction: str) -> str:
 
 
 def _plan_score(score: float | None) -> int:
-    if not _usable_score(score):
+    if not _finite(score):
         return 0
     assert score is not None
     clamped = max(0.0, min(100.0, score))
