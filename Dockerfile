@@ -4,8 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PORT=8000 \
-    CORS_ORIGINS=* \
-    TRUST_PROXY=1
+    CORS_ORIGINS=https://technique-titan.vercel.app \
+    TRUST_PROXY=1 \
+    ENVIRONMENT=production
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \

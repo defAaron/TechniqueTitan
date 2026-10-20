@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 from technique_titan.progress.reducer import ScoredTick, build_session_draft, enforce_samples_size, tips_from_hand
 
-from ..deps import get_scoring_config
+from ..deps import get_scoring_config, public_value_error_detail
 from ..progress_helpers import draft_to_out, min_confidence
 from ..schemas import ReduceProgressRequest, SessionDraftOut
 
@@ -62,7 +62,10 @@ def reduce_progress(body: ReduceProgressRequest) -> SessionDraftOut:
                 summary.tip_fix = fix
         enforce_samples_size(draft.samples)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=400,
+            detail=public_value_error_detail(exc, "Could not reduce that session"),
+        ) from exc
 
     if not draft.hands:
         raise HTTPException(

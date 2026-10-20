@@ -203,6 +203,21 @@ def score_landmark_hands(
     )
 
 
+_VIDEO_SUFFIXES = frozenset({".mp4", ".mov", ".avi"})
+
+
+def safe_video_suffix(suffix: str) -> str:
+    """Keep temp-file suffixes on the upload allowlist.
+
+    ``NamedTemporaryFile`` appends ``suffix`` to a path under the temp
+    directory. A caller-supplied value with ``..`` or a separator would be
+    resolved by the OS outside that directory.
+    """
+    if suffix in _VIDEO_SUFFIXES:
+        return suffix
+    return ".mp4"
+
+
 def analyze_video_bytes(
     data: bytes,
     scoring_config: dict,
@@ -212,23 +227,26 @@ def analyze_video_bytes(
     max_frames: int = 120,
     suffix: str = ".mp4",
 ) -> VideoAnalyzeResponse:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(data)
-        path = tmp.name
-
-    cap = cv2.VideoCapture(path)
-    if not cap.isOpened():
-        Path(path).unlink(missing_ok=True)
-        raise ValueError("Could not open video file")
-
+    suffix = safe_video_suffix(suffix)
+    path: str | None = None
+    cap: cv2.VideoCapture | None = None
     frames_out: List[VideoFrameScore] = []
     timeline: dict[str, list[Optional[float]]] = {}
-    raw_fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
-    fps = raw_fps if raw_fps > 1.0 else 30.0
-    frame_idx = 0
-    analyzed = 0
-
+    fps = 30.0
     try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            path = tmp.name
+            tmp.write(data)
+
+        cap = cv2.VideoCapture(path)
+        if not cap.isOpened():
+            raise ValueError("Could not open video file")
+
+        raw_fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        fps = raw_fps if raw_fps > 1.0 else 30.0
+        frame_idx = 0
+        analyzed = 0
+
         with HandDetector(static_image_mode=False) as detector:
             while analyzed < max_frames:
                 ok, frame = cap.read()
@@ -248,8 +266,10 @@ def analyze_video_bytes(
                     analyzed += 1
                 frame_idx += 1
     finally:
-        cap.release()
-        Path(path).unlink(missing_ok=True)
+        if cap is not None:
+            cap.release()
+        if path is not None:
+            Path(path).unlink(missing_ok=True)
 
     if not frames_out:
         return VideoAnalyzeResponse(

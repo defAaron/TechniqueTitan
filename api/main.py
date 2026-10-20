@@ -22,7 +22,7 @@ if str(_ROOT) not in sys.path:
 
 from api.deps import get_coaching_config, get_scoring_config
 from api.rate_limit import build_limiters_from_env, client_ip, limiter_bucket
-from api.routes.analyze import router as analyze_router
+from api.routes.analyze import UploadBodyLimitMiddleware, router as analyze_router
 from api.routes.coach import router as coach_router
 from api.routes.progress import router as progress_router
 from api.schemas import CRITERION_LABELS, PublicConfigResponse
@@ -37,11 +37,27 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+def schema_urls(environment: str | None = None) -> dict[str, str | None]:
+    """Hide OpenAPI docs when ENVIRONMENT is production.
+
+    Local runs and tests leave the env unset and keep /docs for debugging.
+    """
+    raw = os.environ.get("ENVIRONMENT", "") if environment is None else environment
+    if raw.strip().lower() in {"production", "prod"}:
+        return {"docs_url": None, "redoc_url": None, "openapi_url": None}
+    return {
+        "docs_url": "/docs",
+        "redoc_url": "/redoc",
+        "openapi_url": "/openapi.json",
+    }
+
+
 app = FastAPI(
     title="Technique Titan API",
     version="0.1.0",
     description="Piano hand posture analysis: detect, score, and coach.",
     lifespan=lifespan,
+    **schema_urls(),
 )
 
 _cors_origins = os.environ.get(
@@ -51,6 +67,10 @@ _cors_origins = os.environ.get(
 ).split(",")
 _cors_origins = [o.strip() for o in _cors_origins if o.strip()]
 _cors_wildcard = "*" in _cors_origins
+
+# Added before CORS so it sits inside CORSMiddleware. Early 413 responses then
+# still get Access-Control-Allow-Origin on the way out.
+app.add_middleware(UploadBodyLimitMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
