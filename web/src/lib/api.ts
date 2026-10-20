@@ -1,6 +1,6 @@
 /** API client + shared types for Technique Titan. */
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
 function isNetworkError(err: unknown): boolean {
   if (!(err instanceof TypeError)) return false

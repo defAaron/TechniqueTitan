@@ -1,4 +1,4 @@
-import type { Coaching, CoachingTip } from './api'
+import { API_BASE, type Coaching, type CoachingTip } from './api'
 
 export const COACH_CRITERIA = [
   'wrist_height',
@@ -9,9 +9,6 @@ export const COACH_CRITERIA = [
 ] as const
 
 export type CoachCriterion = (typeof COACH_CRITERIA)[number]
-
-const API_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
 export interface SmoothedCriterionSnapshot {
   severity: string

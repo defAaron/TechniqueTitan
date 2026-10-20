@@ -1,4 +1,4 @@
-import { CRITERION_LABELS } from './api'
+import { API_BASE } from './api'
 import {
   clampCoachScore,
   COACH_CRITERIA,
@@ -7,11 +7,6 @@ import {
 import type { PracticeSessionListRow, SessionHandRow } from './progress'
 import { supabase } from './supabase'
 
-const API_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
-
-export const COACH_FOCUS_EMPTY_MESSAGE = 'Practice a few times to get a weekly focus.'
-
 const CRITERION_SET = new Set<string>(COACH_CRITERIA)
 
 export type CoachFocusLock = {
@@ -19,11 +14,6 @@ export type CoachFocusLock = {
   locked_on: string
   locked_until: string
   burden: Record<string, number>
-}
-
-export type CoachFocusRow = CoachFocusLock & {
-  user_id: string
-  updated_at: string
 }
 
 export type CoachPlanHistoryHand = {
@@ -111,16 +101,6 @@ export function buildCoachPlanHistoryFromSessions(
     if (entry) history.push(entry)
   }
   return history
-}
-
-export function formatCoachFocusMessage(
-  lock: Pick<CoachFocusLock, 'criterion' | 'locked_until'> | null,
-  locales?: Intl.LocalesArgument,
-): string {
-  if (!lock) return COACH_FOCUS_EMPTY_MESSAGE
-  const label = CRITERION_LABELS[lock.criterion] ?? lock.criterion.replace(/_/g, ' ')
-  const dateStr = new Date(`${lock.locked_until}T12:00:00`).toLocaleDateString(locales)
-  return `Weekly focus: ${label} until ${dateStr}`
 }
 
 function rowToLock(row: {

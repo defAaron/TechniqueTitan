@@ -2,28 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { PracticeSessionListRow } from './progress'
 import {
   buildCoachPlanHistoryFromSessions,
-  COACH_FOCUS_EMPTY_MESSAGE,
-  formatCoachFocusMessage,
   mapSessionToPlanHistoryEntry,
 } from './coachFocus'
-
-describe('formatCoachFocusMessage', () => {
-  it('returns the empty-focus sentence when there is no lock', () => {
-    expect(formatCoachFocusMessage(null)).toBe(COACH_FOCUS_EMPTY_MESSAGE)
-    expect(formatCoachFocusMessage(null)).toBe('Practice a few times to get a weekly focus.')
-  })
-
-  it('includes the criterion label and formatted locked_until date', () => {
-    const message = formatCoachFocusMessage(
-      { criterion: 'wrist_height', locked_until: '2026-10-20' },
-      'en-US',
-    )
-    expect(message).toContain('Wrist height')
-    expect(message).toContain(
-      new Date('2026-10-20T12:00:00').toLocaleDateString('en-US'),
-    )
-  })
-})
 
 describe('buildCoachPlanHistoryFromSessions', () => {
   it('drops primary_issue values that are not criterion names', () => {
