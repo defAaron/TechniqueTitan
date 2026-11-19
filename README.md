@@ -32,7 +32,7 @@ The interesting parts of the system, and where to read them:
 | Live video stays on the laptop; the server only receives landmarks | [`web/src/lib/`](web/src/lib/README.md) |
 | Tips hold still: EMA + 1.2 s dwell, same math in Python and TypeScript | [`coach/`](src/technique_titan/coach/README.md) |
 | One weekly focus from 14 days of saved sessions, stored on `/progress` | [`coach/`](src/technique_titan/coach/README.md) |
-| Optional Qwen 0.5B wording in a WebGPU worker; templates win on any failure | [`web/src/workers/`](web/src/workers/README.md) |
+| Optional model wording in a WebGPU worker; templates win on any failure | [`web/src/workers/`](web/src/workers/README.md) |
 | Progress stores scores and tips only, sized for Supabase’s free tier | [`progress/`](src/technique_titan/progress/README.md) |
 | Offline logistic regression that does not replace YAML until it wins hold-out | [`ml/`](src/technique_titan/ml/README.md) |
 | Frozen 10-image hold-out and a train-only threshold notebook | [`eval/`](src/technique_titan/eval/README.md) |
@@ -47,7 +47,7 @@ Last measured heuristic hold-out macro accuracy is **0.689** (Cohen’s κ **0.1
 4. **Map metrics to 0–100.** Inside the `ideal` band the score is 100. At the `limit` edges it is 0. The falloff is linear. `≥ 80` is good, `≥ 50` is warning, below that is critical. Weights: wrist 0.25, fingers 0.25, arch 0.20, thumb 0.15, lateral 0.15.
 5. **Hold the feedback.** An exponential moving average (`α = 0.35`) smooths the score. Severity and direction change only after they have been pending for **1200 ms**, so a live tip does not flicker every frame.
 6. **Pick one sentence.** `CoachPlan` speaks the worst current problem, or a different criterion that has gone critical after the dwell. If the request includes saved-session history, it can instead speak the weekly focus. Copy comes from `config/coaching.yaml`. A cell with four variants picks one with SHA-256 of (optional user id, plan key, UTC date). Photo, video, and the live client currently omit the user id, so that daily pick is shared. `/progress` is what sends history and writes the lock.
-7. **Optionally reword on device.** If `VITE_COACH_MODEL_REPO` is set, Settings can turn on a Qwen2.5-0.5B WebGPU worker. The model sees only the short plan. A Python validator and a TypeScript copy of the same rules reject medical language, the wrong body part, the wrong direction, and numbers that are not the score. A reject shows the template.
+7. **Optionally reword on device.** If `VITE_COACH_MODEL_REPO` is set, Settings can turn on the configured WebGPU wording worker. The model sees only the short plan. A Python validator and a TypeScript copy of the same rules reject medical language, the wrong body part, the wrong direction, and numbers that are not the score. A reject shows the template.
 8. **Save scores if you ask.** “Add to progress” reduces the take to a compact draft (`POST /v1/progress/reduce`) and inserts it with the user’s Supabase session. No photo, video, or landmarks are stored.
 
 ```mermaid
@@ -171,10 +171,8 @@ pip install -e ".[api]"
 pip install -r requirements-dev.txt
 pytest
 
-cd web && npm ci && npm run lint && npm test && npm run build
+cd web && npm install && npm run lint && npm test && npm run build
 ```
-
-CI (`.github/workflows/ci.yml`) runs pytest on Python 3.11 with headless OpenCV, then `npm run build`. It does not batch-score `data/raw/` (those images are gitignored).
 
 Conventions that keep coming back:
 
