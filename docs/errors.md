@@ -35,6 +35,7 @@ new significant error, append an entry here in the same format.
 | Theme tokens | Renaming CSS vars requires updating TS/`getComputedStyle` consumers. |
 | Assets | Don’t reference `/hero-*.jpg|mp4` unless files exist under `web/public/`. |
 | Full-bleed layout | Don’t put `100vw` breakouts under a clipped `max-w-*` + `overflow-x-clip` parent. |
+| Live coach | Project raw metrics onto the five coach API fields. Keep the immediate template visible during wording requests. |
 | Tests | Synthetic hand fixtures must be non-collinear for plane fits. |
 | Filenames | Git-tracked names must match import and markdown-link **case** (Linux/CI is case-sensitive; macOS often is not). |
 | Pytest | Keep `addopts = "--import-mode=importlib"` in `pyproject.toml`. Two test files may share a basename (`tests/engine/test_coach_plan.py` and `tests/api/test_coach_plan.py`); the default prepend importer collides. |
@@ -45,6 +46,7 @@ new significant error, append an entry here in the same format.
 | MediaPipe Hands laterality | Python `mp.solutions.hands` reports **selfie/mirror** Left/Right. Invert to anatomical labels for unmirrored photos (batch, API photo/video). Do **not** invert Streamlit live frames that are already `cv2.flip`'d. |
 | Client IP for limits | Behind Render, prefer **`CF-Connecting-IP`**, then the **first** `X-Forwarded-For` hop. The last hop is a proxy. Ignore both unless `TRUST_PROXY=1`. |
 | Upload size | Cap image (8 MB) and video (40 MB) **before** buffering the body. Do not `file.read()` first and check length after. |
+| Graphify | Install `graphifyy[sql]` so the Supabase migrations are parsed. |
 | Supabase grants | Revoke `EXECUTE` from **`anon` explicitly**. Revoking `PUBLIC` leaves Supabase’s direct `anon` grant in place. |
 | Login redirect | `safeNextPath` must stay on this app. A leading `/` is not enough (`/\\evil.com`, encoded `//`, backslashes). |
 
@@ -534,10 +536,34 @@ When a significant bug is found and fixed, add the next `E##` entry:
 
 ---
 
+### E40 — Live coaching plan requests rejected additional geometry metrics
+| | |
+|---|---|
+| **When** | 2026-11-18 |
+| **Stage** | Live practice coach-plan requests |
+| **Symptom** | The scoring response could produce a 422 on the subsequent coach-plan request, silently keeping the initial template. |
+| **Root cause** | Live forwarded every metric, including thumb lateral offset and MCP dome spread. The plan schema accepts only its five named metrics. The smoother also looked up metric values by criterion ID. |
+| **Fix** | Map each criterion to its metric name and project the request onto the accepted fields. |
+| **Prevention** | Exercise the browser request builder with a full score response, including auxiliary metrics. |
+
+---
+
+### E41 — Graphify skipped Supabase SQL without its parser extra
+| | |
+|---|---|
+| **When** | 2026-11-18 |
+| **Stage** | Initial repository graph |
+| **Symptom** | Graphify built the index but skipped extraction for all nine Supabase SQL files. |
+| **Root cause** | The base Graphify package does not include `tree-sitter-sql`. |
+| **Fix** | Install `graphifyy[sql]` and rerun extraction before generating the report. |
+| **Prevention** | Use the SQL extra when installing Graphify for this repository. |
+
+---
+
 ## How to append
 
 ```markdown
-### E36 — Short title
+### E42 — Short title
 | | |
 |---|---|
 | **When** | YYYY-MM-DD |
