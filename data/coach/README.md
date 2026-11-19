@@ -1,8 +1,8 @@
 # Coach training set
 
-Text-only data for the optional on-device wording model
-([`docs/PERSONALIZED_COACH.md`](../../docs/PERSONALIZED_COACH.md) §5–§6).
-No images, landmarks, user ids, or model weights live here.
+Text the optional on-device wording model would learn from. The running product does not read this folder. Photo, video, and live use [`config/coaching.yaml`](../../config/coaching.yaml) unless the player has opted into the WebGPU worker ([`web/src/workers/README.md`](../../web/src/workers/README.md)).
+
+No images, landmarks, user ids, or model weights live here. Design notes: [`docs/PERSONALIZED_COACH.md`](../../docs/PERSONALIZED_COACH.md).
 
 | Path | Tracked | What it is |
 |---|---|---|

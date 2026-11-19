@@ -1,15 +1,26 @@
-# Data intake
+# Data
 
-**Inventory (Sep 2026):** `labels.csv` has **115** rows — **33** paths under
-`data/raw/` (Notion expert labels) and **82** companion `f*` rows (geometry in
-`synthetic/feature_rows.csv`). Frozen hold-out: **10** real image ids in
-`data/eval/holdout_split.json`. Production scoring is YAML-only; eval/ML are
-local — see [`docs/ML_UPGRADE.md`](../docs/ML_UPGRADE.md).
+Labeled geometry for the offline loop. Nothing in this folder is read during a normal photo, video, or live request. Production scoring uses [`config/scoring.yaml`](../config/scoring.yaml). This tree is how that YAML was calibrated and how a future model would have to beat it.
+
+| Path | README | Role |
+|---|---|---|
+| `labels.csv` | this file | Expert severities. 115 rows as of Sep 2026: 33 real images + 82 synthetic `f*` rows |
+| `labels_template.csv` | this file | Column schema only. The live table is the Notion page `techniquetitan` |
+| `raw/` | this file | Gitignored photos in `excellent/`, `good/`, `warning/`, `critical/` |
+| `processed/` | [batch](../src/technique_titan/batch/README.md) | Gitignored CLI output |
+| `eval/holdout_split.json` | [eval data](eval/README.md) | Frozen 10 real-image ids |
+| `synthetic/feature_rows.csv` | [synthetic](synthetic/README.md) | Geometry for `f*` rows, same columns as `batch_summary.csv` |
+| `coach/` | [coach text](coach/README.md) | Reviewed tip lines for the optional on-device model. No images |
+| `fixtures/` | — | Smoke images, not part of the labeled set |
+
+**Inventory (Sep 2026):** hold-out macro accuracy of the YAML scorer on the 10 real ids is **0.689**. Eval and ML stay local. See [`docs/ML_UPGRADE.md`](../docs/ML_UPGRADE.md).
+
+## Intake
 
 Batch dataset layout for the Technique Titan CLI
 (`python -m technique_titan.batch.process_folder`, then
 `python -m technique_titan.eval`). Requires the package
-installed (`pip install -e .`) and preferably Python 3.11.
+installed (`pip install -e .`) and Python 3.11.
 
 Drop your raw hand images anywhere under `raw/` (subfolders are fine and are
 preserved in the output names). For this project, images are grouped by

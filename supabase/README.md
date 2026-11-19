@@ -1,4 +1,6 @@
-# Technique Titan — Supabase Auth
+# Supabase
+
+Identity, avatars, practice scores, and the weekly coach lock for the Technique Titan project. The FastAPI process does not connect to this database. The browser uses the anon key; row-level security is what keeps one user off another user’s sessions.
 
 Dedicated **Technique Titan** project only. Do not apply these migrations to
 another app’s database (the connected calendar project with `public.accounts`
@@ -7,7 +9,21 @@ is the wrong target).
 Stores **identity** (`profiles`, `app_admins`), a public **`avatars`** bucket for
 profile photos, **opt-in practice progress** (`practice_sessions`,
 `session_hands`), and **coach focus** (`coach_focus`, one weekly focus row per
-user). Do not store analyze photos, video, or frames in Supabase.
+user). Do not store analyze photos, video, or frames in Supabase. Model weights
+do not go in Storage either.
+
+What each table is for in the product:
+
+| Table or bucket | Written by | Holds |
+|---|---|---|
+| `auth.users` | Supabase Auth | Email and Google identities |
+| `profiles` | Trigger on signup, then the profile page | Display name |
+| `avatars` | Profile page | One square JPEG per user, public bucket |
+| `app_admins` | SQL you run by hand | Emails allowed to open `/admin` |
+| `practice_sessions`, `session_hands` | “Add to progress” | Scores, severities, tip text, downsampled samples. No media |
+| `coach_focus` | Progress page, anon key, `auth.uid() = user_id` | One lock: criterion, dates, five burden numbers |
+
+The API’s `/v1/progress/reduce` only shapes the draft. The insert happens here, under the user JWT. Caps that protect the free 500 MB quota are in the migration (32 KB `samples`, samples cleared past the 20 newest sessions, 400 sessions per user) and again in [`technique_titan.progress`](../src/technique_titan/progress/README.md).
 
 Apply [`migrations/20260923000004_practice_sessions.sql`](migrations/20260923000004_practice_sessions.sql),
 [`migrations/20261013000005_profile_avatar.sql`](migrations/20261013000005_profile_avatar.sql),

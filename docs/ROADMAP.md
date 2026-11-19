@@ -1,7 +1,7 @@
 # Technique Titan — Roadmap
 
-**Status:** Draft v1.2
-**Last updated:** 2026-09-21
+**Status:** Draft v1.3
+**Last updated:** 2026-11-11 (baseline). Phase write-ups below still describe the original plan.
 **Companion document:** [`PRD.md`](./PRD.md)
 
 This roadmap turns the PRD into a phased, milestone-based delivery plan. Each phase lists
@@ -15,15 +15,17 @@ estimates, not commitments.
 |---|---|---|
 | Core engine | `src/technique_titan/` | Done |
 | Scoring + coaching config | `config/scoring.yaml`, `config/coaching.yaml` | Done (YAML recalibrated 2026-09-19 from train-only notebook) |
-| Product API | `api/` | Done (YAML scoring only) |
-| Product UI | `web/` (photo / video / live / about) | Done (analyze UX) |
+| Product API | `api/` | Done. Default scorer is YAML. `SCORER=ml_with_fallback` can swap severities. Also serves coach plans and session reduction. |
+| Product UI | `web/` | Done for photo, video, live, progress, profile, settings. Analyze routes require a signed-in session. |
+| Weekly focus + tip validator | `technique_titan.coach`, `POST /v1/coach/plan` | Done. Template wording is what ships. |
+| On-device wording | `web/src/workers/`, `data/coach/` | Code path done. Hidden until both `VITE_COACH_MODEL_*` vars are set. Weights are not in git. |
 | Streamlit interim UI | `app.py` | Done |
 | Batch CLI | `technique_titan.batch` | Done |
 | Eval harness | `technique_titan.eval` + `data/eval/holdout_split.json` | Done (local agreement reports; pytest in CI) |
-| Offline ML scorer | `technique_titan.ml` + `notebooks/scoring_tuning.ipynb` | Done offline (not in API; does not beat YAML on hold-out yet) |
+| Offline ML scorer | `technique_titan.ml` + `notebooks/scoring_tuning.ipynb` | Done offline. Does not beat YAML on the real-image hold-out, so production stays YAML. |
 | CI | `.github/workflows/ci.yml` | Done (pytest + web build; eval/ML units via `tests/`) |
-| Session persistence / progress | `web/` + `supabase/` + `technique_titan.progress` | In progress (save + dashboard shipped; a11y remaining) |
-| Optional accounts (email / Google) | `web/` + `supabase/` | Done (analyze stays public) |
+| Session persistence / progress | `web/` + `supabase/` + `technique_titan.progress` | Shipped (scores and tips only). Capture guidance and a11y remain. |
+| Accounts (email / Google) | `web/` + `supabase/` | Done. The API stays unauthenticated and rate-limited; the React analyze pages require a session. |
 | Teacher roles / exportable reports | — | Not started |
 
 **Measured accuracy (local, Sep 2026):** heuristic hold-out **macro accuracy 0.689**
@@ -104,7 +106,7 @@ NFR-ACC-2 target (≥ 85%) is **not met**.
 
 ## Phase 3 — Product Surface
 
-**Status:** In progress — analyze UX shipped; persistence next
+**Status:** In progress — analyze, accounts, and progress shipped; capture guidance and the accessibility pass remain
 
 **Goals**
 - Deliver a usable web product with static, video, and live modes, then progress tracking.

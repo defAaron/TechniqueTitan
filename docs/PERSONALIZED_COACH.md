@@ -1,7 +1,7 @@
 # Personalized coach — build plan
 
-**Status:** Plan only. Nothing in this document is implemented.
-**Last updated:** 2026-10-13
+**Status:** Design contract. Smoothing, weekly focus, `CoachPlan`, the validator, `POST /v1/coach/plan`, and the browser worker are in the tree. The wording model stays off until `VITE_COACH_MODEL_REPO` and `VITE_COACH_MODEL_REVISION` are set; weights are not in git. Current behavior: [`src/technique_titan/coach/README.md`](../src/technique_titan/coach/README.md), [`web/src/workers/README.md`](../web/src/workers/README.md).
+**Last updated:** 2026-10-13 (status note 2026-11-11)
 **Companions:** [`ML_UPGRADE.md`](./ML_UPGRADE.md), [`ML_LOGISTIC_REGRESSION.md`](./ML_LOGISTIC_REGRESSION.md), [`DEPLOY.md`](./DEPLOY.md), [`supabase/README.md`](../supabase/README.md), [`superpowers/plans/2026-10-13-personalized-coach.md`](./superpowers/plans/2026-10-13-personalized-coach.md) (agent build guide)
 
 This is the start-to-finish plan for weekly-focus coaching and varied

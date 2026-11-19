@@ -1,12 +1,14 @@
 # Agent instructions — Technique Titan
 
-## Project status (2026-09-21)
+## Project status (2026-11-11)
+
+Folder READMEs under the repo root describe each subsystem. The [root README](README.md) is the map.
 
 | Track | Shipped | Next |
 |---|---|---|
-| Product | React + FastAPI analyze; Supabase auth; opt-in **progress** save + `/progress` dashboard | Phase **3b** remainder: a11y, capture guidance |
-| Engine | MediaPipe → geometry → YAML score → template coach | Hold-out macro **0.689** vs ≥85% (NFR-ACC-2) |
-| ML (offline) | `technique_titan.eval`, `technique_titan.ml`, `notebooks/scoring_tuning.ipynb` | Label real photos; YAML/ML until hold-out wins; then API fallback |
+| Product | React + FastAPI; sign-in required for photo, video, and live; opt-in **progress** save + `/progress`; weekly **coach focus** and template tips; optional on-device wording (hidden until `VITE_COACH_MODEL_*` is set) | Phase **3b** remainder: a11y, capture guidance |
+| Engine | MediaPipe → geometry → YAML score → dwell-smoothed coach plan | Hold-out macro **0.689** vs ≥85% (NFR-ACC-2) |
+| ML (offline) | `technique_titan.eval`, `technique_titan.ml`, `notebooks/scoring_tuning.ipynb`. API flag `SCORER=ml_with_fallback` exists; default remains YAML | Label real photos; promote ML only after it beats YAML on the real-image hold-out |
 | Data | `data/labels.csv` (33 real + 82 `f*` rows); frozen hold-out **10** ids | Notion export → batch → eval after every label change |
 
 Roadmap detail: [`docs/ROADMAP.md`](docs/ROADMAP.md). ML sequence: [`docs/ML_UPGRADE.md`](docs/ML_UPGRADE.md).
